@@ -1,0 +1,26 @@
+[
+  {
+    "id": "a-seorin",
+    "name": "김서린",
+    "bio": "색면의 경계를 반복해서 쌓습니다.",
+    "imageUrl": "/images/artists/seorin.svg"
+  },
+  {
+    "id": "a-doyun",
+    "name": "박도윤",
+    "bio": null,
+    "imageUrl": "/images/artists/doyun.svg"
+  },
+  {
+    "id": "a-haram",
+    "name": "최하람",
+    "bio": "종이와 안료로 빛의 층을 만듭니다.",
+    "imageUrl": null
+  },
+  {
+    "id": "a-eungyeol",
+    "name": "이은결",
+    "bio": null,
+    "imageUrl": "/images/artists/eungyeol.svg"
+  }
+]

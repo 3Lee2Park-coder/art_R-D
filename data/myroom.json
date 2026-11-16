@@ -1,0 +1,5 @@
+{
+  "recommendationArtworkIds": ["aw-plane", "aw-fold", "aw-edge"],
+  "wantedExhibitionIds": ["ex-alley"],
+  "recommendedExhibitionIds": ["ex-winter"]
+}
