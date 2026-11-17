@@ -53,6 +53,12 @@ export type Gallery = {
   initial: string;
   contractState: "contracted" | "uncontracted" | "ended";
   bio: string | null;
+  contractStart?: string | null;
+  contractEnd?: string | null;
+  manager?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  imageUrl?: string | null;
 };
 
 export type LeafletPhoto = {

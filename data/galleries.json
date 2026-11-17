@@ -5,7 +5,13 @@
     "region": "서울",
     "initial": "ㅎ",
     "contractState": "contracted",
-    "bio": "한남동에서 동시대 회화와 설치를 소개합니다."
+    "bio": "한남동에서 동시대 회화와 설치를 소개합니다.",
+    "contractStart": "2026-01-01",
+    "contractEnd": "2026-12-31",
+    "manager": "김예시",
+    "email": "hannam@example.com",
+    "phone": "02-000-0001",
+    "imageUrl": null
   },
   {
     "id": "g-seochon",
@@ -13,7 +19,13 @@
     "region": "서울",
     "initial": "ㅅ",
     "contractState": "uncontracted",
-    "bio": null
+    "bio": null,
+    "contractStart": null,
+    "contractEnd": null,
+    "manager": "박예시",
+    "email": "seochon@example.com",
+    "phone": "02-000-0002",
+    "imageUrl": null
   },
   {
     "id": "g-busan",
@@ -21,6 +33,12 @@
     "region": "부산",
     "initial": "ㅎ",
     "contractState": "ended",
-    "bio": "광안리에서 지역 작가를 소개합니다."
+    "bio": "광안리에서 지역 작가를 소개합니다.",
+    "contractStart": "2025-03-01",
+    "contractEnd": "2025-08-31",
+    "manager": "이예시",
+    "email": "busan@example.com",
+    "phone": "051-000-0003",
+    "imageUrl": null
   }
 ]

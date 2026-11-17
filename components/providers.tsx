@@ -125,6 +125,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [added, setAdded] = useState<Exhibition[]>([]);
   const [patches, setPatches] = useState<Record<string, ExhibitionPatch>>({});
   const [accounts, setAccounts] = useState<AccountPatches>({});
+  const [createdGalleries, setCreatedGalleries] = useState<Gallery[]>([]);
   const [spacePick, setSpacePickState] = useState<string | null>(null);
   const [picks, setPicks] = useState<string[]>([]);
   const [decorWall, setDecorWallState] = useState("navy");
@@ -150,6 +151,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAdded(readJSON<Exhibition[]>(localStorage, KEYS.studioAdded, []));
     setPatches(readJSON<Record<string, ExhibitionPatch>>(localStorage, KEYS.exhibitionPatches, {}));
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
+    setCreatedGalleries(readJSON<Gallery[]>(localStorage, KEYS.createdGalleries, []));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
     setPicks(readJSON<string[]>(localStorage, KEYS.artworkPicks, []));
     setDecorWallState(localStorage.getItem(KEYS.decorWall) || "navy");
@@ -415,10 +417,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return [...map.values()];
   }, [added, patches]);
 
-  const galleries = useMemo(
-    () => gallerySeed.map((gallery) => (accounts[gallery.id] ? { ...gallery, contractState: accounts[gallery.id] } : gallery)),
-    [accounts],
-  );
+  const galleries = useMemo(() => {
+    const withAccount = (gallery: Gallery) => (accounts[gallery.id] ? { ...gallery, contractState: accounts[gallery.id] } : gallery);
+    return [...gallerySeed.map(withAccount), ...createdGalleries.map(withAccount)];
+  }, [accounts, createdGalleries]);
 
   const archivedLeaflets = useMemo(() => {
     const map = new Map<string, Leaflet>();

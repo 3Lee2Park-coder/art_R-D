@@ -19,6 +19,7 @@ export const KEYS = {
   studioAdded: "restart.studioAdded",
   exhibitionPatches: "restart.exhibitionPatches",
   accountPatches: "restart.accountPatches",
+  createdGalleries: "restart.createdGalleries",
   spacePick: "restart.spacePick",
   artworkPicks: "restart.artworkPicks",
   decorWall: "restart.decorWall",
