@@ -5,8 +5,10 @@ import { useParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, MockRegion, PageTitle, SectionHeader } from "@/components/ui";
+import { formatFileSize } from "@/lib/files";
 import { formatPeriod, oneParam } from "@/lib/format";
 import { exhibitionStateLabel } from "@/lib/labels";
+import type { ExhibitionFile } from "@/lib/types";
 
 export default function StudioExhibitionPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
@@ -117,15 +119,7 @@ export default function StudioExhibitionPage() {
 
       <div className="mt-8">
         <SectionHeader title="자료" />
-        {exhibition.floorPlanUrl ? (
-          <MockRegion>
-            <div className="flex justify-center rounded-[18px] border border-hairline bg-white p-4">
-              <img src={exhibition.floorPlanUrl} alt="" className="h-auto max-h-[520px] w-auto max-w-full object-contain" />
-            </div>
-          </MockRegion>
-        ) : (
-          <p>올린 자료가 없습니다.</p>
-        )}
+        <MaterialList exhibitionId={exhibition.id} floorPlanUrl={exhibition.floorPlanUrl} />
       </div>
 
       {contracted ? (
@@ -152,4 +146,40 @@ export default function StudioExhibitionPage() {
       </p>
     </Frame>
   );
+}
+
+function MaterialList({ exhibitionId, floorPlanUrl }: { exhibitionId: string; floorPlanUrl: string | null }) {
+  const app = useApp();
+  const files = app.exhibitionFiles[exhibitionId] ?? [];
+  const uploadedPlan = files.find((item) => item.kind === "floorplan" && item.previewDataUrl);
+  const image = uploadedPlan?.previewDataUrl || floorPlanUrl;
+  if (!image && files.length === 0) return <p>올린 자료가 없습니다.</p>;
+  return (
+    <>
+      {image ? (
+        <MockRegion>
+          <div className="flex justify-center rounded-[18px] border border-hairline bg-white p-4">
+            <img src={image} alt="" className="h-auto max-h-[520px] w-auto max-w-full object-contain" />
+          </div>
+        </MockRegion>
+      ) : null}
+      {files.map((file) => (
+        <div key={file.id} className="list-row">
+          {file.previewDataUrl ? <img src={file.previewDataUrl} alt="" className="h-16 w-12 object-contain" /> : null}
+          <span>
+            <span className="block font-semibold">{file.name}</span>
+            <span className="caption">
+              {kindLabel(file.kind)} · {formatFileSize(file.size)}
+            </span>
+          </span>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function kindLabel(kind: ExhibitionFile["kind"]) {
+  if (kind === "floorplan") return "배치도";
+  if (kind === "poster") return "포스터";
+  return "작품 자료";
 }

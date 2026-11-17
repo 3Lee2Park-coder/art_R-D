@@ -27,6 +27,16 @@ export type Exhibition = {
   ended: boolean;
 };
 
+export type ExhibitionFile = {
+  id: string;
+  name: string;
+  kind: "floorplan" | "artworks" | "poster";
+  size: number;
+  type: string;
+  previewDataUrl: string | null;
+  status: "done";
+};
+
 export type Artwork = {
   id: string;
   title: string;

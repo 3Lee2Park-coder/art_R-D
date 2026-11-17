@@ -21,6 +21,7 @@ export const KEYS = {
   accountPatches: "restart.accountPatches",
   createdGalleries: "restart.createdGalleries",
   artworkPatches: "restart.artworkPatches",
+  exhibitionFiles: "restart.exhibitionFiles",
   spacePick: "restart.spacePick",
   artworkPicks: "restart.artworkPicks",
   decorWall: "restart.decorWall",

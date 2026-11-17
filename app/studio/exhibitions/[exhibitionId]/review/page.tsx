@@ -40,7 +40,8 @@ export default function ReviewPage() {
   }
   const waiting = exhibition.approvalState === "pending" || sent || app.reviewAsked(exhibition.id);
   const published = exhibition.published;
-  const plan = exhibition.floorPlanUrl;
+  const uploadedPlan = (app.exhibitionFiles[exhibition.id] ?? []).find((item) => item.kind === "floorplan" && item.previewDataUrl);
+  const plan = uploadedPlan?.previewDataUrl || exhibition.floorPlanUrl;
 
   function begin(work: Artwork) {
     setEditingId(work.id);

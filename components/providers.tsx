@@ -28,7 +28,7 @@ import {
   type ArtworkPatch,
   type ExhibitionPatch,
 } from "@/lib/storage";
-import type { CaptureSession, DecorState, Exhibition, Gallery, Leaflet, LeafletPhoto, Role } from "@/lib/types";
+import type { CaptureSession, DecorState, Exhibition, ExhibitionFile, Gallery, Leaflet, LeafletPhoto, Role } from "@/lib/types";
 
 type AppState = {
   ready: boolean;
@@ -62,6 +62,8 @@ type AppState = {
   patchArtwork: (id: string, patch: ArtworkPatch) => void;
   setContract: (galleryId: string, state: Gallery["contractState"]) => void;
   addGallery: (gallery: Gallery) => void;
+  exhibitionFiles: Record<string, ExhibitionFile[]>;
+  setExhibitionFiles: (exhibitionId: string, files: ExhibitionFile[]) => void;
   savedLeaflets: Leaflet[];
   upsertLeaflet: (leaflet: Leaflet) => void;
   archivedLeaflets: Leaflet[];
@@ -130,6 +132,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [artworkPatches, setArtworkPatches] = useState<Record<string, ArtworkPatch>>({});
   const [accounts, setAccounts] = useState<AccountPatches>({});
   const [createdGalleries, setCreatedGalleries] = useState<Gallery[]>([]);
+  const [exhibitionFiles, setExhibitionFilesState] = useState<Record<string, ExhibitionFile[]>>({});
   const [spacePick, setSpacePickState] = useState<string | null>(null);
   const [picks, setPicks] = useState<string[]>([]);
   const [decorWall, setDecorWallState] = useState("navy");
@@ -157,6 +160,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setArtworkPatches(readJSON<Record<string, ArtworkPatch>>(localStorage, KEYS.artworkPatches, {}));
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
     setCreatedGalleries(readJSON<Gallery[]>(localStorage, KEYS.createdGalleries, []));
+    setExhibitionFilesState(readJSON<Record<string, ExhibitionFile[]>>(localStorage, KEYS.exhibitionFiles, {}));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
     setPicks(readJSON<string[]>(localStorage, KEYS.artworkPicks, []));
     setDecorWallState(localStorage.getItem(KEYS.decorWall) || "navy");
@@ -274,6 +278,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAccounts((prev) => {
       const next = { ...prev, [galleryId]: state };
       localStorage.setItem(KEYS.accountPatches, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const setExhibitionFiles = useCallback((exhibitionId: string, files: ExhibitionFile[]) => {
+    setExhibitionFilesState((prev) => {
+      const next = { ...prev, [exhibitionId]: files };
+      localStorage.setItem(KEYS.exhibitionFiles, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -507,6 +519,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       patchArtwork,
       setContract,
       addGallery,
+      exhibitionFiles,
+      setExhibitionFiles,
       savedLeaflets: saved,
       upsertLeaflet,
       archivedLeaflets,
@@ -567,6 +581,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       patchArtwork,
       setContract,
       addGallery,
+      exhibitionFiles,
+      setExhibitionFiles,
       saved,
       upsertLeaflet,
       archivedLeaflets,
