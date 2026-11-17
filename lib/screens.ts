@@ -25,6 +25,7 @@ export function screenIdFor(path: string) {
   if (path === "/my-room/decorate") return "R-06";
   if (path === "/my-room/intro") return "R-07";
   if (path === "/studio") return "G-01";
+  if (path === "/studio/profile") return "G-07";
   if (path === "/studio/exhibitions/new") return "G-02";
   if (/^\/studio\/exhibitions\/[^/]+$/.test(path)) return "G-06";
   if (/^\/studio\/exhibitions\/[^/]+\/review$/.test(path)) return "G-03";
@@ -96,6 +97,7 @@ export const FLOW_LINKS: FlowLink[] = [
   { id: "UF-08", label: "UF-08 운영자", path: "/operator/accounts", role: "operator" },
   { id: "UF-11", label: "UF-11 운영자 계정 발급", path: "/operator/accounts/new", role: "operator" },
   { id: "UF-09", label: "UF-09 갤러리 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
+  { id: "UF-12", label: "UF-12 갤러리 프로필", path: "/studio/profile", role: "gallery-contracted" },
   { id: "UF-09-op", label: "UF-09 운영 리포트", path: "/operator/reports", role: "operator" },
   { id: "UF-10", label: "UF-10 로그인", path: "/login", role: "visitor-guest" },
 ];
@@ -157,6 +159,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
       { id: "G-03", name: "배치 검토", path: "/studio/exhibitions/ex-pending/review", role: "gallery-contracted" },
       { id: "G-04", name: "전시 QR", path: "/studio/exhibitions/ex-edge/qr", role: "gallery-contracted" },
       { id: "G-05", name: "고객 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
+      { id: "G-07", name: "프로필", path: "/studio/profile", role: "gallery-contracted" },
     ],
   },
   {
@@ -182,6 +185,7 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
   "G-06": "전시 삭제는 지원하지 않음(추후 재결정). 게시 후 수정은 운영자 재확인 없음.",
   "G-02": "파일 전송·저장은 모의. 형식·용량은 미정.",
+  "G-07": "연락처·이메일의 공개 여부는 미정이라 C-10에 표시하지 않음.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
   "A-11": "계정 발급은 모의. 필수 항목은 가안.",
   "V-11": "공유 미리보기는 검토 중이라 확정 기능으로 두지 않는다. 링크는 발급하지 않는다.",

@@ -22,6 +22,7 @@ export const KEYS = {
   createdGalleries: "restart.createdGalleries",
   artworkPatches: "restart.artworkPatches",
   exhibitionFiles: "restart.exhibitionFiles",
+  galleryProfiles: "restart.galleryProfiles",
   spacePick: "restart.spacePick",
   artworkPicks: "restart.artworkPicks",
   decorWall: "restart.decorWall",

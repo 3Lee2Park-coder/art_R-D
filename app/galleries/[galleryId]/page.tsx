@@ -23,6 +23,11 @@ export default function GalleryPage() {
     <>
       <Frame width="read" className="!pb-0">
         <PageTitle title={gallery.name} kicker={gallery.region} lead={gallery.bio ?? undefined} />
+        {gallery.imageUrl ? (
+          <div className="frame-portrait mb-8 w-[220px]">
+            <img src={gallery.imageUrl} alt="" />
+          </div>
+        ) : null}
       </Frame>
       {shows.length ? (
         <Frame>

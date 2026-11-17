@@ -64,6 +64,7 @@ type AppState = {
   addGallery: (gallery: Gallery) => void;
   exhibitionFiles: Record<string, ExhibitionFile[]>;
   setExhibitionFiles: (exhibitionId: string, files: ExhibitionFile[]) => void;
+  patchGalleryProfile: (id: string, patch: Partial<Pick<Gallery, "bio" | "region" | "imageUrl" | "phone" | "email">>) => void;
   savedLeaflets: Leaflet[];
   upsertLeaflet: (leaflet: Leaflet) => void;
   archivedLeaflets: Leaflet[];
@@ -133,6 +134,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<AccountPatches>({});
   const [createdGalleries, setCreatedGalleries] = useState<Gallery[]>([]);
   const [exhibitionFiles, setExhibitionFilesState] = useState<Record<string, ExhibitionFile[]>>({});
+  const [galleryProfiles, setGalleryProfiles] = useState<Record<string, Partial<Pick<Gallery, "bio" | "region" | "imageUrl" | "phone" | "email">>>>({});
   const [spacePick, setSpacePickState] = useState<string | null>(null);
   const [picks, setPicks] = useState<string[]>([]);
   const [decorWall, setDecorWallState] = useState("navy");
@@ -161,6 +163,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
     setCreatedGalleries(readJSON<Gallery[]>(localStorage, KEYS.createdGalleries, []));
     setExhibitionFilesState(readJSON<Record<string, ExhibitionFile[]>>(localStorage, KEYS.exhibitionFiles, {}));
+    setGalleryProfiles(readJSON(localStorage, KEYS.galleryProfiles, {}));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
     setPicks(readJSON<string[]>(localStorage, KEYS.artworkPicks, []));
     setDecorWallState(localStorage.getItem(KEYS.decorWall) || "navy");
@@ -278,6 +281,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAccounts((prev) => {
       const next = { ...prev, [galleryId]: state };
       localStorage.setItem(KEYS.accountPatches, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const patchGalleryProfile = useCallback((id: string, patch: Partial<Pick<Gallery, "bio" | "region" | "imageUrl" | "phone" | "email">>) => {
+    setGalleryProfiles((prev) => {
+      const next = { ...prev, [id]: { ...prev[id], ...patch } };
+      localStorage.setItem(KEYS.galleryProfiles, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -456,9 +467,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [added, patches]);
 
   const galleries = useMemo(() => {
-    const withAccount = (gallery: Gallery) => (accounts[gallery.id] ? { ...gallery, contractState: accounts[gallery.id] } : gallery);
-    return [...gallerySeed.map(withAccount), ...createdGalleries.map(withAccount)];
-  }, [accounts, createdGalleries]);
+    const apply = (gallery: Gallery) => ({
+      ...gallery,
+      ...(accounts[gallery.id] ? { contractState: accounts[gallery.id] } : {}),
+      ...(galleryProfiles[gallery.id] ?? {}),
+    });
+    return [...gallerySeed.map(apply), ...createdGalleries.map(apply)];
+  }, [accounts, createdGalleries, galleryProfiles]);
 
   const archivedLeaflets = useMemo(() => {
     const map = new Map<string, Leaflet>();
@@ -521,6 +536,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       addGallery,
       exhibitionFiles,
       setExhibitionFiles,
+      patchGalleryProfile,
       savedLeaflets: saved,
       upsertLeaflet,
       archivedLeaflets,
@@ -583,6 +599,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       addGallery,
       exhibitionFiles,
       setExhibitionFiles,
+      patchGalleryProfile,
       saved,
       upsertLeaflet,
       archivedLeaflets,
