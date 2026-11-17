@@ -966,6 +966,22 @@ select {
   backdrop-filter: none;
 }
 
+.utility-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+@media (min-width: 720px) {
+  .utility-panel {
+    padding: 24px;
+  }
+}
+
 .list-row {
   display: flex;
   min-height: 64px;

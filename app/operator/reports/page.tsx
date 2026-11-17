@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { MockRegion } from "@/components/ui";
 import { useApp } from "@/components/providers";
@@ -8,7 +9,8 @@ import { dwellLabel, interestLabel } from "@/lib/labels";
 
 export default function OperatorReportsPage() {
   const app = useApp();
-  const [galleryId, setGalleryId] = useState("all");
+  const queryGallery = useSearchParams().get("gallery");
+  const [galleryId, setGalleryId] = useState(queryGallery || "all");
   const [exhibitionId, setExhibitionId] = useState("all");
   const rows = useMemo(
     () =>

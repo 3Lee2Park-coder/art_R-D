@@ -30,6 +30,7 @@ export function screenIdFor(path: string) {
   if (/^\/studio\/exhibitions\/[^/]+\/qr$/.test(path)) return "G-04";
   if (path.startsWith("/studio/reports/")) return "G-05";
   if (path === "/operator/accounts") return "A-01";
+  if (/^\/operator\/galleries\/[^/]+$/.test(path)) return "A-10";
   if (path === "/operator/exhibitions") return "A-02";
   if (/^\/operator\/exhibitions\/[^/]+\/theme$/.test(path)) return "A-03";
   if (/^\/operator\/exhibitions\/[^/]+\/layout$/.test(path)) return "A-04";
@@ -158,6 +159,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
     group: "운영",
     items: [
       { id: "A-01", name: "갤러리 계정", path: "/operator/accounts", role: "operator" },
+      { id: "A-10", name: "갤러리 상세", path: "/operator/galleries/g-hannam", role: "operator" },
       { id: "A-02", name: "전시 확인", path: "/operator/exhibitions", role: "operator" },
       { id: "A-03", name: "테마", path: "/operator/exhibitions/ex-edge/theme", role: "operator" },
       { id: "A-04", name: "배치 점검", path: "/operator/exhibitions/ex-edge/layout", role: "operator" },

@@ -1,16 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
 import { exhibitionStateLabel } from "@/lib/labels";
 
 export default function OperatorExhibitionsPage() {
   const app = useApp();
-  const rows = app.exhibitions.filter((item) => item.published || item.approvalState === "pending");
+  const galleryId = useSearchParams().get("gallery");
+  const gallery = galleryId ? app.galleries.find((item) => item.id === galleryId) : undefined;
+  const rows = app.exhibitions.filter((item) => {
+    if (galleryId && item.galleryId !== galleryId) return false;
+    return item.published || item.approvalState === "pending";
+  });
   return (
     <Frame width="utility">
-      <PageTitle title="전시 확인" />
+      <PageTitle title="전시 확인" kicker={gallery?.name} />
       <ul className="border-t border-hairline">
         {rows.map((exhibition) => {
           const gallery = app.galleries.find((item) => item.id === exhibition.galleryId);

@@ -1,14 +1,22 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
 import { formatPrice } from "@/lib/format";
 
 export default function ArtworkDbPage() {
   const app = useApp();
+  const galleryId = useSearchParams().get("gallery");
+  const gallery = galleryId ? app.galleries.find((item) => item.id === galleryId) : undefined;
+  const rows = app.artworks.filter((artwork) => {
+    if (!galleryId) return true;
+    const exhibition = app.exhibitions.find((item) => item.id === artwork.exhibitionId);
+    return exhibition?.galleryId === galleryId;
+  });
   return (
     <Frame width="utility">
-      <PageTitle title="작품" />
+      <PageTitle title="작품" kicker={gallery?.name} />
       <div className="overflow-x-auto border border-hairline">
         <table className="w-full min-w-[640px] text-left text-[14px]">
           <thead className="bg-parchment">
@@ -21,7 +29,7 @@ export default function ArtworkDbPage() {
             </tr>
           </thead>
           <tbody>
-            {app.artworks.map((artwork) => {
+            {rows.map((artwork) => {
               const artist = app.artists.find((item) => item.id === artwork.artistId);
               const exhibition = artwork.exhibitionId ? app.exhibitions.find((item) => item.id === artwork.exhibitionId) : undefined;
               return (
