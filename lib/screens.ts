@@ -26,6 +26,7 @@ export function screenIdFor(path: string) {
   if (path === "/my-room/intro") return "R-07";
   if (path === "/studio") return "G-01";
   if (path === "/studio/exhibitions/new") return "G-02";
+  if (/^\/studio\/exhibitions\/[^/]+$/.test(path)) return "G-06";
   if (/^\/studio\/exhibitions\/[^/]+\/review$/.test(path)) return "G-03";
   if (/^\/studio\/exhibitions\/[^/]+\/qr$/.test(path)) return "G-04";
   if (path.startsWith("/studio/reports/")) return "G-05";
@@ -152,6 +153,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
     items: [
       { id: "G-01", name: "내 전시", path: "/studio", role: "gallery-contracted" },
       { id: "G-02", name: "전시 등록", path: "/studio/exhibitions/new", role: "gallery-contracted" },
+      { id: "G-06", name: "전시 상세", path: "/studio/exhibitions/ex-edge", role: "gallery-contracted" },
       { id: "G-03", name: "배치 검토", path: "/studio/exhibitions/ex-pending/review", role: "gallery-contracted" },
       { id: "G-04", name: "전시 QR", path: "/studio/exhibitions/ex-edge/qr", role: "gallery-contracted" },
       { id: "G-05", name: "고객 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
@@ -178,6 +180,7 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "C-11": "가안. 메인 홈 전용 요구사항은 아직 없다. 섹션 순서와 더보기(전시, 마이룸, 갤러리, 작가)는 후보.",
   "C-01": "가안. 회원 헤더의 로그인 자리는 로그아웃만 둔다. 원문은 마이룸/로그아웃.",
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
+  "G-06": "전시 삭제는 지원하지 않음(추후 재결정). 게시 후 수정은 운영자 재확인 없음.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
   "A-11": "계정 발급은 모의. 필수 항목은 가안.",
   "V-11": "공유 미리보기는 검토 중이라 확정 기능으로 두지 않는다. 링크는 발급하지 않는다.",

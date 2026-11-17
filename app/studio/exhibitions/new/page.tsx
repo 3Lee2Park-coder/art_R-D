@@ -36,6 +36,7 @@ export default function NewExhibitionPage() {
       startDate: start,
       endDate: end,
       posterUrl: "/images/posters/plain.svg",
+      floorPlanUrl: null,
       description: contracted && description.trim() ? description.trim() : null,
       leafletEnabled: contracted,
       published: !contracted,

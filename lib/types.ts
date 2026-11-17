@@ -18,6 +18,7 @@ export type Exhibition = {
   startDate: string;
   endDate: string;
   posterUrl: string;
+  floorPlanUrl: string | null;
   description: string | null;
   leafletEnabled: boolean;
   published: boolean;

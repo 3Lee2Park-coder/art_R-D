@@ -25,7 +25,11 @@ export default function StudioPage() {
           return (
             <li key={exhibition.id} className="border-b border-hairline py-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-[17px] font-semibold">{exhibition.title}</h2>
+                <h2 className="text-[17px] font-semibold">
+                  <Link href={`/studio/exhibitions/${exhibition.id}`} className="text-ink">
+                    {exhibition.title}
+                  </Link>
+                </h2>
                 <span className="text-[14px] text-mute">{exhibitionStateLabel(exhibition)}</span>
               </div>
               <p className="text-[14px] text-mute">{formatPeriod(exhibition.startDate, exhibition.endDate)}</p>
