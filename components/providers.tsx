@@ -59,6 +59,7 @@ type AppState = {
   upsertExhibition: (exhibition: Exhibition) => void;
   patchExhibition: (id: string, patch: ExhibitionPatch) => void;
   setContract: (galleryId: string, state: Gallery["contractState"]) => void;
+  addGallery: (gallery: Gallery) => void;
   savedLeaflets: Leaflet[];
   upsertLeaflet: (leaflet: Leaflet) => void;
   archivedLeaflets: Leaflet[];
@@ -261,6 +262,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAccounts((prev) => {
       const next = { ...prev, [galleryId]: state };
       localStorage.setItem(KEYS.accountPatches, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const addGallery = useCallback((gallery: Gallery) => {
+    setCreatedGalleries((prev) => {
+      const next = [...prev.filter((item) => item.id !== gallery.id), gallery];
+      localStorage.setItem(KEYS.createdGalleries, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -479,6 +488,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       upsertExhibition,
       patchExhibition,
       setContract,
+      addGallery,
       savedLeaflets: saved,
       upsertLeaflet,
       archivedLeaflets,
@@ -536,6 +546,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       upsertExhibition,
       patchExhibition,
       setContract,
+      addGallery,
       saved,
       upsertLeaflet,
       archivedLeaflets,

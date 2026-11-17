@@ -29,6 +29,7 @@ export function screenIdFor(path: string) {
   if (/^\/studio\/exhibitions\/[^/]+\/review$/.test(path)) return "G-03";
   if (/^\/studio\/exhibitions\/[^/]+\/qr$/.test(path)) return "G-04";
   if (path.startsWith("/studio/reports/")) return "G-05";
+  if (path === "/operator/accounts/new") return "A-11";
   if (path === "/operator/accounts") return "A-01";
   if (/^\/operator\/galleries\/[^/]+$/.test(path)) return "A-10";
   if (path === "/operator/exhibitions") return "A-02";
@@ -92,6 +93,7 @@ export const FLOW_LINKS: FlowLink[] = [
   { id: "UF-07", label: "UF-07 계약 갤러리", path: "/studio", role: "gallery-contracted" },
   { id: "UF-07-open", label: "UF-07 미계약 갤러리", path: "/studio/exhibitions/new", role: "gallery-uncontracted" },
   { id: "UF-08", label: "UF-08 운영자", path: "/operator/accounts", role: "operator" },
+  { id: "UF-11", label: "UF-11 운영자 계정 발급", path: "/operator/accounts/new", role: "operator" },
   { id: "UF-09", label: "UF-09 갤러리 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
   { id: "UF-09-op", label: "UF-09 운영 리포트", path: "/operator/reports", role: "operator" },
   { id: "UF-10", label: "UF-10 로그인", path: "/login", role: "visitor-guest" },
@@ -160,6 +162,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
     items: [
       { id: "A-01", name: "갤러리 계정", path: "/operator/accounts", role: "operator" },
       { id: "A-10", name: "갤러리 상세", path: "/operator/galleries/g-hannam", role: "operator" },
+      { id: "A-11", name: "계정 생성", path: "/operator/accounts/new", role: "operator" },
       { id: "A-02", name: "전시 확인", path: "/operator/exhibitions", role: "operator" },
       { id: "A-03", name: "테마", path: "/operator/exhibitions/ex-edge/theme", role: "operator" },
       { id: "A-04", name: "배치 점검", path: "/operator/exhibitions/ex-edge/layout", role: "operator" },
@@ -176,6 +179,7 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "C-01": "가안. 회원 헤더의 로그인 자리는 로그아웃만 둔다. 원문은 마이룸/로그아웃.",
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
+  "A-11": "계정 발급은 모의. 필수 항목은 가안.",
   "V-11": "공유 미리보기는 검토 중이라 확정 기능으로 두지 않는다. 링크는 발급하지 않는다.",
   "V-13": "가안. 입력 항목은 미정. 화면에는 전시명, 장소, 기간만 둔다.",
   "V-14": "비회원 리플릿 보관 기간은 미정. 만료는 없다.",

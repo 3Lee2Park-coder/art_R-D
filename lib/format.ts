@@ -32,6 +32,16 @@ export function formatPrice(value: number) {
   return `${new Intl.NumberFormat("ko-KR").format(value)}원`;
 }
 
+const CHOSEONG = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
+
+export function initialOf(name: string) {
+  const char = name.trim().charAt(0);
+  if (!char) return "";
+  const code = char.charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return char;
+  return CHOSEONG[Math.floor((code - 0xac00) / 588)] ?? char;
+}
+
 export function oneParam(value: string | string[] | undefined) {
   if (Array.isArray(value)) return value[0] ?? "";
   return value ?? "";
