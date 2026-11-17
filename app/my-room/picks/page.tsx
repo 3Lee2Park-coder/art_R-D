@@ -8,8 +8,8 @@ export default function PicksPage() {
   const app = useApp();
   const router = useRouter();
   return (
-    <div className="mx-auto w-full max-w-[980px] px-4 py-6 pb-24">
-      <PageTitle title="작품 고르기" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="작품 고르기" />
       <ul className="grid grid-cols-2 gap-3 min-[720px]:grid-cols-3">
         {app.artworks.map((artwork) => {
           const on = app.picks.includes(artwork.id);

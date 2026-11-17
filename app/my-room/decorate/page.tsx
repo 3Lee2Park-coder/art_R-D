@@ -13,8 +13,8 @@ export default function DecoratePage() {
   const placed = app.artworks.filter((item) => app.picks.includes(item.id));
 
   return (
-    <div className="mx-auto w-full max-w-[720px] px-4 py-6 pb-24">
-      <PageTitle title="방 꾸미기" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="방 꾸미기" />
       <p className="text-mute-on-dark">관람 기록은 이 방에 그대로 둡니다.</p>
       <div className="mt-6 flex gap-2">
         {WALLS.map((item) => (

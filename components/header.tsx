@@ -68,6 +68,7 @@ export function Header() {
   const pathname = usePathname();
   const { role, mode, logout } = useApp();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dark = mode === "dark";
   const items = itemsFor(role);
   const logo = role === "operator" ? "/operator/accounts" : role.startsWith("gallery") ? "/studio" : "/";
@@ -76,16 +77,23 @@ export function Header() {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className={dark ? "header header-dark" : "header header-light"}>
-      <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center gap-2 px-4">
-        <Link href={logo} className="shrink-0 text-[18px] font-semibold no-underline">
+    <header className={dark ? "header header-dark" : "header header-light"} data-scrolled={scrolled}>
+      <div className="header-bar">
+        <Link href={logo} className="wordmark">
           RestArt
         </Link>
-        <nav className="ml-auto hidden min-w-0 items-center gap-1 overflow-x-auto min-[720px]:flex">
+        <nav className="nav-row">
           {items.map((item) =>
             item.logout ? (
-              <button key={item.label} type="button" className="nav-link bg-transparent" onClick={logout}>
+              <button key={item.label} type="button" className="nav-link" onClick={logout}>
                 {item.label}
               </button>
             ) : (
@@ -95,13 +103,7 @@ export function Header() {
             ),
           )}
         </nav>
-        <button
-          type="button"
-          className="ml-auto inline-flex h-11 w-11 items-center justify-center bg-transparent min-[720px]:hidden"
-          aria-label="메뉴"
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
+        <button type="button" className="menu-button" aria-label="메뉴" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
           <span className="flex w-5 flex-col gap-1.5" aria-hidden>
             <span className="block h-px bg-current" />
             <span className="block h-px bg-current" />
@@ -110,21 +112,25 @@ export function Header() {
         </button>
       </div>
       {open ? (
-        <div className={dark ? "menu-panel header-dark min-[720px]:hidden" : "menu-panel header-light min-[720px]:hidden"}>
-          <nav className="flex flex-col px-3 py-2">
-            {items.map((item) =>
-              item.logout ? (
-                <button key={item.label} type="button" className="nav-link justify-start bg-transparent text-[17px]" onClick={logout}>
-                  {item.label}
-                </button>
-              ) : (
-                <Link key={item.href + item.label} href={item.href} className="nav-link justify-start text-[17px]" data-active={isActive(pathname, item.href)}>
-                  {item.label}
-                </Link>
-              ),
-            )}
-          </nav>
-        </div>
+        <>
+          <button type="button" className="scrim min-[720px]:hidden" aria-label="메뉴 닫기" onClick={() => setOpen(false)} />
+          <div className={dark ? "sheet sheet-dark min-[720px]:hidden" : "sheet min-[720px]:hidden"}>
+            <div className="sheet-handle" />
+            <nav className="flex flex-col">
+              {items.map((item) =>
+                item.logout ? (
+                  <button key={item.label} type="button" className="nav-link justify-start text-[17px]" onClick={logout}>
+                    {item.label}
+                  </button>
+                ) : (
+                  <Link key={item.href + item.label} href={item.href} className="nav-link justify-start text-[17px]" data-active={isActive(pathname, item.href)}>
+                    {item.label}
+                  </Link>
+                ),
+              )}
+            </nav>
+          </div>
+        </>
       ) : null}
     </header>
   );

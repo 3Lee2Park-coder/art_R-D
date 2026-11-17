@@ -19,16 +19,16 @@ export default function NotesPage() {
 
   if (!leaflet) {
     return (
-      <div className="mx-auto max-w-[430px] px-4 py-8">
-        <PageTitle title="기록" dark />
+      <div className="mx-auto leaflet-col py-8">
+        <PageTitle title="기록" />
         <p>리플릿을 찾을 수 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
-      <PageTitle title="기록" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="기록" />
       <p className="mb-6 text-[14px] text-mute-on-dark">비워 두어도 됩니다.</p>
       {works.length ? (
         <label className="block">

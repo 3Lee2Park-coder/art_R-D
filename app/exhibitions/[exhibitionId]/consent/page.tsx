@@ -14,7 +14,7 @@ export default function ConsentPage() {
   useTitle("관람 기록 안내");
 
   return (
-    <div className="mx-auto flex min-h-[70vh] w-full max-w-[430px] items-center px-4 py-10">
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-[480px] items-center px-4 py-10">
       <section className="w-full rounded-2xl bg-surface-dark p-6">
         <h1 className="text-[28px] font-semibold">관람 기록 안내</h1>
         <p className="mt-4 text-mute-on-dark">촬영한 사진과 관람 순서는 리플릿을 만드는 데 쓰입니다. 동의하면 이어서 촬영할 수 있고, 거부하면 전시 소개로 돌아갑니다.</p>

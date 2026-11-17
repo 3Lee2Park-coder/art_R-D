@@ -43,8 +43,8 @@ export default function RecordNewPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
-      <PageTitle title="전시 정보" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="전시 정보" />
       <form className="flex flex-col gap-4" onSubmit={submit}>
         <label className="block">
           <span className="mb-2 block text-[14px] font-semibold">전시 이름</span>

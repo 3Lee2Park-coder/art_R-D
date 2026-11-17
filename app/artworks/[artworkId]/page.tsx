@@ -23,34 +23,40 @@ export default function ArtworkPage() {
   const artist = app.artists.find((item) => item.id === artwork.artistId);
   const exhibition = artwork.exhibitionId ? app.exhibitions.find((item) => item.id === artwork.exhibitionId) : undefined;
   return (
-    <Frame width="read">
-      <PageTitle title={artwork.title} kicker={artist?.name} />
-      <img src={artwork.imageUrl} alt={artwork.title} className="photo-shadow aspect-[4/5] w-full bg-parchment object-contain" />
-      <div className="mt-6 flex flex-col gap-2">
-        {artist ? (
-          <Link href={`/artists/${artist.id}`} className="link font-semibold">
-            {artist.name}
-          </Link>
-        ) : null}
-        {exhibition?.published ? (
-          <Link href={`/exhibitions/${exhibition.id}`} className="link">
-            {exhibition.title}
-          </Link>
-        ) : null}
-        {artwork.description ? <p className="mt-2">{artwork.description}</p> : null}
-        {artwork.priceKrw !== null ? <p className="price text-[21px]">{formatPrice(artwork.priceKrw)}</p> : null}
-        <p className="text-[14px] text-mute">관심 {artwork.likeCount}</p>
+    <>
+      <div className="artwork-hero">
+        <img src={artwork.imageUrl} alt={artwork.title} />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary mt-8"
-        onClick={() => {
-          app.addToCart(artwork.id);
-          router.push("/cart");
-        }}
-      >
-        담기
-      </button>
-    </Frame>
+      <Frame width="read" className="!pb-0">
+        <PageTitle title={artwork.title} kicker={artist?.name} />
+        <div className="flex flex-col gap-3">
+          {artist ? (
+            <Link href={`/artists/${artist.id}`} className="link">
+              {artist.name}
+            </Link>
+          ) : null}
+          {exhibition?.published ? (
+            <Link href={`/exhibitions/${exhibition.id}`} className="link">
+              {exhibition.title}
+            </Link>
+          ) : null}
+          {artwork.description ? <p className="m-0">{artwork.description}</p> : null}
+          <p className="caption m-0">관심 {artwork.likeCount}</p>
+        </div>
+        <div className="sticky-cta">
+          <p className="price m-0 text-[17px]">{artwork.priceKrw !== null ? formatPrice(artwork.priceKrw) : ""}</p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              app.addToCart(artwork.id);
+              router.push("/cart");
+            }}
+          >
+            담기
+          </button>
+        </div>
+      </Frame>
+    </>
   );
 }

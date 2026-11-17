@@ -15,8 +15,8 @@ export default function SharePage() {
 
   if (!leaflet) {
     return (
-      <div className="mx-auto max-w-[430px] px-4 py-8">
-        <PageTitle title="공유" dark />
+      <div className="mx-auto leaflet-col py-8">
+        <PageTitle title="공유" />
         <p>리플릿을 찾을 수 없습니다.</p>
       </div>
     );
@@ -42,8 +42,8 @@ export default function SharePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
-      <PageTitle title="공유" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="공유" />
       <article className="ticket">
         <div className="h-1.5 bg-accent" />
         <div className="px-5 py-6">

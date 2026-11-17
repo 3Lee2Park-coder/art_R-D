@@ -68,7 +68,7 @@ export default function GeneratingPage() {
   }, [app.ready, id]);
 
   return (
-    <div className="mx-auto flex min-h-[70vh] w-full max-w-[430px] flex-col items-center justify-center px-6 text-center">
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-[480px] flex-col items-center justify-center px-6 text-center">
       {phase === "wait" ? (
         <>
           <div className="spinner" aria-hidden />

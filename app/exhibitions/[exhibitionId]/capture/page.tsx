@@ -76,7 +76,7 @@ export default function CapturePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
       <h1 className="display">촬영</h1>
       <div className="relative mt-6 aspect-[3/4] overflow-hidden bg-canvas-dark-deep">
         <span className="pointer-events-none absolute top-3 left-3 h-6 w-6 border-t-2 border-l-2 border-accent" />

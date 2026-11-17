@@ -12,7 +12,7 @@ export default function LeafletPage() {
   if (!leaflet) {
     return (
       <Frame>
-        <PageTitle title="리플릿" dark />
+        <PageTitle title="리플릿" />
         <p>리플릿을 찾을 수 없습니다.</p>
       </Frame>
     );

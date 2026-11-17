@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArtworkCard } from "@/components/cards";
 import { useApp } from "@/components/providers";
-import { Frame, PageTitle } from "@/components/ui";
+import { Frame, PageTitle, SectionHeader, Shelf, SiteFooter } from "@/components/ui";
 import { oneParam } from "@/lib/format";
 
 export default function ArtistPage() {
@@ -22,20 +21,27 @@ export default function ArtistPage() {
   }
   const works = app.artworks.filter((item) => item.artistId === artist.id);
   return (
-    <Frame width="read">
-      <Link href="/artists" className="link text-[14px] font-semibold">
-        작가
-      </Link>
-      <div className="mt-4">
+    <>
+      <div className="page-wrap max-w-[1440px] !pb-0">
+        <div className="frame-portrait mx-auto w-full max-w-[420px] min-[1024px]:mx-0">
+          {artist.imageUrl ? <img src={artist.imageUrl} alt={artist.name} /> : null}
+        </div>
+      </div>
+      <Frame width="read" className="!pb-0">
         <PageTitle title={artist.name} />
-      </div>
-      {artist.imageUrl ? <img src={artist.imageUrl} alt="" className="photo-shadow mb-6 aspect-square w-full max-w-sm object-cover" /> : null}
-      {artist.bio ? <p>{artist.bio}</p> : null}
-      <div className="mt-8 grid grid-cols-1 gap-4 min-[720px]:grid-cols-2">
-        {works.map((artwork) => (
-          <ArtworkCard key={artwork.id} artwork={artwork} artistName={artist.name} />
-        ))}
-      </div>
-    </Frame>
+        {artist.bio ? <p className="m-0">{artist.bio}</p> : null}
+      </Frame>
+      {works.length ? (
+        <Frame className="mt-14">
+          <SectionHeader title="작품" />
+          <Shelf>
+            {works.map((artwork) => (
+              <ArtworkCard key={artwork.id} shelf artwork={artwork} artistName={artist.name} />
+            ))}
+          </Shelf>
+        </Frame>
+      ) : null}
+      <SiteFooter />
+    </>
   );
 }

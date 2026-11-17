@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Providers } from "@/components/providers";
+import "../vertical-exhibition-ticket.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body>
         <Suspense fallback={<div className="min-h-dvh bg-white" data-ready="false" />}>
           <Providers>{children}</Providers>

@@ -77,8 +77,8 @@ export default function RecordLeafletPage() {
 
   if (!ready || !leaflet) {
     return (
-      <div className="mx-auto w-full max-w-[430px] px-4 py-8">
-        <PageTitle title="관람 기록" dark />
+      <div className="mx-auto w-full leaflet-col py-8">
+        <PageTitle title="관람 기록" />
         {ready ? (
           <div className="flex flex-col gap-3">
             <Link href="/exhibitions" className="btn btn-accent">
@@ -101,8 +101,8 @@ export default function RecordLeafletPage() {
   const outside = outsidePeriod(leaflet.visitDate, start, end);
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
-      <PageTitle title={title} dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title={title} />
       {venue ? <p className="text-mute-on-dark">{venue}</p> : null}
       {start && end ? <p className="text-[14px] text-mute-on-dark">{formatPeriod(start, end)}</p> : null}
       <label className="mt-6 block">

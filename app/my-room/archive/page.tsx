@@ -13,20 +13,22 @@ export default function ArchivePage() {
     .filter((item) => item !== undefined);
 
   return (
-    <div className="mx-auto w-full max-w-[720px] px-4 py-6 pb-24">
-      <PageTitle title="기록함" dark />
+    <div className="leaflet-col pb-24">
+      <PageTitle title="기록함" />
       <section>
-        <h2 className="text-[21px] font-semibold">리플릿</h2>
+        <h2 className="section-title">리플릿</h2>
         {app.archivedLeaflets.length === 0 ? <p className="mt-3 text-mute-on-dark">저장된 리플릿이 없습니다.</p> : null}
-        <ul className="mt-4 flex flex-col gap-3">
+        <ul className="artwork-grid mt-4">
           {app.archivedLeaflets.map((leaflet) => {
             const exhibition = leaflet.exhibitionId ? app.exhibitions.find((item) => item.id === leaflet.exhibitionId) : undefined;
             const title = exhibition?.title ?? leaflet.unregisteredTitle ?? "관람 기록";
+            const cover = leaflet.photos[0]?.url ?? exhibition?.posterUrl;
             return (
               <li key={leaflet.id}>
-                <Link href={`/my-room/leaflets/${leaflet.id}`} className="block rounded-2xl bg-surface-dark px-4 py-4 text-inherit no-underline">
-                  <span className="block font-semibold">{title}</span>
-                  <span className="mt-1 block text-[14px] text-mute-on-dark">{formatDate(leaflet.visitDate)}</span>
+                <Link href={`/my-room/leaflets/${leaflet.id}`} className="block overflow-hidden rounded-[18px] bg-surface-dark text-inherit no-underline">
+                  {cover ? <img src={cover} alt="" className="aspect-[3/4] w-full object-cover" /> : <div className="aspect-[3/4] bg-canvas-dark-deep" />}
+                  <span className="block px-3 pt-3 font-semibold">{title}</span>
+                  <span className="caption block px-3 pt-1 pb-4">{formatDate(leaflet.visitDate)}</span>
                 </Link>
               </li>
             );
@@ -34,7 +36,7 @@ export default function ArchivePage() {
         </ul>
       </section>
       <section className="mt-10">
-        <h2 className="text-[21px] font-semibold">가고 싶은 전시</h2>
+        <h2 className="section-title">가고 싶은 전시</h2>
         {wanted.length === 0 ? <p className="mt-3 text-mute-on-dark">저장한 전시가 없습니다.</p> : null}
         <ul className="mt-4 flex flex-col gap-3">
           {wanted.map((exhibition) => (
@@ -48,7 +50,7 @@ export default function ArchivePage() {
         </ul>
       </section>
       <section className="mt-10">
-        <h2 className="text-[21px] font-semibold">추천 전시</h2>
+        <h2 className="section-title">추천 전시</h2>
         <ul className="mt-4 flex flex-col gap-3">
           {recommended.map((exhibition) => (
             <li key={exhibition.id}>

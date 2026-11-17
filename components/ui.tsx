@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useApp } from "@/components/providers";
 
 export function useTitle(title: string) {
@@ -18,17 +18,61 @@ export function Frame({
   width?: "browse" | "read" | "leaflet" | "utility";
   className?: string;
 }) {
-  const max = width === "leaflet" ? "max-w-[430px]" : width === "browse" ? "max-w-[1440px]" : "max-w-[980px]";
-  return <div className={`mx-auto w-full ${max} px-4 py-6 pb-20 ${className}`}>{children}</div>;
+  const max = width === "leaflet" ? "max-w-[480px]" : width === "read" ? "max-w-[980px]" : "max-w-[1440px]";
+  return <div className={`page-wrap ${max} ${className}`}>{children}</div>;
 }
 
-export function PageTitle({ title, kicker, dark = false }: { title: string; kicker?: string; dark?: boolean }) {
+export function PageTitle({ title, kicker, lead }: { title: string; kicker?: string; lead?: string }) {
   useTitle(title);
   return (
-    <header className="mb-6">
-      {kicker ? <p className={dark ? "text-[12px] font-semibold text-accent" : "text-[12px] font-semibold text-primary"}>{kicker}</p> : null}
-      <h1 className="display">{title}</h1>
+    <header className="page-headline">
+      {kicker ? <p className="eyebrow">{kicker}</p> : null}
+      <h1>{title}</h1>
+      {lead ? <p className="lead">{lead}</p> : null}
     </header>
+  );
+}
+
+export function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+  return (
+    <div className="section-header">
+      <h2 className="section-title">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+export function Shelf({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  function move(direction: number) {
+    ref.current?.scrollBy({ left: direction * 340, behavior: "smooth" });
+  }
+  return (
+    <div className="shelf">
+      <div className="shelf-arrows">
+        <button type="button" className="icon-btn" aria-label="이전" onClick={() => move(-1)}>
+          <span aria-hidden>←</span>
+        </button>
+        <button type="button" className="icon-btn" aria-label="다음" onClick={() => move(1)}>
+          <span aria-hidden>→</span>
+        </button>
+      </div>
+      <div ref={ref} className="shelf-track">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="page-wrap max-w-[1440px]">
+        <p className="m-0 text-[17px] font-semibold">RestArt</p>
+        <p className="caption mt-3">전시, 작품, 관람 기록</p>
+        <p className="fine-print">관람 기록은 전시장에서 남긴 순서로 만들어집니다.</p>
+      </div>
+    </footer>
   );
 }
 
@@ -43,5 +87,5 @@ export function MockRegion({ children }: { children: React.ReactNode }) {
 }
 
 export function EmptyText({ children }: { children: React.ReactNode }) {
-  return <p className="text-mute">{children}</p>;
+  return <p className="caption">{children}</p>;
 }

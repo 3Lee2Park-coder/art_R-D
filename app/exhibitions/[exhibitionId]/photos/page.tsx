@@ -16,7 +16,7 @@ export default function PhotosPage() {
   const photos = app.capture?.exhibitionId === id ? app.capture.photos : [];
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
       <h1 className="display">촬영한 사진</h1>
       {photos.length === 0 ? <p className="mt-6 text-mute-on-dark">촬영한 사진이 없습니다.</p> : null}
       <ul className="mt-6 grid grid-cols-2 gap-3">

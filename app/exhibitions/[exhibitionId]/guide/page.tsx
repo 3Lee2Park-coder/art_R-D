@@ -17,7 +17,7 @@ export default function GuidePage() {
   const sample = app.artworks.find((item) => item.exhibitionId === id);
 
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-8 pb-24">
+    <div className="mx-auto w-full leaflet-col py-8 pb-24">
       <h1 className="display">촬영</h1>
       <p className="mt-4 text-mute-on-dark">작품을 화면 가운데 두고 한 장씩 찍습니다. 사진은 이 기기에만 남습니다.</p>
       {sample ? (

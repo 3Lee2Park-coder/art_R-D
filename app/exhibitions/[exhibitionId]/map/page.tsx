@@ -23,7 +23,7 @@ export default function MapPage() {
   const artist = artwork ? app.artists.find((item) => item.id === artwork.artistId) : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-[720px] px-4 py-6 pb-28">
+    <div className="mx-auto w-full leaflet-col py-6 pb-28">
       <div className="flex items-center justify-between gap-3">
         <h1 className="display">배치도</h1>
         <Link href={`/exhibitions/${id}/capture?from=qr`} className="link-accent text-[14px] font-semibold">

@@ -9,8 +9,8 @@ export default function SpacePage() {
   const app = useApp();
   const router = useRouter();
   return (
-    <div className="mx-auto w-full max-w-[430px] px-4 py-6 pb-24">
-      <PageTitle title="공간" dark />
+    <div className="mx-auto w-full leaflet-col py-6 pb-24">
+      <PageTitle title="공간" />
       <p className="text-mute-on-dark">지금 마음에 가까운 공간을 고릅니다.</p>
       <div className="mt-6 grid grid-cols-2 gap-3">
         {SPACE_LABELS.map((label) => (
