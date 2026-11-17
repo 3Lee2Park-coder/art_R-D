@@ -30,7 +30,7 @@ export function screenIdFor(path: string) {
   if (/^\/studio\/exhibitions\/[^/]+$/.test(path)) return "G-06";
   if (/^\/studio\/exhibitions\/[^/]+\/review$/.test(path)) return "G-03";
   if (/^\/studio\/exhibitions\/[^/]+\/qr$/.test(path)) return "G-04";
-  if (path.startsWith("/studio/reports/")) return "G-05";
+  if (path === "/studio/reports" || path.startsWith("/studio/reports/")) return "G-05";
   if (path === "/operator/accounts/new") return "A-11";
   if (path === "/operator/accounts") return "A-01";
   if (/^\/operator\/galleries\/[^/]+$/.test(path)) return "A-10";
@@ -96,7 +96,7 @@ export const FLOW_LINKS: FlowLink[] = [
   { id: "UF-07-open", label: "UF-07 미계약 갤러리", path: "/studio/exhibitions/new", role: "gallery-uncontracted" },
   { id: "UF-08", label: "UF-08 운영자", path: "/operator/accounts", role: "operator" },
   { id: "UF-11", label: "UF-11 운영자 계정 발급", path: "/operator/accounts/new", role: "operator" },
-  { id: "UF-09", label: "UF-09 갤러리 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
+  { id: "UF-09", label: "UF-09 갤러리 리포트", path: "/studio/reports", role: "gallery-contracted" },
   { id: "UF-12", label: "UF-12 갤러리 프로필", path: "/studio/profile", role: "gallery-contracted" },
   { id: "UF-09-op", label: "UF-09 운영 리포트", path: "/operator/reports", role: "operator" },
   { id: "UF-10", label: "UF-10 로그인", path: "/login", role: "visitor-guest" },
@@ -158,7 +158,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
       { id: "G-06", name: "전시 상세", path: "/studio/exhibitions/ex-edge", role: "gallery-contracted" },
       { id: "G-03", name: "배치 검토", path: "/studio/exhibitions/ex-pending/review", role: "gallery-contracted" },
       { id: "G-04", name: "전시 QR", path: "/studio/exhibitions/ex-edge/qr", role: "gallery-contracted" },
-      { id: "G-05", name: "고객 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
+      { id: "G-05", name: "고객 리포트", path: "/studio/reports", role: "gallery-contracted" },
       { id: "G-07", name: "프로필", path: "/studio/profile", role: "gallery-contracted" },
     ],
   },
