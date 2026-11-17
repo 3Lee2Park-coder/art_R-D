@@ -25,6 +25,7 @@ import {
   readSavedLeaflets,
   writeSavedLeaflets,
   type AccountPatches,
+  type ArtworkPatch,
   type ExhibitionPatch,
 } from "@/lib/storage";
 import type { CaptureSession, DecorState, Exhibition, Gallery, Leaflet, LeafletPhoto, Role } from "@/lib/types";
@@ -58,6 +59,7 @@ type AppState = {
   myGalleryId: string | null;
   upsertExhibition: (exhibition: Exhibition) => void;
   patchExhibition: (id: string, patch: ExhibitionPatch) => void;
+  patchArtwork: (id: string, patch: ArtworkPatch) => void;
   setContract: (galleryId: string, state: Gallery["contractState"]) => void;
   addGallery: (gallery: Gallery) => void;
   savedLeaflets: Leaflet[];
@@ -125,6 +127,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [wantedIds, setWantedIds] = useState<string[]>([]);
   const [added, setAdded] = useState<Exhibition[]>([]);
   const [patches, setPatches] = useState<Record<string, ExhibitionPatch>>({});
+  const [artworkPatches, setArtworkPatches] = useState<Record<string, ArtworkPatch>>({});
   const [accounts, setAccounts] = useState<AccountPatches>({});
   const [createdGalleries, setCreatedGalleries] = useState<Gallery[]>([]);
   const [spacePick, setSpacePickState] = useState<string | null>(null);
@@ -151,6 +154,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setSaved(readSavedLeaflets());
     setAdded(readJSON<Exhibition[]>(localStorage, KEYS.studioAdded, []));
     setPatches(readJSON<Record<string, ExhibitionPatch>>(localStorage, KEYS.exhibitionPatches, {}));
+    setArtworkPatches(readJSON<Record<string, ArtworkPatch>>(localStorage, KEYS.artworkPatches, {}));
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
     setCreatedGalleries(readJSON<Gallery[]>(localStorage, KEYS.createdGalleries, []));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
@@ -254,6 +258,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setPatches((prev) => {
       const next = { ...prev, [id]: { ...prev[id], ...patch } };
       localStorage.setItem(KEYS.exhibitionPatches, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const patchArtwork = useCallback((id: string, patch: ArtworkPatch) => {
+    setArtworkPatches((prev) => {
+      const next = { ...prev, [id]: { ...prev[id], ...patch } };
+      localStorage.setItem(KEYS.artworkPatches, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -419,6 +431,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const artworks = useMemo(
+    () => artworkSeed.map((artwork) => ({ ...artwork, ...artworkPatches[artwork.id] })),
+    [artworkPatches],
+  );
+
   const exhibitions = useMemo(() => {
     const map = new Map<string, Exhibition>();
     for (const exhibition of exhibitionSeed) map.set(exhibition.id, { ...exhibition, ...patches[exhibition.id] });
@@ -481,12 +498,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       exhibitions,
       galleries,
       artists: artistSeed,
-      artworks: artworkSeed,
+      artworks,
       reports: reportSeed,
       errors: errorSeed,
       myGalleryId: galleryIdFor(role),
       upsertExhibition,
       patchExhibition,
+      patchArtwork,
       setContract,
       addGallery,
       savedLeaflets: saved,
@@ -542,9 +560,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       addToCart,
       removeFromCart,
       exhibitions,
+      artworks,
       galleries,
       upsertExhibition,
       patchExhibition,
+      patchArtwork,
       setContract,
       addGallery,
       saved,

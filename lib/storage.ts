@@ -1,4 +1,4 @@
-import type { Exhibition, Gallery, Leaflet, Role } from "@/lib/types";
+import type { Artwork, Exhibition, Gallery, Leaflet, Role } from "@/lib/types";
 
 /**
  * 브라우저 보관 키. 접두사는 restart.
@@ -20,6 +20,7 @@ export const KEYS = {
   exhibitionPatches: "restart.exhibitionPatches",
   accountPatches: "restart.accountPatches",
   createdGalleries: "restart.createdGalleries",
+  artworkPatches: "restart.artworkPatches",
   spacePick: "restart.spacePick",
   artworkPicks: "restart.artworkPicks",
   decorWall: "restart.decorWall",
@@ -65,6 +66,8 @@ export type ExhibitionPatch = Partial<
 >;
 
 export type AccountPatches = Record<string, Gallery["contractState"]>;
+
+export type ArtworkPatch = Partial<Pick<Artwork, "title" | "zone" | "description" | "priceKrw" | "forSale">>;
 
 export function readSavedLeaflets() {
   return readJSON<Leaflet[]>(localStorage, KEYS.savedLeaflets, []);
