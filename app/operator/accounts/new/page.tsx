@@ -57,7 +57,7 @@ export default function NewAccountPage() {
   return (
     <Frame width="read">
       <PageTitle title="계정 생성" />
-      <form className="utility-panel" onSubmit={submit}>
+      <form className="utility-panel" noValidate onSubmit={submit}>
         <label className="block">
           <span className="mb-2 block text-[14px] font-semibold">갤러리명</span>
           <input className="field" value={name} onChange={(event) => setName(event.target.value)} />

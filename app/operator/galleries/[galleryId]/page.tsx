@@ -69,12 +69,14 @@ export default function OperatorGalleryPage() {
       </section>
 
       <SectionHeader title="전시" />
+      {live.length + upcoming.length + ended.length === 0 ? <p>등록된 전시가 없습니다.</p> : null}
       <ExhibitionGroup label="게시" items={live} />
       <ExhibitionGroup label="예정" items={upcoming} />
       <ExhibitionGroup label="종료" items={ended} />
 
       <div className="mt-8">
         <SectionHeader title="작품" />
+        {shows.length === 0 ? <p>등록된 작품이 없습니다.</p> : null}
         {shows.map((exhibition) => {
           const works = app.artworks.filter((item) => item.exhibitionId === exhibition.id);
           return (

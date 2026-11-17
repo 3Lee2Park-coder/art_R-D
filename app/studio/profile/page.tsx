@@ -54,6 +54,7 @@ export default function ProfilePage() {
       <PageTitle title={gallery.name} kicker="프로필" />
       <form
         className="utility-panel"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           save();

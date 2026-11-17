@@ -151,7 +151,6 @@ export default function ReviewPage() {
         </section>
       </div>
       {savedNote ? <p className="mt-6">저장했습니다.</p> : null}
-      {published ? <p className="mt-6">게시된 전시입니다.</p> : null}
       {!published && waiting ? <p className="mt-6">확인을 기다리는 중입니다.</p> : null}
       {!published ? (
         <button
