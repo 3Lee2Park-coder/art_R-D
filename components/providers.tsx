@@ -594,10 +594,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   if (!ready) return <div className="min-h-dvh bg-white" data-ready="false" />;
 
+  /** V-09 리플릿 카드: 사이트 헤더 숨김 (로고·날짜는 카드 1만) */
+  const hideSiteHeader =
+    /^\/leaflets\/[^/]+$/.test(pathname) || /^\/my-room\/leaflets\/[^/]+$/.test(pathname);
+
   return (
     <AppContext.Provider value={value}>
       <div data-ready="true" data-mode={mode} data-screen={screenId} data-demo={demo ? "1" : "0"} className="min-h-dvh">
-        <Header />
+        {hideSiteHeader ? null : <Header />}
         {notice ? (
           <div className="bg-parchment text-ink flex items-center justify-between gap-3 px-4 py-3 text-[14px]">
             <p>{notice}</p>

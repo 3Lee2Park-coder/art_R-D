@@ -3,7 +3,7 @@
 import { EMOTIONS, type EmotionId } from "@/lib/leaflet/emotions";
 import type { LeafletTheme } from "@/components/leaflet/theme";
 
-/** 15감성 원형 지도 — 6계열 꽃잎, 고른 횟수만큼 길이 (LEAFLET_CARDS 카드 3) */
+/** 15감성 원형 지도 — 가운데에서 뻗는 뾰족한 꽃잎 (LEAFLET_CARDS 카드 3) */
 export function EmotionMap({
   counts,
   theme,
@@ -12,26 +12,25 @@ export function EmotionMap({
   theme: LeafletTheme;
 }) {
   const max = Math.max(1, ...EMOTIONS.map((e) => counts[e.id] ?? 0));
-  const cx = 120;
-  const cy = 120;
-  const inner = 28;
-  const minOuter = 52;
-  const maxOuter = 108;
+  const cx = 150;
+  const cy = 150;
+  const hub = 14;
+  const minLen = 58;
+  const maxLen = 98;
   const n = EMOTIONS.length;
   const slice = (Math.PI * 2) / n;
 
   return (
-    <svg viewBox="0 0 240 240" className="mx-auto block h-auto w-full max-w-[280px]" aria-hidden>
+    <svg viewBox="0 0 300 300" className="mx-auto block h-auto w-full max-w-[300px]" aria-hidden>
       {EMOTIONS.map((emotion, i) => {
         const count = counts[emotion.id] ?? 0;
         const selected = count > 0;
         const t = count / max;
-        const outer = selected ? minOuter + (maxOuter - minOuter) * t : minOuter;
-        const a0 = -Math.PI / 2 + i * slice;
-        const a1 = a0 + slice * 0.92;
-        const mid = (a0 + a1) / 2;
-        const path = petalPath(cx, cy, inner, outer, a0, a1);
-        const labelR = outer + 10;
+        const len = selected ? minLen + (maxLen - minLen) * t : minLen;
+        const mid = -Math.PI / 2 + i * slice + slice / 2;
+        const half = slice * 0.38;
+        const path = sharpPetal(cx, cy, hub, len, mid, half);
+        const labelR = maxLen + 22;
         const lx = cx + Math.cos(mid) * labelR;
         const ly = cy + Math.sin(mid) * labelR;
         return (
@@ -40,48 +39,50 @@ export function EmotionMap({
               d={path}
               fill={selected ? emotion.displayColor : "transparent"}
               stroke={selected ? emotion.displayColor : theme.aux}
-              strokeWidth={selected ? 0 : 1.25}
+              strokeWidth={selected ? 0.5 : 1.2}
             />
-            {selected ? (
-              <text
-                x={lx}
-                y={ly}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill={theme.text}
-                fontSize="9"
-                fontWeight={600}
-              >
-                {emotion.nameKo}
-              </text>
-            ) : null}
+            <text
+              x={lx}
+              y={ly}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={theme.text}
+              fontSize="10"
+              fontWeight={selected ? 600 : 400}
+              opacity={selected ? 1 : 0.75}
+            >
+              {emotion.nameKo}
+            </text>
           </g>
         );
       })}
-      <circle cx={cx} cy={cy} r={inner - 4} fill={theme.bg} stroke={theme.aux} strokeWidth={1} />
+      <circle cx={cx} cy={cy} r={hub - 2} fill={theme.bg} stroke={theme.aux} strokeWidth={1} />
     </svg>
   );
 }
 
-function petalPath(
+/** 중심에서 tip까지 뾰족한 꽃잎 (양옆 기점 → tip) */
+function sharpPetal(
   cx: number,
   cy: number,
-  inner: number,
-  outer: number,
-  a0: number,
-  a1: number,
+  hub: number,
+  length: number,
+  angle: number,
+  halfWidth: number,
 ): string {
-  const x0 = cx + Math.cos(a0) * inner;
-  const y0 = cy + Math.sin(a0) * inner;
-  const x1 = cx + Math.cos(a0) * outer;
-  const y1 = cy + Math.sin(a0) * outer;
-  const x2 = cx + Math.cos(a1) * outer;
-  const y2 = cy + Math.sin(a1) * outer;
-  const x3 = cx + Math.cos(a1) * inner;
-  const y3 = cy + Math.sin(a1) * inner;
-  const mid = (a0 + a1) / 2;
-  const tip = outer + 6;
-  const tx = cx + Math.cos(mid) * tip;
-  const ty = cy + Math.sin(mid) * tip;
-  return `M ${x0} ${y0} L ${x1} ${y1} Q ${tx} ${ty} ${x2} ${y2} L ${x3} ${y3} Z`;
+  const tipX = cx + Math.cos(angle) * length;
+  const tipY = cy + Math.sin(angle) * length;
+  const left = angle - halfWidth;
+  const right = angle + halfWidth;
+  const lx = cx + Math.cos(left) * hub;
+  const ly = cy + Math.sin(left) * hub;
+  const rx = cx + Math.cos(right) * hub;
+  const ry = cy + Math.sin(right) * hub;
+  // 살짝 바깥으로 볼록한 옆선 → tip에서 모이도록
+  const bulge = length * 0.55;
+  const blx = cx + Math.cos(angle - halfWidth * 0.55) * bulge;
+  const bly = cy + Math.sin(angle - halfWidth * 0.55) * bulge;
+  const brx = cx + Math.cos(angle + halfWidth * 0.55) * bulge;
+  const bry = cy + Math.sin(angle + halfWidth * 0.55) * bulge;
+  return `M ${lx} ${ly} Q ${blx} ${bly} ${tipX} ${tipY} Q ${brx} ${bry} ${rx} ${ry} Z`;
 }

@@ -55,11 +55,12 @@ export function mockDbWork(id: string): {
   id: string;
   title: string;
   artistName: string;
+  imageUrl: string | null;
 } | null {
   const entry = (
     leafletFixtures.mockDb as Record<
       string,
-      { title?: string; artistName?: string }
+      { title?: string; artistName?: string; imageUrl?: string }
     >
   )[id];
   if (!entry) return null;
@@ -67,5 +68,6 @@ export function mockDbWork(id: string): {
     id,
     title: entry.title ?? id,
     artistName: entry.artistName ?? "",
+    imageUrl: entry.imageUrl ?? null,
   };
 }

@@ -18,42 +18,53 @@ export function EmotionsCard({
   similarArtwork?: Artwork;
   similarArtist?: Artist;
 }) {
+  const sum = result.topColors.reduce((s, c) => s + c.percent, 0) || 1;
+  const normalized = result.topColors.map((c) => ({
+    ...c,
+    share: (c.percent / sum) * 100,
+  }));
+
   return (
-    <div className="flex h-full flex-col gap-5 px-1 pb-2 pt-1">
-      <h2 className="m-0 text-[22px] font-semibold" style={{ color: theme.text }}>
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden px-1 pb-1 pt-1">
+      <h2 className="m-0 shrink-0 text-[22px] font-semibold" style={{ color: theme.text }}>
         나의 감성
       </h2>
 
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 shrink-0">
         <EmotionMap counts={result.emotionCounts} theme={theme} />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex shrink-0 flex-col gap-2">
         <h3 className="m-0 text-[14px] font-semibold" style={{ color: theme.text }}>
           나의 색
         </h3>
-        <div className="flex h-4 w-full overflow-hidden" style={{ border: `1px solid ${theme.border}` }}>
-          {result.topColors.map((c) => {
+        <div className="flex w-full gap-1">
+          {normalized.map((c) => {
             const swatch = COLOR_BY_NAME[c.name];
             return (
-              <div
-                key={c.name}
-                style={{
-                  width: `${c.percent}%`,
-                  background: swatch?.hex ?? "#888",
-                }}
-                title={`${c.name} ${c.percent}%`}
-              />
+              <div key={c.name} className="flex min-w-0 flex-col gap-1" style={{ width: `${c.share}%` }}>
+                <div
+                  className="h-4 w-full"
+                  style={{
+                    background: swatch?.hex ?? "#888",
+                    // 배경과 같은 색(Persian Indigo·Wheat)도 구분되게 본문 글자색 테두리
+                    border: `1px solid ${theme.text}59`,
+                  }}
+                />
+                <p
+                  className="m-0 truncate text-[12px] leading-tight"
+                  style={{ color: theme.aux }}
+                  title={`${c.name} ${c.percent}%`}
+                >
+                  {c.name}
+                </p>
+                <p className="m-0 text-[12px]" style={{ color: theme.aux }}>
+                  {c.percent}%
+                </p>
+              </div>
             );
           })}
         </div>
-        <ul className="m-0 flex list-none flex-wrap gap-x-3 gap-y-1 p-0 text-[12px]" style={{ color: theme.aux }}>
-          {result.topColors.map((c) => (
-            <li key={c.name}>
-              {c.name} {c.percent}%
-            </li>
-          ))}
-        </ul>
       </div>
 
       <MockRegion>
@@ -63,14 +74,18 @@ export function EmotionsCard({
           </h3>
           <div className="flex gap-3">
             <div
-              className="h-16 w-16 shrink-0 overflow-hidden"
+              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
               style={{
-                border: theme.imageBorder ? `1px solid ${theme.border}` : undefined,
-                background: `${theme.text}14`,
+                border: `1px solid ${theme.border}`,
+                background: `${theme.text}10`,
               }}
             >
               {similarArtwork ? (
-                <img src={similarArtwork.imageUrl} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={similarArtwork.imageUrl}
+                  alt=""
+                  className="max-h-full max-w-full object-contain"
+                />
               ) : null}
             </div>
             <div className="flex min-w-0 flex-col gap-1">

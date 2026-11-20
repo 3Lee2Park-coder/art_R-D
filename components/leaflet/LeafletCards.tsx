@@ -179,39 +179,45 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
   ];
 
   return (
-    <div className="min-h-[100svh] pb-10" style={{ background: theme.bg, color: theme.text }}>
-      <div className="mx-auto w-full max-w-[480px] px-6 pt-6">
+    <div
+      className="flex min-h-[100svh] items-start justify-center"
+      style={{ background: theme.bg, color: theme.text }}
+    >
+      <div className="mx-auto w-full max-w-[480px] px-6 py-4">
         <div
           ref={scrollerRef}
-          className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {cards.map((card, i) => (
             <section
               key={i}
               data-leaflet-card
-              className="w-[min(100%,calc(100vw-48px))] max-w-[432px] shrink-0 snap-center"
-              style={{ aspectRatio: "9 / 16" }}
+              className="relative flex w-[min(100%,calc(100vw-48px))] max-w-[342px] shrink-0 snap-center flex-col"
+              style={{ aspectRatio: "9 / 16", width: "min(100%, 342px)" }}
             >
-              {card}
+              <div className="min-h-0 flex-1 overflow-hidden pb-8">{card}</div>
+              <div
+                className="absolute inset-x-0 bottom-1 flex items-center justify-center gap-1.5"
+                role="tablist"
+                aria-label="카드"
+              >
+                {Array.from({ length: CARD_COUNT }, (_, di) => (
+                  <button
+                    key={di}
+                    type="button"
+                    role="tab"
+                    aria-selected={page === di}
+                    aria-label={`${di + 1}/5`}
+                    className={page === di ? "h-1.5 w-5 rounded-full" : "h-1.5 w-1.5 rounded-full"}
+                    style={{
+                      background: page === di ? theme.text : theme.aux,
+                      opacity: page === di ? 1 : 0.55,
+                    }}
+                    onClick={() => goTo(di)}
+                  />
+                ))}
+              </div>
             </section>
-          ))}
-        </div>
-
-        <div className="mt-2 flex items-center justify-center gap-2" role="tablist" aria-label="카드">
-          {Array.from({ length: CARD_COUNT }, (_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={page === i}
-              aria-label={`${i + 1}/5`}
-              className="h-2 w-2 rounded-full"
-              style={{
-                background: page === i ? theme.text : theme.aux,
-                opacity: page === i ? 1 : 0.5,
-              }}
-              onClick={() => goTo(i)}
-            />
           ))}
         </div>
       </div>

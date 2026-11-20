@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { LeafletResult } from "@/lib/leaflet/buildLeafletResult";
 import type { VisitRecord } from "@/lib/leaflet/dwell";
 import { EMOTION_BY_ID, type EmotionId } from "@/lib/leaflet/emotions";
 import type { Artist, Artwork } from "@/lib/types";
-import type { LeafletTheme } from "@/components/leaflet/theme";
+import { leafletPillStyle, type LeafletTheme } from "@/components/leaflet/theme";
 
 export function RecordsCard({
   result,
@@ -25,18 +25,24 @@ export function RecordsCard({
 }) {
   const items = records.length > 0 ? records : [];
   const [index, setIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
   const current = items[Math.min(index, Math.max(0, items.length - 1))];
-  const artwork = current ? artworks.find((a) => a.id === current.artworkId) : undefined;
-  const artist = artwork ? artists.find((a) => a.id === artwork.artistId) : undefined;
-  const emotion =
-    current?.emotionId && EMOTION_BY_ID[current.emotionId as EmotionId]
-      ? EMOTION_BY_ID[current.emotionId as EmotionId]
-      : null;
-  const inquireId = artwork?.id;
+  const inquireId = current
+    ? artworks.find((a) => a.id === current.artworkId)?.id
+    : undefined;
+
+  const go = (i: number) => {
+    const next = Math.max(0, Math.min(items.length - 1, i));
+    setIndex(next);
+    const el = trackRef.current;
+    if (!el) return;
+    const slide = el.children[next] as HTMLElement | undefined;
+    slide?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+  };
 
   return (
-    <div className="flex h-full flex-col gap-5 px-1 pb-2 pt-1">
-      <div className="flex items-baseline justify-between gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden px-1 pb-1 pt-1">
+      <div className="flex shrink-0 items-baseline justify-between gap-3">
         <h2 className="m-0 text-[22px] font-semibold" style={{ color: theme.text }}>
           나의 기록
         </h2>
@@ -45,53 +51,71 @@ export function RecordsCard({
         </span>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4">
-        {artwork ? (
-          <div className="flex flex-col gap-3">
-            <div
-              className="w-full overflow-hidden"
-              style={{
-                aspectRatio: "3 / 4",
-                maxHeight: "42%",
-                border: theme.imageBorder ? `1px solid ${theme.border}` : undefined,
-                background: `${theme.text}14`,
-              }}
-            >
-              <img src={artwork.imageUrl} alt="" className="h-full w-full object-cover" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="m-0 text-[17px] font-semibold" style={{ color: theme.text }}>
-                {artwork.title}
-              </p>
-              {artist ? (
-                <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
-                  {artist.name}
-                </p>
-              ) : null}
-            </div>
-            {emotion ? (
-              <span
-                className="inline-flex w-fit rounded-sm px-2.5 py-1 text-[12px] font-medium"
-                style={{
-                  background: emotion.displayColor,
-                  color: "#111111",
-                  border: theme.chipBorder(emotion.displayColor)
-                    ? `1px solid ${theme.chipBorder(emotion.displayColor)}`
-                    : undefined,
-                }}
-              >
-                {emotion.nameKo}
-              </span>
-            ) : null}
+      {items.length > 0 ? (
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          <div
+            ref={trackRef}
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              const w = el.clientWidth * 0.82;
+              const next = Math.round(el.scrollLeft / (w + 12));
+              if (next !== index) setIndex(Math.max(0, Math.min(items.length - 1, next)));
+            }}
+          >
+            {items.map((rec, i) => {
+              const aw = artworks.find((a) => a.id === rec.artworkId);
+              const ar = aw ? artists.find((a) => a.id === aw.artistId) : undefined;
+              const em =
+                rec.emotionId && EMOTION_BY_ID[rec.emotionId as EmotionId]
+                  ? EMOTION_BY_ID[rec.emotionId as EmotionId]
+                  : null;
+              return (
+                <div
+                  key={`${rec.artworkId}-${rec.atSec}-${i}`}
+                  className="w-[82%] shrink-0 snap-start"
+                >
+                  <div
+                    className="flex aspect-[3/4] w-full items-center justify-center overflow-hidden"
+                    style={{
+                      border: `1px solid ${theme.border}`,
+                      background: `${theme.text}10`,
+                    }}
+                  >
+                    {aw ? (
+                      <img src={aw.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                    ) : null}
+                  </div>
+                  <div className="mt-2.5 flex flex-col gap-1">
+                    <p className="m-0 text-[16px] font-semibold" style={{ color: theme.text }}>
+                      {aw?.title ?? rec.artworkId}
+                    </p>
+                    {ar ? (
+                      <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
+                        {ar.name}
+                      </p>
+                    ) : null}
+                    {em ? (
+                      <span
+                        className="mt-1 inline-flex w-fit rounded-full px-2.5 py-1 text-[12px] font-medium"
+                        style={{
+                          background: em.displayColor,
+                          color: "#111111",
+                          border: theme.chipBorder(em.displayColor)
+                            ? `1px solid ${theme.chipBorder(em.displayColor)}`
+                            : undefined,
+                        }}
+                      >
+                        {em.nameKo}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ) : (
-          <p className="m-0 text-[14px]" style={{ color: theme.aux }}>
-            기록이 없습니다.
-          </p>
-        )}
 
-        {items.length > 1 ? (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="grid shrink-0 grid-cols-6 gap-1.5">
             {items.map((rec, i) => {
               const aw = artworks.find((a) => a.id === rec.artworkId);
               const em =
@@ -100,25 +124,25 @@ export function RecordsCard({
                   : null;
               return (
                 <button
-                  key={`${rec.artworkId}-${rec.atSec}-${i}`}
+                  key={`thumb-${rec.artworkId}-${rec.atSec}-${i}`}
                   type="button"
-                  className="relative h-14 w-14 shrink-0 overflow-hidden"
+                  className="relative aspect-square w-full overflow-hidden"
                   style={{
                     border:
                       i === index
                         ? `2px solid ${theme.text}`
-                        : theme.imageBorder
-                          ? `1px solid ${theme.border}`
-                          : "1px solid transparent",
-                    background: `${theme.text}14`,
+                        : `1px solid ${theme.border}`,
+                    background: `${theme.text}10`,
                   }}
-                  onClick={() => setIndex(i)}
+                  onClick={() => go(i)}
                   aria-label={`${i + 1}/${items.length}`}
                 >
-                  {aw ? <img src={aw.imageUrl} alt="" className="h-full w-full object-cover" /> : null}
+                  {aw ? (
+                    <img src={aw.imageUrl} alt="" className="h-full w-full object-contain" />
+                  ) : null}
                   {em ? (
                     <span
-                      className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full"
+                      className="absolute bottom-0.5 right-0.5 h-2 w-2 rounded-full"
                       style={{
                         background: em.displayColor,
                         boxShadow: `0 0 0 1px ${theme.bg}`,
@@ -129,23 +153,27 @@ export function RecordsCard({
               );
             })}
           </div>
-        ) : null}
 
-        {comment ? (
-          <blockquote
-            className="m-0 border-l-2 pl-3 text-[14px] leading-relaxed"
-            style={{ borderColor: theme.border, color: theme.text }}
-          >
-            {comment}
-          </blockquote>
-        ) : null}
-      </div>
+          {comment ? (
+            <blockquote
+              className="m-0 shrink-0 border-l-2 pl-3 text-[14px] leading-relaxed"
+              style={{ borderColor: theme.border, color: theme.text }}
+            >
+              {comment}
+            </blockquote>
+          ) : null}
+        </div>
+      ) : (
+        <p className="m-0 text-[14px]" style={{ color: theme.aux }}>
+          기록이 없습니다.
+        </p>
+      )}
 
       {inquireId ? (
         <Link
           href={`/artworks/${inquireId}`}
-          className="inline-flex h-11 items-center justify-center border px-4 text-[14px] font-medium"
-          style={{ borderColor: theme.text, color: theme.text }}
+          className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-5 text-[14px] font-medium"
+          style={leafletPillStyle(theme, "secondary")}
         >
           작품 문의
         </Link>

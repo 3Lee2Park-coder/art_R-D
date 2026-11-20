@@ -1,5 +1,6 @@
 /** 리플릿 테마 색 → 글자·테두리 (계산은 contrast/colors만) */
 
+import type { CSSProperties } from "react";
 import { COLOR_BY_NAME, type RestartColor } from "@/lib/leaflet/colors";
 import { hexToRgb, needsBorder, textColorFor } from "@/lib/leaflet/contrast";
 
@@ -24,8 +25,8 @@ export function resolveLeafletTheme(themeColorName: string | undefined): Leaflet
     color,
     bg: color.hex,
     text,
-    aux: `${text}B3`, // 70%
-    border: `${text}33`, // 20%
+    aux: `${text}B3`,
+    border: `${text}33`,
     chipBorder: (chipHex: string) => {
       try {
         return needsBorder(hexToRgb(chipHex), bgRgb) ? `${text}33` : undefined;
@@ -34,5 +35,26 @@ export function resolveLeafletTheme(themeColorName: string | undefined): Leaflet
       }
     },
     imageBorder: needsBorder({ r: 128, g: 128, b: 128 }, bgRgb),
+  };
+}
+
+/** 와이어프레임 알약 버튼 */
+export function leafletPillStyle(
+  theme: LeafletTheme,
+  kind: "primary" | "secondary",
+): CSSProperties {
+  if (kind === "primary") {
+    return {
+      background: theme.text,
+      color: theme.bg,
+      borderRadius: 9999,
+      border: "none",
+    };
+  }
+  return {
+    background: "transparent",
+    color: theme.text,
+    borderRadius: 9999,
+    border: `1px solid ${theme.text}`,
   };
 }
