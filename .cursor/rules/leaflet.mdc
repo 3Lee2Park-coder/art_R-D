@@ -1,0 +1,15 @@
+---
+description: RestArt 리플릿(V-04~V-11, V-15 허브, lib/leaflet, 리플릿 카드, 전시 테마 색) 작업 규칙. 리플릿, 기록하기, 관람 유형, 테마 색을 만들거나 고칠 때 적용한다.
+globs: lib/leaflet/**,components/leaflet/**,components/leaflet-view.tsx,app/leaflets/**,app/exhibitions/**,data/leaflet-fixtures.json,docs/leaflet/**
+alwaysApply: false
+---
+
+- 기준 문서는 `docs/leaflet/`이다: `LEAFLET_SPEC.md`(규칙), `LEAFLET_CARDS.md`(배치), `LEAFLET_FIXTURES.md` + `leaflet-fixtures.json`(모의 전시·시나리오), `wireframes/`. 문서와 코드가 다르면 문서를 따르고, 문서가 틀려 보이면 고치지 말고 보고한다.
+- 문서에 없는 규칙·값을 새로 정하지 않는다. 꼭 필요하면 `[가안]`으로 표시하고 PR 설명에 적는다.
+- `[가안]`, `[기술 확인]` 표시는 코드 주석과 PR 설명에 그대로 남긴다. 작품 인식, 이동 감지, R&D 추천은 `mock` 이름의 모의 구현으로만 만들고 구현됐다고 쓰지 않는다. 프로토타입의 목적은 프로세스 흐름과 실 사용자 화면을 보여주는 것이다.
+- 화면에는 실제 사용자가 볼 문구만 쓴다(OVERRIDES.md 1장). "설명 보기", 개발 설명, "모의", "가안", 요구사항 ID는 화면에 쓰지 않는다. 데모 정보는 `lib/screens.ts`의 데모 오버레이로만.
+- 계산은 `lib/leaflet/`에만 둔다. 컴포넌트는 계산 결과를 받아 그리기만 한다. `judgeStyle()`은 대표 스타일만 돌려준다. 보조 관람 성향은 계산·저장하지 않는다.
+- 판정 규칙을 바꾸면 `STYLE_RULE_VERSION`을 올리고 테스트를 먼저 고친다. `npm test`가 통과해야 끝난 것이다.
+- 화면 ID와 요구사항 ID는 바꾸지 않는다. 허브만 새 ID `V-15` `[가안]`을 쓴다(`LEAFLET_SPEC.md` 1장). `V-07`은 쓰지 않는다.
+- 디자인은 `DESIGN_v2.md`, 브랜드 색 #0D2E52 · #F6CD52 · #B8312B. 리플릿 카드 영역의 모양·배치는 `LEAFLET_CARDS.md`와 `wireframes/rowA_PersianIndigo.png`, `rowB_Wheat.png`만 따른다. `DESIGN_v2.md` 부록 B의 세로 스크롤 티켓형과 `CONTRIBUTING.md`의 `public/leaflets/Leaflets-ticket.png` 배경은 무시한다. 기존 티켓 레이아웃으로 그리거나 폴백하지 않는다. 리플릿 배경만 전시 테마 색을 쓴다(CL-009: 갤러리가 65색 중 1개를 고른다).
+- 허브(V-15), 배치도 감성 선택, 기록 0점 알림은 `wireframes/rowD_hub_map_draft.png`를 따른다. 기록하기 카메라·촬영 후 시트는 `wireframes/rowC_record_screen_draft.png`를 따른다. 와이어프레임에 없는 화면을 만들지 않는다. 입장(V-01)·동의(V-02)·촬영 안내(V-03)는 기존 페이지를 유지하고 DESIGN_v2 토큰만 맞춘다.

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "rep-winter",
+    "exhibitionId": "ex-winter",
+    "galleryId": "g-hannam",
+    "zones": [
+      { "zone": "전실", "interest": "높음" },
+      { "zone": "복도", "interest": "추정 불가" }
+    ],
+    "artworks": [
+      { "artworkId": "aw-grain", "interest": "높음" },
+      { "artworkId": "aw-white", "interest": "낮음" }
+    ],
+    "dwell": [
+      { "zone": "전실", "estimate": "18분" },
+      { "zone": "복도", "estimate": null }
+    ]
+  },
+  {
+    "id": "rep-tide",
+    "exhibitionId": "ex-tide",
+    "galleryId": "g-busan",
+    "zones": [{ "zone": "본관", "interest": "보통" }],
+    "artworks": [],
+    "dwell": [{ "zone": "본관", "estimate": null }]
+  }
+]

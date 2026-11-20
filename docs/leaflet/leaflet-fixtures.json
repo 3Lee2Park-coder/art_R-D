@@ -1,0 +1,75 @@
+{
+ "exhibitionId": "ex-edge",
+ "zones": ["입구", "창가", "중앙홀", "복도"],
+ "newArtworks": [
+  {"id": "aw-e06", "title": "첫 번째 문턱", "artistId": "a-haram", "zone": "입구"},
+  {"id": "aw-e07", "title": "오후의 틈", "artistId": "a-seorin", "zone": "창가"},
+  {"id": "aw-e08", "title": "먼 빛", "artistId": "a-eungyeol", "zone": "창가"},
+  {"id": "aw-e09", "title": "깊은 정오", "artistId": "a-doyun", "zone": "중앙홀"},
+  {"id": "aw-e10", "title": "긴 복도", "artistId": "a-haram", "zone": "복도"},
+  {"id": "aw-e11", "title": "남은 온기", "artistId": "a-seorin", "zone": "복도"},
+  {"id": "aw-e12", "title": "닫힌 색", "artistId": "a-doyun", "zone": "복도"}
+ ],
+ "artworkLabels": {
+  "aw-plane": {"zone": "입구", "emotions": {"sensuous": 0.4, "curiosity": 0.3, "happiness": 0.3}, "colors": {"Cinnabar": 0.35, "Cobalt": 0.3, "Wheat": 0.2, "Pale Rose": 0.15}},
+  "aw-edge": {"zone": "입구", "emotions": {"sophistication": 0.5, "compassion": 0.3, "sadness": 0.2}, "colors": {"Persian Indigo": 0.4, "Nobel": 0.3, "White Smoke": 0.3}},
+  "aw-e06": {"zone": "입구", "emotions": {"sensuous": 0.5, "sophistication": 0.3, "joy": 0.2}, "colors": {"Mandy": 0.42, "Wheat": 0.33, "Cobalt": 0.25}},
+  "aw-window": {"zone": "창가", "emotions": {"awe": 0.5, "curiosity": 0.3, "sadness": 0.2}, "colors": {"Persian Indigo": 0.45, "Heather": 0.3, "White Smoke": 0.25}},
+  "aw-e07": {"zone": "창가", "emotions": {"awe": 0.4, "happiness": 0.3, "curiosity": 0.3}, "colors": {"Hawkes Blue": 0.4, "Kournikova": 0.35, "Wheat": 0.25}},
+  "aw-e08": {"zone": "창가", "emotions": {"sadness": 0.5, "worry": 0.3, "awe": 0.2}, "colors": {"Chetwode Blue": 0.5, "Heather": 0.3, "Black": 0.2}},
+  "aw-navy": {"zone": "중앙홀", "emotions": {"sophistication": 0.5, "awe": 0.3, "sadness": 0.2}, "colors": {"Persian Indigo": 0.5, "Cobalt": 0.3, "Tangerine Yellow": 0.2}},
+  "aw-fold": {"zone": "중앙홀", "emotions": {"curiosity": 0.4, "sensuous": 0.3, "love": 0.3}, "colors": {"Wafer": 0.4, "Tamarillo": 0.35, "Corn Field": 0.25}},
+  "aw-e09": {"zone": "중앙홀", "emotions": {"sensuous": 0.6, "love": 0.2, "greed": 0.2}, "colors": {"Mandy": 0.45, "Kournikova": 0.3, "Cobalt": 0.25}},
+  "aw-e10": {"zone": "복도", "emotions": {"love": 0.4, "curiosity": 0.3, "happiness": 0.3}, "colors": {"Feldspar": 0.4, "Tonys Pink": 0.35, "Wheat": 0.25}},
+  "aw-e11": {"zone": "복도", "emotions": {"happiness": 0.5, "joy": 0.3, "compassion": 0.2}, "colors": {"Kournikova": 0.45, "Corn Field": 0.35, "Gossip": 0.2}},
+  "aw-e12": {"zone": "복도", "emotions": {"happiness": 0.5, "joy": 0.3, "love": 0.2}, "colors": {"Paris Daisy": 0.4, "Kournikova": 0.35, "Gossip": 0.25}}
+ },
+ "mockDb": {
+  "db-01": {"title": "푸른 정적", "artistName": "한지오", "emotions": {"awe": 0.55, "curiosity": 0.25, "sadness": 0.2}, "colors": {"Persian Indigo": 0.5, "Heather": 0.3, "White Smoke": 0.2}},
+  "db-02": {"title": "노란 오후", "artistName": "윤소아", "emotions": {"happiness": 0.5, "joy": 0.35, "love": 0.15}, "colors": {"Paris Daisy": 0.45, "Kournikova": 0.3, "Gossip": 0.25}},
+  "db-03": {"title": "분홍의 결", "artistName": "정마루", "emotions": {"sensuous": 0.55, "sophistication": 0.3, "joy": 0.15}, "colors": {"Mandy": 0.45, "Wheat": 0.3, "Cobalt": 0.25}},
+  "db-04": {"title": "회색 편지", "artistName": "오유진", "emotions": {"sophistication": 0.45, "compassion": 0.35, "sadness": 0.2}, "colors": {"Persian Indigo": 0.4, "Nobel": 0.35, "White Smoke": 0.25}},
+  "db-05": {"title": "밤의 수면", "artistName": "한지오", "emotions": {"awe": 0.4, "sadness": 0.4, "worry": 0.2}, "colors": {"Chetwode Blue": 0.5, "Cobalt": 0.3, "Black": 0.2}},
+  "db-06": {"title": "따뜻한 벽", "artistName": "윤소아", "emotions": {"love": 0.45, "happiness": 0.35, "sensuous": 0.2}, "colors": {"Tonys Pink": 0.4, "Feldspar": 0.35, "Wheat": 0.25}}
+ },
+ "scenarios": {
+  "wonder-immersive": { "generateAtSec": 420, "dbRecommendationIds": ["db-01", "db-05"], "records": [
+    {"artworkId": "aw-plane", "atSec": 0, "movingSec": 10, "emotionId": "awe", "source": "camera"},
+    {"artworkId": "aw-edge", "atSec": 50, "movingSec": 5, "emotionId": "curiosity", "source": "camera"},
+    {"artworkId": "aw-window", "atSec": 110, "movingSec": 20, "emotionId": "awe", "source": "camera"},
+    {"artworkId": "aw-e07", "atSec": 310, "movingSec": 15, "emotionId": "awe", "source": "camera"},
+    {"artworkId": "aw-e08", "atSec": 370, "movingSec": 0, "emotionId": "sadness", "source": "camera"}
+  ] },
+  "bright-explorer": { "generateAtSec": 1130, "dbRecommendationIds": ["db-02", "db-06"], "records": [
+    {"artworkId": "aw-plane", "atSec": 0, "movingSec": 5, "emotionId": "happiness", "source": "camera"},
+    {"artworkId": "aw-window", "atSec": 40, "movingSec": 10, "emotionId": "joy", "source": "camera"},
+    {"artworkId": "aw-navy", "atSec": 90, "movingSec": 8, "emotionId": "happiness", "source": "camera"},
+    {"artworkId": "aw-e10", "atSec": 140, "movingSec": 6, "emotionId": "love", "source": "camera"},
+    {"artworkId": "aw-e11", "atSec": 1040, "movingSec": 4, "emotionId": "happiness", "source": "camera"},
+    {"artworkId": "aw-fold", "atSec": 1080, "movingSec": 7, "emotionId": "curiosity", "source": "camera"}
+  ] },
+  "color-collector": { "generateAtSec": 470, "dbRecommendationIds": ["db-03", "db-06"], "records": [
+    {"artworkId": "aw-plane", "atSec": 0, "movingSec": 5, "emotionId": "sensuous", "source": "camera"},
+    {"artworkId": "aw-edge", "atSec": 30, "movingSec": 4, "emotionId": "sophistication", "source": "camera"},
+    {"artworkId": "aw-edge", "atSec": 45, "movingSec": 0, "emotionId": "sophistication", "source": "camera"},
+    {"artworkId": "aw-e06", "atSec": 70, "movingSec": 6, "emotionId": "sensuous", "source": "camera"},
+    {"artworkId": "aw-window", "atSec": 115, "movingSec": 8, "emotionId": "sensuous", "source": "camera"},
+    {"artworkId": "aw-e07", "atSec": 160, "movingSec": 5, "emotionId": "happiness", "source": "camera"},
+    {"artworkId": "aw-navy", "atSec": 205, "movingSec": 10, "emotionId": "sophistication", "source": "camera"},
+    {"artworkId": "aw-e09", "atSec": 335, "movingSec": 6, "emotionId": "sensuous", "source": "camera"},
+    {"artworkId": "aw-e12", "atSec": 380, "movingSec": 0, "emotionId": "curiosity", "source": "map"},
+    {"artworkId": "aw-e10", "atSec": 420, "movingSec": 5, "emotionId": "curiosity", "source": "camera"}
+  ] },
+  "walker": { "generateAtSec": 230, "dbRecommendationIds": ["db-04", "db-01"], "records": [
+    {"artworkId": "aw-plane", "atSec": 0, "movingSec": 50, "emotionId": "compassion", "source": "camera"},
+    {"artworkId": "aw-edge", "atSec": 95, "movingSec": 20, "emotionId": "compassion", "source": "camera"},
+    {"artworkId": "aw-e06", "atSec": 170, "movingSec": 10, "emotionId": "sadness", "source": "camera"}
+  ] }
+ },
+ "otherVisitorsTop1": {"awe": 23, "happiness": 31, "curiosity": 18, "sophistication": 14, "sensuous": 0, "compassion": 4, "sadness": 9, "joy": 12, "love": 8, "worry": 3, "confusion": 2, "fear": 1, "hatred": 0, "anger": 0, "greed": 1},
+ "memberHistory": [
+  {"leafletId": "hist-winter-1", "exhibitionId": "ex-winter", "visitDate": "2026-01-20", "top1EmotionId": "awe", "top1Color": "Cobalt"},
+  {"leafletId": "hist-winter-2", "exhibitionId": "ex-winter", "visitDate": "2026-02-14", "top1EmotionId": "sadness", "top1Color": "Chetwode Blue"}
+ ],
+ "defaultThemeColor": "Persian Indigo"
+}
