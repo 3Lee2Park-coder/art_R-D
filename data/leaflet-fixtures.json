@@ -25,12 +25,12 @@
   "aw-e12": {"zone": "복도", "emotions": {"happiness": 0.5, "joy": 0.3, "love": 0.2}, "colors": {"Paris Daisy": 0.4, "Kournikova": 0.35, "Gossip": 0.25}}
  },
  "mockDb": {
-  "db-01": {"title": "푸른 정적", "artistName": "한지오", "emotions": {"awe": 0.55, "curiosity": 0.25, "sadness": 0.2}, "colors": {"Persian Indigo": 0.5, "Heather": 0.3, "White Smoke": 0.2}},
-  "db-02": {"title": "노란 오후", "artistName": "윤소아", "emotions": {"happiness": 0.5, "joy": 0.35, "love": 0.15}, "colors": {"Paris Daisy": 0.45, "Kournikova": 0.3, "Gossip": 0.25}},
-  "db-03": {"title": "분홍의 결", "artistName": "정마루", "emotions": {"sensuous": 0.55, "sophistication": 0.3, "joy": 0.15}, "colors": {"Mandy": 0.45, "Wheat": 0.3, "Cobalt": 0.25}},
-  "db-04": {"title": "회색 편지", "artistName": "오유진", "emotions": {"sophistication": 0.45, "compassion": 0.35, "sadness": 0.2}, "colors": {"Persian Indigo": 0.4, "Nobel": 0.35, "White Smoke": 0.25}},
-  "db-05": {"title": "밤의 수면", "artistName": "한지오", "emotions": {"awe": 0.4, "sadness": 0.4, "worry": 0.2}, "colors": {"Chetwode Blue": 0.5, "Cobalt": 0.3, "Black": 0.2}},
-  "db-06": {"title": "따뜻한 벽", "artistName": "윤소아", "emotions": {"love": 0.45, "happiness": 0.35, "sensuous": 0.2}, "colors": {"Tonys Pink": 0.4, "Feldspar": 0.35, "Wheat": 0.25}}
+  "db-01": {"title": "푸른 정적", "artistName": "한지오", "emotions": {"awe": 0.55, "curiosity": 0.25, "sadness": 0.2}, "colors": {"Persian Indigo": 0.5, "Heather": 0.3, "White Smoke": 0.2}, "imageUrl": "/images/artworks/gang-mingi-27.jpg"},
+  "db-02": {"title": "노란 오후", "artistName": "윤소아", "emotions": {"happiness": 0.5, "joy": 0.35, "love": 0.15}, "colors": {"Paris Daisy": 0.45, "Kournikova": 0.3, "Gossip": 0.25}, "imageUrl": "/images/artworks/lee-gicho-frame.svg"},
+  "db-03": {"title": "분홍의 결", "artistName": "정마루", "emotions": {"sensuous": 0.55, "sophistication": 0.3, "joy": 0.15}, "colors": {"Mandy": 0.45, "Wheat": 0.3, "Cobalt": 0.25}, "imageUrl": "/images/artworks/lee-seungyeon-inner.jpg"},
+  "db-04": {"title": "회색 편지", "artistName": "오유진", "emotions": {"sophistication": 0.45, "compassion": 0.35, "sadness": 0.2}, "colors": {"Persian Indigo": 0.4, "Nobel": 0.35, "White Smoke": 0.25}, "imageUrl": "/images/artworks/gang-mingi-27.jpg"},
+  "db-05": {"title": "밤의 수면", "artistName": "한지오", "emotions": {"awe": 0.4, "sadness": 0.4, "worry": 0.2}, "colors": {"Chetwode Blue": 0.5, "Cobalt": 0.3, "Black": 0.2}, "imageUrl": "/images/artworks/lee-seungyeon-inner.jpg"},
+  "db-06": {"title": "따뜻한 벽", "artistName": "윤소아", "emotions": {"love": 0.45, "happiness": 0.35, "sensuous": 0.2}, "colors": {"Tonys Pink": 0.4, "Feldspar": 0.35, "Wheat": 0.25}, "imageUrl": "/images/artworks/lee-gicho-frame.svg"}
  },
  "scenarios": {
   "wonder-immersive": { "generateAtSec": 420, "dbRecommendationIds": ["db-01", "db-05"], "records": [

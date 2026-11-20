@@ -16,6 +16,7 @@ import {
   myRoomSeed,
   reportSeed,
 } from "@/lib/data";
+import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -433,7 +434,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [role, saved]);
 
   const findLeaflet = useCallback(
-    (id: string) => saved.find((leaflet) => leaflet.id === id) ?? leafletSeed.find((leaflet) => leaflet.id === id),
+    (id: string) => {
+      const savedOne = saved.find((leaflet) => leaflet.id === id);
+      if (savedOne?.result) return savedOne;
+
+      const seed = leafletSeed.find((leaflet) => leaflet.id === id);
+      if (seed?.result) return seed;
+
+      // 시연 리플릿: 즉석 계산 (JSON에 result 저장하지 않음)
+      const demo = buildDemoLeaflet(id);
+      if (demo) {
+        if (seed) {
+          return {
+            ...demo,
+            notes: seed.notes,
+            comment: seed.comment,
+            photos: seed.photos.length > 0 ? seed.photos : demo.photos,
+            myPhotoUrl: seed.myPhotoUrl ?? demo.myPhotoUrl,
+            inArchive: seed.inArchive,
+          };
+        }
+        return demo;
+      }
+
+      return savedOne ?? seed;
+    },
     [saved],
   );
 
@@ -569,10 +594,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   if (!ready) return <div className="min-h-dvh bg-white" data-ready="false" />;
 
+  /** V-09 리플릿 카드: 사이트 헤더 숨김 (로고·날짜는 카드 1만) */
+  const hideSiteHeader =
+    /^\/leaflets\/[^/]+$/.test(pathname) || /^\/my-room\/leaflets\/[^/]+$/.test(pathname);
+
   return (
     <AppContext.Provider value={value}>
       <div data-ready="true" data-mode={mode} data-screen={screenId} data-demo={demo ? "1" : "0"} className="min-h-dvh">
-        <Header />
+        {hideSiteHeader ? null : <Header />}
         {notice ? (
           <div className="bg-parchment text-ink flex items-center justify-between gap-3 px-4 py-3 text-[14px]">
             <p>{notice}</p>
