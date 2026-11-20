@@ -53,6 +53,34 @@ save(
   "public/images/artworks/study.svg",
   `<rect width="800" height="1000" fill="#F3F0EA"/><circle cx="300" cy="380" r="140" fill="none" stroke="#5C584F" stroke-width="6"/><circle cx="460" cy="540" r="180" fill="none" stroke="#8A8175" stroke-width="4"/><circle cx="250" cy="680" r="70" fill="none" stroke="#1D1D1F" stroke-width="5"/>`,
 );
+save(
+  "public/images/artworks/e06.svg",
+  `<rect width="800" height="1000" fill="#F6EDE8"/><rect x="100" y="200" width="280" height="520" fill="#CC3F5C"/><rect x="420" y="320" width="260" height="400" fill="#F5DFB5"/><rect x="200" y="700" width="400" height="40" fill="#03569B"/>`,
+);
+save(
+  "public/images/artworks/e07.svg",
+  `<rect width="800" height="1000" fill="#CBD7E8"/><rect x="80" y="140" width="640" height="40" fill="#FFCB58"/><rect x="120" y="280" width="200" height="480" fill="#F5DFB5"/><rect x="400" y="220" width="280" height="560" fill="#A5B8C7" opacity="0.7"/>`,
+);
+save(
+  "public/images/artworks/e08.svg",
+  `<rect width="800" height="1000" fill="#1A1A22"/><rect x="60" y="180" width="680" height="120" fill="#5C68A3"/><rect x="100" y="380" width="500" height="80" fill="#A5B8C7"/><circle cx="620" cy="700" r="90" fill="#262626"/>`,
+);
+save(
+  "public/images/artworks/e09.svg",
+  `<rect width="800" height="1000" fill="#2E1450"/><rect x="140" y="160" width="520" height="680" fill="#CC3F5C"/><rect x="200" y="280" width="180" height="180" fill="#FFCB58"/><rect x="420" y="520" width="160" height="220" fill="#03569B"/>`,
+);
+save(
+  "public/images/artworks/e10.svg",
+  `<rect width="800" height="1000" fill="#E8D4C4"/><rect x="0" y="0" width="160" height="1000" fill="#D38E6E"/><rect x="200" y="0" width="80" height="1000" fill="#E76C56"/><rect x="360" y="0" width="200" height="1000" fill="#F5DFB5"/><rect x="640" y="0" width="100" height="1000" fill="#D38E6E"/>`,
+);
+save(
+  "public/images/artworks/e11.svg",
+  `<rect width="800" height="1000" fill="#FFF6E0"/><circle cx="400" cy="420" r="220" fill="#FFCB58"/><circle cx="400" cy="420" r="120" fill="#F9EFBD"/><rect x="180" y="700" width="440" height="60" fill="#92C683"/>`,
+);
+save(
+  "public/images/artworks/e12.svg",
+  `<rect width="800" height="1000" fill="#1D1D1F"/><rect x="120" y="160" width="560" height="680" fill="#FFE40F"/><rect x="200" y="260" width="400" height="480" fill="#FFCB58"/><rect x="280" y="360" width="240" height="280" fill="#92C683"/>`,
+);
 
 save(
   "public/images/posters/edge.svg",
