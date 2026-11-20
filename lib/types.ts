@@ -1,3 +1,6 @@
+import type { LeafletResult } from "@/lib/leaflet/buildLeafletResult";
+import type { VisitRecord } from "@/lib/leaflet/dwell";
+
 export type Role =
   | "visitor-guest"
   | "visitor-member"
@@ -84,6 +87,13 @@ export type Leaflet = {
   comment?: string;
   recommendationArtworkIds: string[];
   inArchive?: boolean;
+  /** 관람 기록 (카드 2) */
+  records?: VisitRecord[];
+  /** STEP1 계산 결과 (카드는 이 값만 그린다) */
+  result?: LeafletResult;
+  /** 65색 이름 (LEAFLET_SPEC 7-3) */
+  themeColor?: string;
+  myPhotoUrl?: string;
 };
 
 export type Report = {

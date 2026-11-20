@@ -16,6 +16,7 @@ import {
   myRoomSeed,
   reportSeed,
 } from "@/lib/data";
+import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -433,7 +434,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [role, saved]);
 
   const findLeaflet = useCallback(
-    (id: string) => saved.find((leaflet) => leaflet.id === id) ?? leafletSeed.find((leaflet) => leaflet.id === id),
+    (id: string) => {
+      const savedOne = saved.find((leaflet) => leaflet.id === id);
+      if (savedOne?.result) return savedOne;
+
+      const seed = leafletSeed.find((leaflet) => leaflet.id === id);
+      if (seed?.result) return seed;
+
+      // 시연 리플릿: 즉석 계산 (JSON에 result 저장하지 않음)
+      const demo = buildDemoLeaflet(id);
+      if (demo) {
+        if (seed) {
+          return {
+            ...demo,
+            notes: seed.notes,
+            comment: seed.comment,
+            photos: seed.photos.length > 0 ? seed.photos : demo.photos,
+            myPhotoUrl: seed.myPhotoUrl ?? demo.myPhotoUrl,
+            inArchive: seed.inArchive,
+          };
+        }
+        return demo;
+      }
+
+      return savedOne ?? seed;
+    },
     [saved],
   );
 
