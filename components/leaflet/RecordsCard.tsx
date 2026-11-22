@@ -41,21 +41,24 @@ export function RecordsCard({
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden px-1 pb-1 pt-1">
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       <div className="flex shrink-0 items-baseline justify-between gap-3">
-        <h2 className="m-0 text-[22px] font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="m-0 font-semibold"
+          style={{ color: theme.text, fontSize: "clamp(1rem, 2.8svh, 1.375rem)" }}
+        >
           나의 기록
         </h2>
-        <span className="text-[13px]" style={{ color: theme.aux }}>
+        <span style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)" }}>
           기록 {result.stats.records}점
         </span>
       </div>
 
       {items.length > 0 ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <>
           <div
             ref={trackRef}
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={(e) => {
               const el = e.currentTarget;
               const w = el.clientWidth * 0.82;
@@ -73,34 +76,47 @@ export function RecordsCard({
               return (
                 <div
                   key={`${rec.artworkId}-${rec.atSec}-${i}`}
-                  className="w-[82%] shrink-0 snap-start"
+                  className="flex h-full min-h-0 w-[82%] shrink-0 snap-start flex-col"
                 >
                   <div
-                    className="flex aspect-[3/4] w-full items-center justify-center overflow-hidden"
+                    className="flex min-h-0 flex-1 items-center justify-center overflow-hidden"
                     style={{
                       border: `1px solid ${theme.border}`,
                       background: `${theme.text}10`,
                     }}
                   >
                     {aw ? (
-                      <img src={aw.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                      <img
+                        src={aw.imageUrl}
+                        alt=""
+                        className="max-h-full max-w-full object-contain"
+                      />
                     ) : null}
                   </div>
-                  <div className="mt-2.5 flex flex-col gap-1">
-                    <p className="m-0 text-[16px] font-semibold" style={{ color: theme.text }}>
+                  <div className="mt-2 flex shrink-0 flex-col gap-1">
+                    <p
+                      className="m-0 font-semibold"
+                      style={{ color: theme.text, fontSize: "clamp(0.875rem, 2.2svh, 1rem)" }}
+                    >
                       {aw?.title ?? rec.artworkId}
                     </p>
                     {ar ? (
-                      <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
+                      <p
+                        className="m-0"
+                        data-record-artist
+                        style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)" }}
+                      >
                         {ar.name}
                       </p>
                     ) : null}
                     {em ? (
                       <span
-                        className="mt-1 inline-flex w-fit rounded-full px-2.5 py-1 text-[12px] font-medium"
+                        data-record-emotion
+                        className="mt-0.5 inline-flex w-fit rounded-full px-2.5 py-1 font-medium"
                         style={{
                           background: em.displayColor,
                           color: "#111111",
+                          fontSize: "clamp(0.75rem, 1.6svh, 0.75rem)",
                           border: theme.chipBorder(em.displayColor)
                             ? `1px solid ${theme.chipBorder(em.displayColor)}`
                             : undefined,
@@ -115,7 +131,7 @@ export function RecordsCard({
             })}
           </div>
 
-          <div className="grid shrink-0 grid-cols-6 gap-1.5">
+          <div className="grid shrink-0 grid-cols-6 gap-1.5" data-record-thumbs>
             {items.map((rec, i) => {
               const aw = artworks.find((a) => a.id === rec.artworkId);
               const em =
@@ -156,15 +172,19 @@ export function RecordsCard({
 
           {comment ? (
             <blockquote
-              className="m-0 shrink-0 border-l-2 pl-3 text-[14px] leading-relaxed"
-              style={{ borderColor: theme.border, color: theme.text }}
+              className="m-0 shrink-0 border-l-2 pl-3 leading-relaxed"
+              style={{
+                borderColor: theme.border,
+                color: theme.text,
+                fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
+              }}
             >
               {comment}
             </blockquote>
           ) : null}
-        </div>
+        </>
       ) : (
-        <p className="m-0 text-[14px]" style={{ color: theme.aux }}>
+        <p className="m-0" style={{ color: theme.aux, fontSize: "clamp(0.8125rem, 2svh, 0.875rem)" }}>
           기록이 없습니다.
         </p>
       )}
@@ -172,8 +192,11 @@ export function RecordsCard({
       {inquireId ? (
         <Link
           href={`/artworks/${inquireId}`}
-          className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-5 text-[14px] font-medium"
-          style={leafletPillStyle(theme, "secondary")}
+          className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-5 font-medium"
+          style={{
+            ...leafletPillStyle(theme, "secondary"),
+            fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
+          }}
         >
           작품 문의
         </Link>

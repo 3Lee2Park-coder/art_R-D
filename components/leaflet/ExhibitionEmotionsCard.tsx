@@ -33,12 +33,18 @@ export function ExhibitionEmotionsCard({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-5 overflow-hidden px-1 pb-1 pt-1">
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
       <div className="flex shrink-0 flex-col gap-1">
-        <h2 className="m-0 text-[22px] font-semibold" style={{ color: theme.text }}>
+        <h2
+          className="m-0 font-semibold"
+          style={{ color: theme.text, fontSize: "clamp(1rem, 2.8svh, 1.375rem)" }}
+        >
           이 전시의 감성
         </h2>
-        <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
+        <p
+          className="m-0"
+          style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)" }}
+        >
           관람객 {result.comparison.visitorCount}명의 기록
         </p>
       </div>
@@ -52,10 +58,11 @@ export function ExhibitionEmotionsCard({
               return (
                 <span
                   key={b.key}
-                  className="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-medium"
+                  className="inline-flex items-center rounded-full px-2.5 py-1 font-medium"
                   style={{
                     background: filled ? em.displayColor : "transparent",
                     color: filled ? "#111111" : theme.text,
+                    fontSize: "clamp(0.75rem, 1.6svh, 0.75rem)",
                     border: filled
                       ? theme.chipBorder(em.displayColor)
                         ? `1px solid ${theme.chipBorder(em.displayColor)}`
@@ -72,7 +79,10 @@ export function ExhibitionEmotionsCard({
       </div>
 
       {result.comparison.line ? (
-        <p className="m-0 shrink-0 text-[15px] leading-snug" style={{ color: theme.text }}>
+        <p
+          className="m-0 shrink-0 leading-snug"
+          style={{ color: theme.text, fontSize: "clamp(0.875rem, 2.2svh, 0.9375rem)" }}
+        >
           {result.comparison.line}
         </p>
       ) : null}
@@ -80,8 +90,11 @@ export function ExhibitionEmotionsCard({
       {exhibitionId ? (
         <Link
           href={`/exhibitions/${exhibitionId}`}
-          className="inline-flex h-10 w-fit shrink-0 items-center justify-center px-5 text-[14px] font-medium"
-          style={leafletPillStyle(theme, "secondary")}
+          className="inline-flex h-10 w-fit shrink-0 items-center justify-center px-5 font-medium"
+          style={{
+            ...leafletPillStyle(theme, "secondary"),
+            fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
+          }}
         >
           전시 기록 더 보기
         </Link>

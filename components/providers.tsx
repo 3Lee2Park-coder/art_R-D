@@ -611,7 +611,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
         <main>{children}</main>
-        <DemoOverlay />
+        {hideSiteHeader ? null : <DemoOverlay />}
       </div>
     </AppContext.Provider>
   );

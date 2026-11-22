@@ -16,6 +16,10 @@ import type { Leaflet } from "@/lib/types";
 
 const CARD_COUNT = 5;
 
+function slotWidth(scroller: HTMLDivElement) {
+  return scroller.clientWidth;
+}
+
 export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; readOnly?: boolean }) {
   const app = useApp();
   const search = useSearchParams();
@@ -84,9 +88,8 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
     const el = scrollerRef.current;
     if (!el) return;
     const onScroll = () => {
-      const card = el.querySelector<HTMLElement>("[data-leaflet-card]");
-      if (!card) return;
-      const w = card.offsetWidth + 16;
+      const w = slotWidth(el);
+      if (w <= 0) return;
       const next = Math.round(el.scrollLeft / w);
       setPage(Math.max(0, Math.min(CARD_COUNT - 1, next)));
     };
@@ -100,9 +103,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
       e.preventDefault();
       const el = scrollerRef.current;
       if (!el) return;
-      const card = el.querySelector<HTMLElement>("[data-leaflet-card]");
-      if (!card) return;
-      const w = card.offsetWidth + 16;
+      const w = slotWidth(el);
       const target =
         e.key === "ArrowRight"
           ? Math.min(CARD_COUNT - 1, page + 1)
@@ -117,9 +118,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
   const goTo = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const card = el.querySelector<HTMLElement>("[data-leaflet-card]");
-    if (!card) return;
-    const w = card.offsetWidth + 16;
+    const w = slotWidth(el);
     el.scrollTo({ left: i * w, behavior: "smooth" });
     setPage(i);
   };
@@ -180,24 +179,40 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
 
   return (
     <div
-      className="flex min-h-[100svh] items-start justify-center"
-      style={{ background: theme.bg, color: theme.text }}
+      className="flex h-[100svh] max-h-[100dvh] w-screen items-stretch justify-center overflow-hidden"
+      style={{
+        background: theme.bg,
+        color: theme.text,
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+        paddingRight: "env(safe-area-inset-right)",
+      }}
     >
-      <div className="mx-auto w-full max-w-[480px] px-6 py-4">
-        <div
-          ref={scrollerRef}
-          className="flex snap-x snap-mandatory gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {cards.map((card, i) => (
-            <section
-              key={i}
-              data-leaflet-card
-              className="relative flex w-[min(100%,calc(100vw-48px))] max-w-[342px] shrink-0 snap-center flex-col"
-              style={{ aspectRatio: "9 / 16", width: "min(100%, 342px)" }}
+      <div
+        ref={scrollerRef}
+        className="flex h-full w-full min-w-0 snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {cards.map((card, i) => (
+          <section
+            key={i}
+            data-leaflet-card
+            className="relative flex h-full w-full shrink-0 snap-center justify-center"
+          >
+            <div
+              className="relative flex h-full w-full min-w-0 flex-col md:w-auto"
+              style={{
+                width: "100%",
+                maxWidth:
+                  "min(100%, 480px, calc((100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 9 / 16))",
+                height: "100%",
+              }}
             >
-              <div className="min-h-0 flex-1 overflow-hidden pb-8">{card}</div>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-10">
+                {card}
+              </div>
               <div
-                className="absolute inset-x-0 bottom-1 flex items-center justify-center gap-1.5"
+                className="absolute inset-x-0 bottom-0 flex h-10 items-center justify-center gap-1.5"
                 role="tablist"
                 aria-label="카드"
               >
@@ -217,9 +232,9 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
                   />
                 ))}
               </div>
-            </section>
-          ))}
-        </div>
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );

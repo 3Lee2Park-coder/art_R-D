@@ -25,17 +25,23 @@ export function EmotionsCard({
   }));
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden px-1 pb-1 pt-1">
-      <h2 className="m-0 shrink-0 text-[22px] font-semibold" style={{ color: theme.text }}>
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
+      <h2
+        className="m-0 shrink-0 font-semibold"
+        style={{ color: theme.text, fontSize: "clamp(1rem, 2.8svh, 1.375rem)" }}
+      >
         나의 감성
       </h2>
 
-      <div className="min-h-0 shrink-0">
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
         <EmotionMap counts={result.emotionCounts} theme={theme} />
       </div>
 
       <div className="flex shrink-0 flex-col gap-2">
-        <h3 className="m-0 text-[14px] font-semibold" style={{ color: theme.text }}>
+        <h3
+          className="m-0 font-semibold"
+          style={{ color: theme.text, fontSize: "clamp(0.8125rem, 2svh, 0.875rem)" }}
+        >
           나의 색
         </h3>
         <div className="flex w-full gap-1">
@@ -52,13 +58,16 @@ export function EmotionsCard({
                   }}
                 />
                 <p
-                  className="m-0 truncate text-[12px] leading-tight"
-                  style={{ color: theme.aux }}
+                  className="m-0 truncate leading-tight"
+                  style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.6svh, 0.75rem)" }}
                   title={`${c.name} ${c.percent}%`}
                 >
                   {c.name}
                 </p>
-                <p className="m-0 text-[12px]" style={{ color: theme.aux }}>
+                <p
+                  className="m-0"
+                  style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.6svh, 0.75rem)" }}
+                >
                   {c.percent}%
                 </p>
               </div>
@@ -68,13 +77,16 @@ export function EmotionsCard({
       </div>
 
       <MockRegion>
-        <div className="flex flex-col gap-2">
-          <h3 className="m-0 text-[14px] font-semibold" style={{ color: theme.text }}>
+        <div className="flex shrink-0 flex-col gap-2">
+          <h3
+            className="m-0 font-semibold"
+            style={{ color: theme.text, fontSize: "clamp(0.8125rem, 2svh, 0.875rem)" }}
+          >
             나와 닮은 작품
           </h3>
           <div className="flex gap-3">
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
+              className="flex size-[clamp(3rem,8svh,4rem)] shrink-0 items-center justify-center overflow-hidden"
               style={{
                 border: `1px solid ${theme.border}`,
                 background: `${theme.text}10`,
@@ -89,15 +101,24 @@ export function EmotionsCard({
               ) : null}
             </div>
             <div className="flex min-w-0 flex-col gap-1">
-              <p className="m-0 truncate text-[14px] font-medium" style={{ color: theme.text }}>
+              <p
+                className="m-0 font-medium"
+                style={{ color: theme.text, fontSize: "clamp(0.8125rem, 2svh, 0.875rem)" }}
+              >
                 {similarArtwork?.title ?? result.similar.artworkId}
               </p>
               {similarArtist ? (
-                <p className="m-0 text-[12px]" style={{ color: theme.aux }}>
+                <p
+                  className="m-0"
+                  style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.6svh, 0.75rem)" }}
+                >
                   {similarArtist.name}
                 </p>
               ) : null}
-              <p className="m-0 text-[12px] leading-snug" style={{ color: theme.aux }}>
+              <p
+                className="m-0 leading-snug"
+                style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.75rem)" }}
+              >
                 {result.similar.reason}
               </p>
             </div>
