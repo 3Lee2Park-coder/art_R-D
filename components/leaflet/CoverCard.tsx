@@ -33,9 +33,8 @@ export function CoverCard({
       </div>
 
       <div
-        className="relative flex w-full shrink-0 items-center justify-center overflow-hidden"
+        className="relative flex min-h-0 w-full flex-[1_1_48%] items-center justify-center overflow-hidden"
         style={{
-          height: "50%",
           border: `1px solid ${theme.border}`,
           background: `${theme.text}10`,
         }}
@@ -45,38 +44,34 @@ export function CoverCard({
         ) : null}
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-4">
-        <div className="flex flex-col gap-3">
-          <h1
-            className="m-0 text-[32px] font-bold leading-[1.15] tracking-[-0.01em]"
-            style={{ color: theme.text }}
-          >
-            {result.typeName}
-          </h1>
-          <p className="m-0 text-[15px] leading-snug" style={{ color: theme.text }}>
-            {result.oneLiner}
+      <div className="flex shrink-0 flex-col gap-3">
+        <h1
+          className="m-0 text-[28px] font-bold leading-[1.15] tracking-[-0.01em]"
+          style={{ color: theme.text }}
+        >
+          {result.typeName}
+        </h1>
+        <p className="m-0 text-[14px] leading-snug" style={{ color: theme.text }}>
+          {result.oneLiner}
+        </p>
+        <hr className="m-0 border-0 border-t" style={{ borderColor: theme.border }} />
+        <div className="flex flex-col gap-1.5">
+          <p className="m-0 text-[14px] font-medium" style={{ color: theme.text }}>
+            {exhibitionTitle}
           </p>
-        </div>
-        <div className="flex flex-col gap-2.5">
-          <hr className="m-0 border-0 border-t" style={{ borderColor: theme.border }} />
-          <div className="flex flex-col gap-1.5">
-            <p className="m-0 text-[15px] font-medium" style={{ color: theme.text }}>
-              {exhibitionTitle}
-            </p>
-            {galleryLine ? (
-              <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
-                {galleryLine}
-              </p>
-            ) : null}
+          {galleryLine ? (
             <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
-              기록 {result.stats.records}점 · {result.stats.minutes}분
+              {galleryLine}
             </p>
-            {artistLine ? (
-              <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
-                {artistLine}
-              </p>
-            ) : null}
-          </div>
+          ) : null}
+          <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
+            기록 {result.stats.records}점 · {result.stats.minutes}분
+          </p>
+          {artistLine ? (
+            <p className="m-0 text-[13px]" style={{ color: theme.aux }}>
+              {artistLine}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
