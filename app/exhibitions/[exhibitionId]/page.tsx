@@ -66,7 +66,7 @@ export default function ExhibitionPage() {
         {canStart ? (
           <div className="mt-6 flex flex-col items-start gap-3">
             <button type="button" className="btn btn-primary" onClick={start}>
-              관람 시작
+              입장하기
             </button>
             {/* 미정: 인앱 브라우저 세션 */}
             <div className="flex gap-4 text-[13px]">

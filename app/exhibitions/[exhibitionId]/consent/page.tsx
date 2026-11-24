@@ -28,6 +28,8 @@ export default function ConsentPage() {
             type="button"
             className="btn btn-accent"
             onClick={() => {
+              app.ensureVisit(id);
+              app.grantVisitConsent();
               if (app.role === "visitor-member") app.grantConsent();
               router.push(
                 app.guideHidden

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { FloorPlanViewer } from "@/components/leaflet/FloorPlanViewer";
 import { RecordSheet } from "@/components/leaflet/RecordSheet";
 import { useScenario } from "@/components/leaflet/useScenario";
 import { useApp } from "@/components/providers";
@@ -21,6 +22,7 @@ export default function MapPage() {
   useVisitGate(id);
   useScenario();
   useTitle("배치도");
+  const exhibition = app.exhibitions.find((item) => item.id === id);
   const works = app.artworks.filter((item) => item.exhibitionId === id && item.zone);
   const zones = useMemo(
     () => Array.from(new Set(works.map((item) => item.zone).filter((z): z is string => Boolean(z)))),
@@ -29,24 +31,38 @@ export default function MapPage() {
   const [zone, setZone] = useState("전체");
   const [selected, setSelected] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
+  const mapSaveIndex = useRef<number | null>(null);
   const visible = works.filter((item) => zone === "전체" || item.zone === zone);
   const artwork = works.find((item) => item.id === selected) ?? null;
   const artist = artwork
     ? app.artists.find((item) => item.id === artwork.artistId)
     : undefined;
+  const records = app.capture?.exhibitionId === id ? (app.capture.records ?? []) : [];
+  const priorEmotion =
+    artwork && records.find((r) => r.artworkId === artwork.id && r.emotionId)?.emotionId;
+  const floorPlanUrl = exhibition?.floorPlanUrl ?? null;
 
   function openSheet(artworkId: string) {
+    mapSaveIndex.current = null;
     setSelected(artworkId);
     setSheetOpen(true);
   }
 
-  function saveMap(emotionId: EmotionId | null, descriptionOpened: boolean) {
-    if (!artwork || !emotionId) {
-      setSheetOpen(false);
-      setSelected(null);
+  function closeSheet() {
+    mapSaveIndex.current = null;
+    setSheetOpen(false);
+    setSelected(null);
+  }
+
+  function persistMapEmotion(emotionId: EmotionId, descriptionOpened: boolean) {
+    if (!artwork) return;
+    if (mapSaveIndex.current != null) {
+      app.updateRecordEmotion(id, mapSaveIndex.current, emotionId);
       return;
     }
     const atSec = Math.floor(Date.now() / 1000) % 100000;
+    const idx = records.length;
     app.addRecord(id, {
       artworkId: artwork.id,
       source: "map",
@@ -55,8 +71,7 @@ export default function MapPage() {
       emotionId,
       descriptionOpened,
     });
-    setSheetOpen(false);
-    setSelected(null);
+    mapSaveIndex.current = idx;
   }
 
   return (
@@ -67,6 +82,18 @@ export default function MapPage() {
           촬영
         </Link>
       </div>
+
+      {floorPlanUrl ? (
+        <button
+          type="button"
+          className="mt-5 block w-full overflow-hidden rounded-2xl bg-canvas-dark-deep p-0"
+          onClick={() => setPlanOpen(true)}
+          aria-label="배치도 확대"
+        >
+          <img src={floorPlanUrl} alt="" className="h-auto w-full object-cover" />
+        </button>
+      ) : null}
+
       <div className="mt-6 grid grid-cols-2 gap-2">
         {["전체", ...zones].map((item) => (
           <button
@@ -103,8 +130,10 @@ export default function MapPage() {
         artist={artist}
         mode="map"
         initialDescriptionOpen
+        initialEmotionId={priorEmotion ?? null}
         exhibitionArtworks={works}
         continueLabel="닫기"
+        continueVariant="secondary"
         footer={
           artwork ? (
             <>
@@ -128,21 +157,16 @@ export default function MapPage() {
           ) : null
         }
         onSelectEmotion={(emotionId, descriptionOpened) => {
-          saveMap(emotionId, descriptionOpened);
+          persistMapEmotion(emotionId, descriptionOpened);
         }}
-        onDismissWithoutEmotion={() => {
-          setSheetOpen(false);
-          setSelected(null);
-        }}
-        onContinue={() => {
-          setSheetOpen(false);
-          setSelected(null);
-        }}
-        onClose={() => {
-          setSheetOpen(false);
-          setSelected(null);
-        }}
+        onDismissWithoutEmotion={() => closeSheet()}
+        onContinue={() => closeSheet()}
+        onClose={() => closeSheet()}
       />
+
+      {floorPlanUrl ? (
+        <FloorPlanViewer open={planOpen} src={floorPlanUrl} onClose={() => setPlanOpen(false)} />
+      ) : null}
     </div>
   );
 }

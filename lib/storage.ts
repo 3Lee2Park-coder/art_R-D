@@ -30,6 +30,8 @@ export const KEYS = {
   exhibitionTheme: "restart.exhibitionTheme",
   layoutChecked: "restart.layoutChecked",
   reviewAsked: "restart.reviewAsked",
+  /** 회원가입 이름. 허브 인사에만 사용 [가안] */
+  visitorName: "restart.visitorName",
 } as const;
 
 export const SESSION = {
@@ -40,6 +42,8 @@ export const SESSION = {
   /** 시나리오 id. 화면에는 보이지 않음 [가안 기본 wonder-immersive] */
   scenario: "restart.scenario",
   visitId: "restart.visitId",
+  /** [가안] 이번 visitId 동의 { visitId, version } */
+  visitConsent: "restart.visitConsent",
 } as const;
 
 const ROLES: Role[] = [

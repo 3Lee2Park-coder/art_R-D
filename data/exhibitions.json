@@ -12,7 +12,8 @@
     "leafletEnabled": true,
     "published": true,
     "approvalState": "approved",
-    "ended": false
+    "ended": false,
+    "floorPlanUrl": "/images/exhibitions/ex-edge-floorplan.svg"
   },
   {
     "id": "ex-winter",
@@ -27,7 +28,8 @@
     "leafletEnabled": true,
     "published": true,
     "approvalState": "approved",
-    "ended": true
+    "ended": true,
+    "floorPlanUrl": null
   },
   {
     "id": "ex-alley",
@@ -42,7 +44,8 @@
     "leafletEnabled": false,
     "published": true,
     "approvalState": "none",
-    "ended": false
+    "ended": false,
+    "floorPlanUrl": null
   },
   {
     "id": "ex-tide",
@@ -57,7 +60,8 @@
     "leafletEnabled": true,
     "published": true,
     "approvalState": "approved",
-    "ended": true
+    "ended": true,
+    "floorPlanUrl": null
   },
   {
     "id": "ex-pending",
@@ -72,6 +76,7 @@
     "leafletEnabled": true,
     "published": false,
     "approvalState": "pending",
-    "ended": false
+    "ended": false,
+    "floorPlanUrl": null
   }
 ]

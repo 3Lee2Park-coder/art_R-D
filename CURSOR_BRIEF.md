@@ -101,7 +101,7 @@
 | C-08 | `/artworks` | 작품 목록 | 라이트 | C-03 |
 | C-09 | `/galleries` | 갤러리 목록 | 라이트 | C-10. 초성·지역 필터 |
 | C-10 | `/galleries/[galleryId]` | 갤러리 상세 | 라이트 | 전시 → V-01 |
-| V-01 | `/exhibitions/[exhibitionId]` | 전시 페이지 | 라이트 | 계약+현장QR 가정+관람 시작 → V-02 또는 건너뛰어 V-03/V-04. V-12에서 연 계약 전시는 QR 안내 + 가고 싶은 전시 저장만. 동의 거부 복귀 지점 |
+| V-01 | `/exhibitions/[exhibitionId]` | 전시 페이지 | 라이트 | 계약+현장QR 가정+입장하기 → V-02 또는 건너뛰어 V-03/V-15. V-12에서 연 계약 전시는 QR 안내 + 가고 싶은 전시 저장만. 동의 거부 복귀 지점 |
 | V-02 | `/exhibitions/[exhibitionId]/consent` | 수집 안내·동의 | 다크 | 동의 → V-03 또는 V-04. 거부 → V-01, 리플릿 없음 |
 | V-03 | `/exhibitions/[exhibitionId]/guide` | 촬영 방법·결과 예시 | 다크 | V-04. 「1주일 동안 보지 않기」 |
 | V-04 | `/exhibitions/[exhibitionId]/capture` | 촬영 | 다크 | V-05, V-06. 카메라 권한 거부 안내(NFR-005). 브라우저 카메라만, 사진첩 없음. 계약 전시 전용 |

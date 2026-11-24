@@ -4,12 +4,17 @@ import Link from "next/link";
 import { FormEvent } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
+import { KEYS } from "@/lib/storage";
 
 export default function SignupPage() {
   const { login } = useApp();
 
-  function submit(event: FormEvent) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const name = new FormData(event.currentTarget).get("name");
+    const trimmed = typeof name === "string" ? name.trim() : "";
+    if (trimmed) localStorage.setItem(KEYS.visitorName, trimmed);
+    else localStorage.removeItem(KEYS.visitorName);
     login("visitor-member");
   }
 

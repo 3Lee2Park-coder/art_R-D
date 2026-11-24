@@ -102,6 +102,7 @@ export default function PhotosPage() {
         artwork={artwork ?? null}
         artist={artist}
         mode="camera"
+        initialEmotionId={editing?.emotionId ?? null}
         exhibitionArtworks={works}
         onSelectEmotion={(emotionId) => {
           if (editIndex == null) return;
