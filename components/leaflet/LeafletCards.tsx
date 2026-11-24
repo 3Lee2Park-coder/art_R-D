@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CoverCard } from "@/components/leaflet/CoverCard";
 import { EmotionsCard } from "@/components/leaflet/EmotionsCard";
@@ -181,9 +182,11 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
     />,
   ];
 
+  const showNotesLink = !readOnly && Boolean(leaflet.records?.length);
+
   return (
     <div
-      className="flex h-[100svh] max-h-[100dvh] w-screen items-stretch justify-center overflow-hidden"
+      className="relative flex h-[100svh] max-h-[100dvh] w-screen flex-col items-stretch overflow-hidden"
       style={{
         background: theme.bg,
         color: theme.text,
@@ -195,7 +198,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
     >
       <div
         ref={scrollerRef}
-        className="flex h-full w-full min-w-0 snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-h-0 w-full flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {cards.map((card, i) => (
           <section
@@ -240,6 +243,17 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
           </section>
         ))}
       </div>
+      {showNotesLink ? (
+        <div className="mx-auto flex w-full max-w-[480px] shrink-0 justify-center px-4 pb-3 pt-1">
+          <Link
+            href={`/leaflets/${leaflet.id}/notes`}
+            className="bg-transparent text-[13px] font-medium underline-offset-2"
+            style={{ color: theme.aux, textDecorationColor: theme.aux }}
+          >
+            내 사진·한줄평 남기기
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
