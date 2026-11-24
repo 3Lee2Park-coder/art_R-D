@@ -19,7 +19,27 @@ export type InterestWork = {
 export function listInterestWorks(leafletId?: string): InterestWork[] {
   if (typeof localStorage === "undefined") return [];
   const all = readJSON<InterestWork[]>(localStorage, KEYS.interestWorks, []);
-  return leafletId ? all.filter((w) => w.leafletId === leafletId) : all;
+  return leafletId ? filterInterestByLeaflet(all, leafletId) : all;
+}
+
+/** 메모리 상태(providers)에서 리플릿별 관심 작품 ID — 새로고침 없이 UI 동기화용 */
+export function filterInterestByLeaflet(
+  works: InterestWork[],
+  leafletId: string,
+): InterestWork[] {
+  return works.filter((w) => w.leafletId === leafletId);
+}
+
+export function interestIdsFromWorks(works: InterestWork[], leafletId: string): string[] {
+  return filterInterestByLeaflet(works, leafletId).map((w) => w.artworkId);
+}
+
+export function hasInterestInWorks(
+  works: InterestWork[],
+  leafletId: string,
+  artworkId: string,
+): boolean {
+  return works.some((w) => w.leafletId === leafletId && w.artworkId === artworkId);
 }
 
 export function hasInterest(leafletId: string, artworkId: string): boolean {

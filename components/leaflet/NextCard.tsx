@@ -16,7 +16,7 @@ import {
   hasNewsSubscribe,
   recordInquiryOpen,
 } from "@/lib/leaflet/inquiry";
-import { interestArtworkIdsForLeaflet } from "@/lib/leaflet/interest";
+import { interestIdsFromWorks } from "@/lib/leaflet/interest";
 import type { Exhibition, Gallery } from "@/lib/types";
 
 export function NextCard({
@@ -47,10 +47,10 @@ export function NextCard({
   const [newsOpen, setNewsOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
 
-  const interestIds = useMemo(() => {
-    void tick;
-    return interestArtworkIdsForLeaflet(leafletId);
-  }, [tick, leafletId]);
+  const interestIds = useMemo(
+    () => interestIdsFromWorks(app.interestWorks, leafletId),
+    [app.interestWorks, leafletId],
+  );
 
   const newsOn = useMemo(() => {
     void tick;

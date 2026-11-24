@@ -37,6 +37,12 @@ export function oneParam(value: string | string[] | undefined) {
   return value ?? "";
 }
 
+/** V-01 로그인 복귀: 기존 쿼리(?from=qr&scenario=…) 보존 */
+export function exhibitionReturnPath(exhibitionId: string, search: string): string {
+  const qs = search.startsWith("?") ? search.slice(1) : search;
+  return `/exhibitions/${exhibitionId}${qs ? `?${qs}` : ""}`;
+}
+
 export function outsidePeriod(date: string, start: string, end: string) {
   if (!date || !start || !end) return false;
   return date < start || date > end;

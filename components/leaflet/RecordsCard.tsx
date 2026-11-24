@@ -8,7 +8,7 @@ import type { LeafletResult } from "@/lib/leaflet/buildLeafletResult";
 import type { VisitRecord } from "@/lib/leaflet/dwell";
 import { EMOTION_BY_ID, type EmotionId } from "@/lib/leaflet/emotions";
 import { recordInquiryOpen } from "@/lib/leaflet/inquiry";
-import { hasInterest, toggleInterestWork } from "@/lib/leaflet/interest";
+import { hasInterestInWorks } from "@/lib/leaflet/interest";
 import type { Artist, Artwork } from "@/lib/types";
 
 export function RecordsCard({
@@ -33,16 +33,14 @@ export function RecordsCard({
   const app = useApp();
   const items = records.length > 0 ? records : [];
   const [index, setIndex] = useState(0);
-  const [interestTick, setInterestTick] = useState(0);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const current = items[Math.min(index, Math.max(0, items.length - 1))];
   const currentArtworkId = current?.artworkId;
 
-  const interested = useMemo(() => {
-    void interestTick;
-    return currentArtworkId ? hasInterest(leafletId, currentArtworkId) : false;
-  }, [interestTick, leafletId, currentArtworkId]);
+  const interested = currentArtworkId
+    ? hasInterestInWorks(app.interestWorks, leafletId, currentArtworkId)
+    : false;
 
   const artworkTitles = useMemo(() => {
     const map: Record<string, string> = {};
@@ -61,13 +59,11 @@ export function RecordsCard({
 
   function onToggleInterest() {
     if (!currentArtworkId) return;
-    toggleInterestWork({
+    app.toggleInterest({
       artworkId: currentArtworkId,
       exhibitionId,
       leafletId,
-      role: app.role,
     });
-    setInterestTick((n) => n + 1);
   }
 
   function onOpenInquiry() {

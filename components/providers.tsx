@@ -18,6 +18,11 @@ import {
 } from "@/lib/data";
 import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
 import { listVisitorEvents, mergeIdentityForLeaflet } from "@/lib/leaflet/events";
+import {
+  listInterestWorks,
+  toggleInterestWork,
+  type InterestWork,
+} from "@/lib/leaflet/interest";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -85,6 +90,13 @@ type AppState = {
   setSpacePick: (value: string) => void;
   picks: string[];
   togglePick: (id: string) => void;
+  /** 리플릿 관심 작품(마이룸 picks와 분리). 토글 시 즉시 반영 */
+  interestWorks: InterestWork[];
+  toggleInterest: (input: {
+    artworkId: string;
+    exhibitionId: string;
+    leafletId: string;
+  }) => { added: boolean };
   decorWall: string;
   setDecorWall: (id: string) => void;
   themeFor: (exhibitionId: string) => string | null;
@@ -129,6 +141,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = useState<AccountPatches>({});
   const [spacePick, setSpacePickState] = useState<string | null>(null);
   const [picks, setPicks] = useState<string[]>([]);
+  const [interestWorks, setInterestWorks] = useState<InterestWork[]>([]);
   const [decorWall, setDecorWallState] = useState("navy");
   const [themes, setThemes] = useState<Record<string, string>>({});
   const [checkedLayouts, setCheckedLayouts] = useState<string[]>([]);
@@ -154,6 +167,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
     setPicks(readJSON<string[]>(localStorage, KEYS.artworkPicks, []));
+    setInterestWorks(listInterestWorks());
     setDecorWallState(localStorage.getItem(KEYS.decorWall) || "navy");
     setThemes(readJSON<Record<string, string>>(localStorage, KEYS.exhibitionTheme, {}));
     setCheckedLayouts(readJSON<string[]>(localStorage, KEYS.layoutChecked, []));
@@ -384,6 +398,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const toggleInterest = useCallback(
+    (input: { artworkId: string; exhibitionId: string; leafletId: string }) => {
+      const result = toggleInterestWork({ ...input, role: readRole() });
+      setInterestWorks(listInterestWorks());
+      return { added: result.added };
+    },
+    [],
+  );
+
   const setDecorWall = useCallback((id: string) => {
     localStorage.setItem(KEYS.decorWall, id);
     setDecorWallState(id);
@@ -536,6 +559,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       setSpacePick,
       picks,
       togglePick,
+      interestWorks,
+      toggleInterest,
       decorWall,
       setDecorWall,
       themeFor: (exhibitionId: string) => themes[exhibitionId] ?? null,
@@ -591,6 +616,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       setSpacePick,
       picks,
       togglePick,
+      interestWorks,
+      toggleInterest,
       decorWall,
       setDecorWall,
       themes,

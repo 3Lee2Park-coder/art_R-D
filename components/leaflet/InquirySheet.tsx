@@ -7,8 +7,15 @@ import {
   type ContactMethod,
   type InquiryFormInput,
 } from "@/lib/leaflet/inquiry";
-import { interestArtworkIdsForLeaflet } from "@/lib/leaflet/interest";
+import { interestIdsFromWorks } from "@/lib/leaflet/interest";
+import { useApp } from "@/components/providers";
 import type { Role } from "@/lib/types";
+
+const ERR_NAME = "이름을 입력해 주세요.";
+const ERR_METHOD = "연락 수단을 골라 주세요.";
+const ERR_EMAIL = "이메일을 입력해 주세요.";
+const ERR_PHONE = "연락처를 입력해 주세요.";
+const ERR_CONSENT = "문의 답변을 위한 연락에 동의해 주세요.";
 
 export function InquirySheet({
   open,
@@ -29,6 +36,7 @@ export function InquirySheet({
   artworkTitles: Record<string, string>;
   role: Role;
 }) {
+  const app = useApp();
   const [name, setName] = useState("");
   const [contactMethod, setContactMethod] = useState<ContactMethod | null>(null);
   const [contactValue, setContactValue] = useState("");
@@ -39,9 +47,13 @@ export function InquirySheet({
   const [done, setDone] = useState(false);
 
   const interestIds = useMemo(
-    () => (open ? interestArtworkIdsForLeaflet(leafletId) : []),
-    [open, leafletId],
+    () => (open ? interestIdsFromWorks(app.interestWorks, leafletId) : []),
+    [open, leafletId, app.interestWorks],
   );
+
+  function clearError(...messages: string[]) {
+    setError((prev) => (prev && messages.includes(prev) ? null : prev));
+  }
 
   if (!open) return null;
 
@@ -126,7 +138,10 @@ export function InquirySheet({
                 이름
                 <input
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (e.target.value.trim()) clearError(ERR_NAME);
+                  }}
                   style={fieldStyle}
                   autoComplete="name"
                 />
@@ -152,6 +167,7 @@ export function InquirySheet({
                       onClick={() => {
                         setContactMethod(value);
                         setContactValue("");
+                        clearError(ERR_METHOD);
                       }}
                     >
                       {label}
@@ -161,7 +177,10 @@ export function InquirySheet({
                 {contactMethod ? (
                   <input
                     value={contactValue}
-                    onChange={(e) => setContactValue(e.target.value)}
+                    onChange={(e) => {
+                      setContactValue(e.target.value);
+                      if (e.target.value.trim()) clearError(ERR_EMAIL, ERR_PHONE);
+                    }}
                     style={fieldStyle}
                     type={contactMethod === "email" ? "email" : "tel"}
                     autoComplete={contactMethod === "email" ? "email" : "tel"}
@@ -208,7 +227,10 @@ export function InquirySheet({
                 <input
                   type="checkbox"
                   checked={consentContact}
-                  onChange={(e) => setConsentContact(e.target.checked)}
+                  onChange={(e) => {
+                    setConsentContact(e.target.checked);
+                    if (e.target.checked) clearError(ERR_CONSENT);
+                  }}
                   className="mt-0.5"
                 />
                 {/* [가안 문구] */}

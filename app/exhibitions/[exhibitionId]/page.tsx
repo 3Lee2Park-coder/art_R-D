@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { ArtworkCard } from "@/components/cards";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle, SectionHeader, Shelf, SiteFooter } from "@/components/ui";
-import { formatPeriod, oneParam } from "@/lib/format";
+import { exhibitionReturnPath, formatPeriod, oneParam } from "@/lib/format";
 import { KEYS } from "@/lib/storage";
 
 export default function ExhibitionPage() {
@@ -69,7 +69,10 @@ export default function ExhibitionPage() {
                 type="button"
                 className="link bg-transparent p-0 font-normal text-[13px] opacity-70"
                 onClick={() => {
-                  localStorage.setItem(KEYS.returnTo, `/exhibitions/${exhibition.id}?from=qr`);
+                  localStorage.setItem(
+                    KEYS.returnTo,
+                    exhibitionReturnPath(exhibition.id, searchParams.toString()),
+                  );
                   router.push("/login");
                 }}
               >
@@ -79,7 +82,10 @@ export default function ExhibitionPage() {
                 type="button"
                 className="link bg-transparent p-0 font-normal text-[13px] opacity-70"
                 onClick={() => {
-                  localStorage.setItem(KEYS.returnTo, `/exhibitions/${exhibition.id}?from=qr`);
+                  localStorage.setItem(
+                    KEYS.returnTo,
+                    exhibitionReturnPath(exhibition.id, searchParams.toString()),
+                  );
                   router.push("/signup");
                 }}
               >

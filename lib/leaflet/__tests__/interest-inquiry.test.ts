@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { KEYS } from "@/lib/storage";
 import { listVisitorEvents, mergeIdentityForLeaflet } from "@/lib/leaflet/events";
+import { exhibitionReturnPath } from "@/lib/format";
 import {
   hasInterest,
+  interestIdsFromWorks,
   listInterestWorks,
   toggleInterestWork,
 } from "@/lib/leaflet/interest";
@@ -98,6 +100,33 @@ describe("interest vs artworkPicks", () => {
     expect(r2.added).toBe(false);
     expect(listInterestWorks("demo-bright-explorer")).toHaveLength(0);
     expect(JSON.parse(localStorage.getItem(KEYS.artworkPicks)!)).toEqual(["aw-keep"]);
+  });
+
+  it("메모리 목록으로 카드 5가 새로고침 없이 관심 유무를 반영한다", () => {
+    expect(interestIdsFromWorks([], "demo-bright-explorer")).toEqual([]);
+    toggleInterestWork({
+      artworkId: "aw-e01",
+      exhibitionId: "ex-edge",
+      leafletId: "demo-bright-explorer",
+      role: "visitor-guest",
+    });
+    const afterAdd = listInterestWorks();
+    expect(interestIdsFromWorks(afterAdd, "demo-bright-explorer")).toEqual(["aw-e01"]);
+    toggleInterestWork({
+      artworkId: "aw-e01",
+      exhibitionId: "ex-edge",
+      leafletId: "demo-bright-explorer",
+      role: "visitor-guest",
+    });
+    expect(interestIdsFromWorks(listInterestWorks(), "demo-bright-explorer")).toEqual([]);
+  });
+});
+
+describe("V-01 returnTo query", () => {
+  it("from=qr와 scenario 등 기존 쿼리를 보존한다", () => {
+    expect(
+      exhibitionReturnPath("ex-edge", "from=qr&scenario=bright-explorer"),
+    ).toBe("/exhibitions/ex-edge?from=qr&scenario=bright-explorer");
   });
 });
 
