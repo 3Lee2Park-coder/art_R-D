@@ -27,6 +27,8 @@ export type Exhibition = {
   approvalState: "none" | "pending" | "approved";
   /** 종료 확정 방식이 정해지기 전, 데이터에 직접 둔다. */
   ended: boolean;
+  /** 배치도 이미지. 없으면 맵 상단 블록 숨김 */
+  floorPlanUrl: string | null;
 };
 
 export type Artwork = {

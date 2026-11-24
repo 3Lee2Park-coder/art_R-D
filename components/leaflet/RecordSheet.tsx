@@ -12,9 +12,11 @@ export function RecordSheet({
   artist,
   mode,
   initialDescriptionOpen = false,
+  initialEmotionId = null,
   exhibitionArtworks,
   footer,
   continueLabel,
+  continueVariant = "accent",
   onPickArtwork,
   onSelectEmotion,
   onDismissWithoutEmotion,
@@ -26,9 +28,11 @@ export function RecordSheet({
   artist?: Artist;
   mode: RecordSheetMode;
   initialDescriptionOpen?: boolean;
+  initialEmotionId?: EmotionId | string | null;
   exhibitionArtworks: Artwork[];
   footer?: ReactNode;
   continueLabel?: string;
+  continueVariant?: "accent" | "secondary";
   onPickArtwork?: (artworkId: string) => void;
   onSelectEmotion: (emotionId: EmotionId, descriptionOpened: boolean) => void;
   onDismissWithoutEmotion: (descriptionOpened: boolean) => void;
@@ -37,19 +41,31 @@ export function RecordSheet({
 }) {
   const [expanded, setExpanded] = useState(initialDescriptionOpen);
   const [picker, setPicker] = useState(false);
+  const [selectedEmotionId, setSelectedEmotionId] = useState<EmotionId | null>(
+    (initialEmotionId as EmotionId | null) ?? null,
+  );
   const startY = useRef<number | null>(null);
 
   useEffect(() => {
     if (open) {
       setExpanded(initialDescriptionOpen);
       setPicker(false);
+      setSelectedEmotionId((initialEmotionId as EmotionId | null) ?? null);
     }
-  }, [open, initialDescriptionOpen, artwork?.id]);
+  }, [open, initialDescriptionOpen, initialEmotionId, artwork?.id]);
 
   if (!open || !artwork) return null;
 
   function finishEmotion(emotionId: EmotionId) {
-    onSelectEmotion(emotionId, expanded);
+    setSelectedEmotionId(emotionId);
+    if (expanded) {
+      onSelectEmotion(emotionId, true);
+      return;
+    }
+    // 접힌 상태: 선택 스타일을 한 프레임 보여 준 뒤 저장·닫기
+    requestAnimationFrame(() => {
+      onSelectEmotion(emotionId, false);
+    });
   }
 
   return (
@@ -125,23 +141,30 @@ export function RecordSheet({
         ) : null}
 
         <p className="mt-5 mb-3 text-[15px] font-medium">어떤 느낌이었나요?</p>
-        <div className="grid grid-cols-5 gap-2">
-          {EMOTIONS.map((em) => (
-            <button
-              key={em.id}
-              type="button"
-              className="flex aspect-square flex-col items-center justify-center rounded-full border bg-transparent p-1 text-center text-[10px] leading-tight"
-              style={{
-                borderColor: em.displayColor,
-                background: `${em.displayColor}33`,
-                color: "#F5F2EA",
-              }}
-              onClick={() => finishEmotion(em.id)}
-              aria-label={em.nameKo}
-            >
-              {em.nameKo}
-            </button>
-          ))}
+        <div className="grid grid-cols-5 gap-2" data-emotion-grid>
+          {EMOTIONS.map((em) => {
+            const pressed = selectedEmotionId === em.id;
+            return (
+              <button
+                key={em.id}
+                type="button"
+                className="flex aspect-square flex-col items-center justify-center rounded-full border bg-transparent p-1 text-center text-[10px] leading-tight"
+                style={{
+                  borderColor: em.displayColor,
+                  borderWidth: pressed ? 3 : 1,
+                  background: pressed ? `${em.displayColor}cc` : `${em.displayColor}33`,
+                  color: "#F5F2EA",
+                }}
+                onClick={() => finishEmotion(em.id)}
+                aria-label={em.nameKo}
+                aria-pressed={pressed}
+                data-emotion-id={em.id}
+                data-selected={pressed ? "true" : "false"}
+              >
+                {em.nameKo}
+              </button>
+            );
+          })}
         </div>
         <p className="mt-2 text-center text-[12px] text-mute-on-dark">하나만 눌러 주세요</p>
 
@@ -162,7 +185,15 @@ export function RecordSheet({
             )}
             {footer ? <div className="mt-4 flex flex-col gap-2">{footer}</div> : null}
             {onContinue ? (
-              <button type="button" className="btn btn-accent mt-6 w-full" onClick={onContinue}>
+              <button
+                type="button"
+                className={
+                  continueVariant === "secondary"
+                    ? "btn btn-secondary-dark mt-6 w-full"
+                    : "btn btn-accent mt-6 w-full"
+                }
+                onClick={onContinue}
+              >
                 {continueLabel ?? "계속 촬영하기"}
               </button>
             ) : null}

@@ -26,6 +26,12 @@ export default function HubPage() {
     app.capture?.exhibitionId === id ? (app.capture.records ?? []) : [];
   const count = records.length;
   const [blocked, setBlocked] = useState(false);
+  const isMember = app.role === "visitor-member";
+  const greet = isMember
+    ? app.visitorName
+      ? `${app.visitorName} 님, 무엇을 진행할까요?`
+      : "무엇을 진행할까요?"
+    : null;
 
   function generate() {
     if (!canGenerateLeaflet(records)) {
@@ -36,26 +42,53 @@ export default function HubPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[100svh] w-full max-w-[480px] flex-col px-5 py-8 pb-28">
+    <div className="mx-auto flex h-[100svh] w-full max-w-[480px] flex-col px-5 py-8 pb-28">
       <h1 className="display m-0">{exhibition?.title ?? "전시"}</h1>
-      <p className="mt-3 text-[15px] text-mute-on-dark">기록 {count}점</p>
+      {greet ? <p className="mt-3 text-[16px] text-ink-on-dark">{greet}</p> : null}
+      <p className={`text-[15px] text-mute-on-dark ${greet ? "mt-2" : "mt-3"}`}>기록 {count}점</p>
 
-      <div className="mt-10 flex flex-col gap-3">
-        <Link href={`/exhibitions/${id}/capture${suffix}`} className="btn btn-secondary-dark">
-          기록하기
+      <div className="mt-8 flex flex-1 flex-col gap-4">
+        <Link
+          href={`/exhibitions/${id}/capture${suffix}`}
+          className="hub-tile flex min-h-[140px] flex-1 flex-col items-center justify-center gap-3 rounded-3xl bg-surface-dark text-ink-on-dark no-underline"
+        >
+          <span className="hub-tile-icon text-[40px] leading-none" aria-hidden>
+            ◎
+          </span>
+          <span className="text-[18px] font-semibold">기록하기</span>
         </Link>
-        <Link href={`/exhibitions/${id}/map${suffix}`} className="btn btn-secondary-dark">
-          배치도
+        <Link
+          href={`/exhibitions/${id}/map${suffix}`}
+          className="hub-tile flex min-h-[140px] flex-1 flex-col items-center justify-center gap-3 rounded-3xl bg-surface-dark text-ink-on-dark no-underline"
+        >
+          <span className="hub-tile-icon text-[40px] leading-none" aria-hidden>
+            ▦
+          </span>
+          <span className="text-[18px] font-semibold">배치도</span>
         </Link>
       </div>
 
-      <div className="mt-auto pt-10">
+      <div className="pt-8">
         <button type="button" className="btn btn-accent w-full" onClick={generate}>
           리플릿 생성하기
         </button>
       </div>
 
       <GenerateBlockedAlert open={blocked} onClose={() => setBlocked(false)} />
+
+      <style>{`
+        @keyframes hub-tile-breathe {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        .hub-tile-icon {
+          display: inline-block;
+          animation: hub-tile-breathe 2.6s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hub-tile-icon { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }

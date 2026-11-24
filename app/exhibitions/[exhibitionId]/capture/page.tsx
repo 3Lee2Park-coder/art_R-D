@@ -15,6 +15,41 @@ import { mockRecognize } from "@/lib/leaflet/mockRecognition";
 import { oneParam } from "@/lib/format";
 import type { Artwork } from "@/lib/types";
 
+async function openCameraStream(): Promise<MediaStream> {
+  const attempts: MediaStreamConstraints[] = [
+    {
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        aspectRatio: { ideal: 9 / 16 },
+        width: { ideal: 720 },
+        height: { ideal: 1280 },
+      },
+    },
+    {
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        aspectRatio: { ideal: 9 / 16 },
+      },
+    },
+    {
+      audio: false,
+      video: { facingMode: { ideal: "environment" } },
+    },
+    { audio: false, video: true },
+  ];
+  let lastError: unknown;
+  for (const constraints of attempts) {
+    try {
+      return await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("camera unavailable");
+}
+
 export default function CapturePage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
   const search = useSearchParams();
@@ -52,6 +87,9 @@ export default function CapturePage() {
   const pendingArtist = pending
     ? app.artists.find((a) => a.id === pending.artwork.artistId)
     : undefined;
+  const priorEmotion =
+    pending &&
+    records.find((r) => r.artworkId === pending.artwork.id && r.emotionId)?.emotionId;
 
   useEffect(() => {
     let cancelled = false;
@@ -61,15 +99,7 @@ export default function CapturePage() {
         return;
       }
       try {
-        let stream: MediaStream;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-            audio: false,
-          });
-        } catch {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        }
+        const stream = await openCameraStream();
         if (cancelled) {
           stream.getTracks().forEach((track) => track.stop());
           return;
@@ -183,35 +213,36 @@ export default function CapturePage() {
   }
 
   return (
-    <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[480px] flex-col px-4 pb-6 pt-4">
-      <div className="flex shrink-0 items-center justify-between">
+    <div className="relative mx-auto flex h-[100svh] w-full max-w-[480px] flex-col overflow-hidden">
+      <div className="relative z-10 flex shrink-0 items-center justify-between px-4 pt-4 pb-2">
         <p className="m-0 text-[14px] font-semibold">기록 {count}점</p>
         <button type="button" className="link-accent bg-transparent text-[14px] font-semibold" onClick={generate}>
           리플릿 생성하기
         </button>
       </div>
 
-      <div className="relative mt-4 min-h-0 flex-1 overflow-hidden bg-canvas-dark-deep">
+      <div className="relative min-h-0 flex-1 bg-canvas-dark-deep" data-camera-stage>
         <video
           ref={videoRef}
           playsInline
           muted
           autoPlay
-          className={live ? "h-full w-full object-cover" : "hidden"}
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ visibility: live ? "visible" : "hidden" }}
         />
         {denied ? (
-          <p className="absolute inset-x-6 bottom-8 text-center text-[14px] text-mute-on-dark">
+          <p className="absolute inset-x-6 bottom-8 z-[1] text-center text-[14px] text-mute-on-dark">
             카메라를 사용할 수 없습니다. 브라우저에서 카메라 권한을 허용해 주세요.
           </p>
         ) : null}
         {!live && !denied ? (
-          <p className="absolute inset-0 flex items-center justify-center text-[14px] text-mute-on-dark">
+          <p className="absolute inset-0 z-[1] flex items-center justify-center text-[14px] text-mute-on-dark">
             카메라 준비 중
           </p>
         ) : null}
       </div>
 
-      <div className="mt-4 flex items-end justify-between gap-3">
+      <div className="relative z-10 flex shrink-0 items-end justify-between gap-3 px-4 pt-3 pb-6">
         <Link
           href={`/exhibitions/${id}/photos${suffix}`}
           className="relative flex w-20 flex-col items-center gap-1 text-[12px] text-mute-on-dark"
@@ -268,6 +299,7 @@ export default function CapturePage() {
         artwork={pending?.artwork ?? null}
         artist={pendingArtist}
         mode="camera"
+        initialEmotionId={priorEmotion ?? null}
         exhibitionArtworks={works}
         onPickArtwork={(artworkId) => {
           const next = works.find((a) => a.id === artworkId);

@@ -28,6 +28,7 @@ import {
   mergeVisitorOnLogin,
   newVisitId,
 } from "@/lib/leaflet/visitSession";
+import { writeVisitConsent } from "@/lib/leaflet/visitConsent";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -52,7 +53,9 @@ type AppState = {
   dismissNotice: () => void;
   consentVersion: string | null;
   grantConsent: () => void;
+  grantVisitConsent: () => void;
   clearConsent: () => void;
+  visitorName: string | null;
   guideHidden: boolean;
   hideGuideForWeek: () => void;
   clearGuideHide: () => void;
@@ -149,6 +152,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [demo, setDemoState] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [consentVersion, setConsentVersion] = useState<string | null>(null);
+  const [visitorName, setVisitorName] = useState<string | null>(null);
   const [guideUntil, setGuideUntil] = useState<string | null>(null);
   const [uploadConsent, setUploadConsentState] = useState(false);
   const [cart, setCart] = useState<string[]>([]);
@@ -177,6 +181,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (demoQuery === "0") localStorage.setItem(KEYS.demo, "0");
     setDemoState(localStorage.getItem(KEYS.demo) === "1");
     setConsentVersion(localStorage.getItem(KEYS.consentVersion));
+    setVisitorName(localStorage.getItem(KEYS.visitorName));
     setGuideUntil(localStorage.getItem(KEYS.guideHiddenUntil));
     setUploadConsentState(localStorage.getItem(KEYS.uploadConsent) === "1");
     setCart(readJSON<string[]>(localStorage, KEYS.cart, []));
@@ -233,6 +238,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const grantConsent = useCallback(() => {
     localStorage.setItem(KEYS.consentVersion, CONSENT_VERSION);
     setConsentVersion(CONSENT_VERSION);
+  }, []);
+
+  const grantVisitConsent = useCallback(() => {
+    const visitId =
+      sessionStorage.getItem(SESSION.visitId) ??
+      readJSON<CaptureSession | null>(sessionStorage, SESSION.capture, null)?.visitId ??
+      null;
+    if (!visitId) return;
+    writeVisitConsent(visitId, CONSENT_VERSION);
   }, []);
 
   const clearConsent = useCallback(() => {
@@ -658,7 +672,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       dismissNotice: () => setNotice(null),
       consentVersion,
       grantConsent,
+      grantVisitConsent,
       clearConsent,
+      visitorName,
       guideHidden,
       hideGuideForWeek,
       clearGuideHide,
@@ -727,7 +743,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       notice,
       consentVersion,
       grantConsent,
+      grantVisitConsent,
       clearConsent,
+      visitorName,
       guideHidden,
       hideGuideForWeek,
       clearGuideHide,
