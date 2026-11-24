@@ -1,0 +1,26 @@
+[
+  {
+    "id": "g-hannam",
+    "name": "한남 아틀리에",
+    "region": "서울",
+    "initial": "ㅎ",
+    "contractState": "contracted",
+    "bio": "한남동에서 동시대 회화와 설치를 소개합니다."
+  },
+  {
+    "id": "g-seochon",
+    "name": "서촌 룸",
+    "region": "서울",
+    "initial": "ㅅ",
+    "contractState": "uncontracted",
+    "bio": null
+  },
+  {
+    "id": "g-busan",
+    "name": "해변 갤러리",
+    "region": "부산",
+    "initial": "ㅎ",
+    "contractState": "ended",
+    "bio": "광안리에서 지역 작가를 소개합니다."
+  }
+]

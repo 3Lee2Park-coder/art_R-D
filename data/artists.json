@@ -1,0 +1,26 @@
+[
+  {
+    "id": "a-seorin",
+    "name": "이기초",
+    "bio": "아크릴로 사람과 장면을 그립니다.",
+    "imageUrl": "/images/artists/lee-gicho.jpg"
+  },
+  {
+    "id": "a-doyun",
+    "name": "강민기",
+    "bio": null,
+    "imageUrl": "/images/artists/gang-mingi.jpg"
+  },
+  {
+    "id": "a-haram",
+    "name": "이승연",
+    "bio": null,
+    "imageUrl": "/images/artists/lee-seungyeon.jpg"
+  },
+  {
+    "id": "a-eungyeol",
+    "name": "이은결",
+    "bio": null,
+    "imageUrl": "/images/artists/eungyeol.svg"
+  }
+]
