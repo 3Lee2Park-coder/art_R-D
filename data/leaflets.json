@@ -1,0 +1,38 @@
+[
+  {
+    "id": "demo-visit",
+    "kind": "visit",
+    "exhibitionId": "ex-edge",
+    "visitDate": "2026-11-16",
+    "themeId": "deep",
+    "photos": [
+      {
+        "id": "p1",
+        "url": "/images/artworks/plane.svg",
+        "capturedAt": "2026-11-16T14:02:00",
+        "source": "camera",
+        "recognizedArtworkId": "aw-plane"
+      },
+      {
+        "id": "p2",
+        "url": "/images/artworks/navy.svg",
+        "capturedAt": "2026-11-16T14:18:00",
+        "source": "camera",
+        "recognizedArtworkId": "aw-navy"
+      },
+      {
+        "id": "p3",
+        "url": "/images/artworks/fold.svg",
+        "capturedAt": "2026-11-16T14:26:00",
+        "source": "camera",
+        "recognizedArtworkId": null
+      }
+    ],
+    "notes": {
+      "onePickArtworkId": "aw-navy",
+      "reasonChips": ["색", "자리"],
+      "comment": "중앙홀의 남색 앞에 오래 서 있었다."
+    },
+    "recommendationArtworkIds": ["aw-edge", "aw-window", "aw-grain"]
+  }
+]

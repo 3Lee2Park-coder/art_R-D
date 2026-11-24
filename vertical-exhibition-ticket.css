@@ -1,0 +1,182 @@
+/*
+ * Vertical exhibition ticket layout
+ * Reference canvas: 896 x 1344px (2:3)
+ * All coordinates are percentages of the full ticket container.
+ *
+ * Usage:
+ * <div class="ticket-card">
+ *   <div class="ticket-photo"><span class="ticket-photo__label">PHOTO</span></div>
+ *   <div class="ticket-title-band">
+ *     <h1 class="ticket-title">LAUTREC &amp; VALADON</h1>
+ *     <p class="ticket-subtitle">The Painters of Montmartre</p>
+ *   </div>
+ *   ...
+ * </div>
+ */
+
+.ticket-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ticket-card *,
+.ticket-card *::before,
+.ticket-card *::after {
+  box-sizing: border-box;
+}
+
+/* 1. Photo placeholder */
+.ticket-photo {
+  position: absolute;
+  left: 8.48%;
+  top: 11.76%;
+  width: 83.04%;
+  height: 31.14%;
+}
+
+.ticket-photo__label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* 2. Exhibition title band and centered text */
+.ticket-title-band {
+  position: absolute;
+  left: 8.48%;
+  top: 44.20%;
+  width: 83.04%;
+  height: 8.63%;
+}
+
+.ticket-title,
+.ticket-subtitle {
+  position: absolute;
+  left: 50%;
+  width: 100%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.ticket-title {
+  top: 48.36%;
+}
+
+.ticket-subtitle {
+  top: 50.82%;
+}
+
+/* 3. Exhibition information labels and values */
+.ticket-field-label,
+.ticket-field-value {
+  position: absolute;
+  margin: 0;
+  line-height: 1;
+}
+
+/* Label Y coordinates are baseline reference points from the layout map.
+   The em-based adjustment approximates baseline alignment; tune per font. */
+.ticket-field-label {
+  transform: translateY(-0.8em);
+}
+
+.ticket-field-label--date {
+  left: 10.27%;
+  top: 56.99%;
+}
+
+.ticket-field-value--date {
+  left: 10.27%;
+  top: 59.52%;
+  transform: translateY(-0.8em);
+}
+
+.ticket-field-label--place {
+  left: 52.23%;
+  top: 56.99%;
+}
+
+.ticket-field-label--artist {
+  left: 10.27%;
+  top: 62.87%;
+}
+
+.ticket-field-label--genre {
+  left: 52.23%;
+  top: 62.87%;
+}
+
+/* Grey value/input placeholders */
+.ticket-field-input {
+  position: absolute;
+  width: 27.34%;
+  height: 0.97%;
+}
+
+.ticket-field-input--place {
+  left: 52.23%;
+  top: 58.33%;
+}
+
+.ticket-field-input--artist {
+  left: 10.27%;
+  top: 64.21%;
+}
+
+.ticket-field-input--genre {
+  left: 52.23%;
+  top: 64.21%;
+}
+
+/* 4. MY PICK heading */
+.ticket-my-pick-heading {
+  position: absolute;
+  left: 10.27%;
+  top: 69.94%;
+  margin: 0;
+  line-height: 1;
+  transform: translateY(-0.8em);
+}
+
+/* Artwork placeholder and its centered label */
+.ticket-artwork {
+  position: absolute;
+  left: 10.27%;
+  top: 71.43%;
+  width: 11.61%;
+  height: 7.74%;
+}
+
+.ticket-artwork__label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* Rounded tag/chip placeholders */
+.ticket-tag {
+  position: absolute;
+  top: 72.92%;
+  width: 19.42%;
+  height: 2.83%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ticket-tag--first {
+  left: 28.12%;
+}
+
+.ticket-tag--second {
+  left: 49.89%;
+}
