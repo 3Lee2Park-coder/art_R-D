@@ -44,6 +44,7 @@ export function screenIdFor(path: string) {
     if (!sub) return "V-01";
     if (sub === "consent") return "V-02";
     if (sub === "guide") return "V-03";
+    if (sub === "hub") return "V-15";
     if (sub === "capture") return "V-04";
     if (sub === "photos") return "V-05";
     if (sub === "map") return "V-06";
@@ -52,7 +53,20 @@ export function screenIdFor(path: string) {
   return "";
 }
 
-const DARK = new Set(["V-02", "V-03", "V-04", "V-05", "V-06", "V-08", "V-09", "V-10", "V-11", "V-13", "V-14"]);
+const DARK = new Set([
+  "V-02",
+  "V-03",
+  "V-04",
+  "V-05",
+  "V-06",
+  "V-08",
+  "V-09",
+  "V-10",
+  "V-11",
+  "V-13",
+  "V-14",
+  "V-15",
+]);
 
 export function modeFor(path: string): Mode {
   const id = screenIdFor(path);
@@ -120,6 +134,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
       { id: "V-01", name: "현장 QR", path: "/exhibitions/ex-edge?from=qr" },
       { id: "V-02", name: "수집 안내", path: "/exhibitions/ex-edge/consent?from=qr" },
       { id: "V-03", name: "촬영 안내", path: "/exhibitions/ex-edge/guide?from=qr" },
+      { id: "V-15", name: "허브", path: "/exhibitions/ex-edge/hub?from=qr" },
       { id: "V-04", name: "촬영", path: "/exhibitions/ex-edge/capture?from=qr" },
       { id: "V-05", name: "촬영 사진", path: "/exhibitions/ex-edge/photos?from=qr" },
       { id: "V-06", name: "배치도", path: "/exhibitions/ex-edge/map?from=qr" },
@@ -178,9 +193,11 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "C-01": "가안. 회원 헤더의 로그인 자리는 로그아웃만 둔다. 원문은 마이룸/로그아웃.",
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
+  "V-04": "작품 인식·이동 감지는 시나리오 순서 모의. 실제 기술 확인 전.",
   "V-11": "공유 미리보기는 검토 중이라 확정 기능으로 두지 않는다. 링크는 발급하지 않는다.",
   "V-13": "가안. 입력 항목은 미정. 화면에는 전시명, 장소, 기간만 둔다.",
   "V-14": "비회원 리플릿 보관 기간은 미정. 만료는 없다.",
+  "V-15": "가안. 허브 화면 ID는 확정 전.",
   "R-04": "가안. 질문 열 개와 S1–S6의 대응은 미정. 라벨만 보여 준다.",
   "R-05": "가안. 여러 점 선택 허용 여부는 미정. 여러 점을 고를 수 있게 둔다.",
   "R-06": "가안. 개인 사진 액자 범위는 미정. 고른 작품만 놓는다.",

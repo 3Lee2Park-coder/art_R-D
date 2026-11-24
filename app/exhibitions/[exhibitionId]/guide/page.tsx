@@ -1,7 +1,8 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useScenario } from "@/components/leaflet/useScenario";
 import { useApp } from "@/components/providers";
 import { useTitle } from "@/components/ui";
 import { useVisitGate } from "@/components/visit-gate";
@@ -9,10 +10,14 @@ import { oneParam } from "@/lib/format";
 
 export default function GuidePage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
+  const search = useSearchParams();
+  const qs = search.toString();
+  const suffix = qs ? `?${qs}` : "?from=qr";
   const router = useRouter();
   const app = useApp();
   const [hide, setHide] = useState(false);
   useVisitGate(id);
+  useScenario();
   useTitle("촬영 안내");
   const sample = app.artworks.find((item) => item.exhibitionId === id);
 
@@ -35,7 +40,7 @@ export default function GuidePage() {
         className="btn btn-accent mt-6 w-full"
         onClick={() => {
           if (hide) app.hideGuideForWeek();
-          router.push(`/exhibitions/${id}/capture?from=qr`);
+          router.push(`/exhibitions/${id}/hub${suffix}`);
         }}
       >
         촬영하기

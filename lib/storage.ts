@@ -37,6 +37,9 @@ export const SESSION = {
   capture: "restart.capture",
   failNext: "restart.failNext",
   notice: "restart.notice",
+  /** 시나리오 id. 화면에는 보이지 않음 [가안 기본 wonder-immersive] */
+  scenario: "restart.scenario",
+  visitId: "restart.visitId",
 } as const;
 
 const ROLES: Role[] = [

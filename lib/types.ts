@@ -116,6 +116,12 @@ export type ErrorLog = {
 export type CaptureSession = {
   exhibitionId: string;
   photos: LeafletPhoto[];
+  /** STEP3 관람 기록. photos는 화면 호환용 */
+  records?: VisitRecord[];
+  /** QR 입장 방문 키. 리플릿 ID 생성 전 익명 기록 묶음 */
+  visitId?: string;
+  /** 카메라 촬영 시도 횟수(연속 동일작 포함). mockRecognize 인덱스 */
+  cameraIndex?: number;
 };
 
 export type DecorState = {

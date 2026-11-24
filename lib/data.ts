@@ -26,7 +26,10 @@ export function artworksInExhibition(exhibitionId: string) {
   return artworkSeed.filter((artwork) => artwork.exhibitionId === exhibitionId);
 }
 
-/** 촬영 순서에 맞춘 고정 샘플. 서버 인식은 하지 않는다. */
+/**
+ * 촬영 순서 샘플. 실제 촬영 경로는 `mockRecognize`(시나리오)를 쓴다.
+ * 서버 인식은 하지 않는다.
+ */
 export function recognizedArtworkId(exhibitionId: string, index: number) {
   const works = artworksInExhibition(exhibitionId).filter((artwork) => artwork.zone);
   return works[index]?.id ?? null;

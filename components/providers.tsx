@@ -17,12 +17,17 @@ import {
   reportSeed,
 } from "@/lib/data";
 import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
-import { listVisitorEvents, mergeIdentityForLeaflet } from "@/lib/leaflet/events";
+import type { VisitRecord } from "@/lib/leaflet/dwell";
 import {
   listInterestWorks,
   toggleInterestWork,
   type InterestWork,
 } from "@/lib/leaflet/interest";
+import {
+  hasIdentifiedVisitor,
+  mergeVisitorOnLogin,
+  newVisitId,
+} from "@/lib/leaflet/visitSession";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -81,8 +86,21 @@ type AppState = {
   recommendedExhibitionIds: string[];
   capture: CaptureSession | null;
   addPhoto: (exhibitionId: string, photo: LeafletPhoto) => void;
+  addRecord: (
+    exhibitionId: string,
+    record: VisitRecord,
+    photo?: LeafletPhoto,
+  ) => { added: boolean };
+  updateRecordEmotion: (
+    exhibitionId: string,
+    index: number,
+    emotionId: string | null,
+  ) => void;
+  ensureVisit: (exhibitionId: string) => string;
   clearCapture: () => void;
   markQr: (exhibitionId: string) => void;
+  scenario: string | null;
+  setScenario: (id: string) => void;
   qrExhibitionId: string | null;
   failNext: boolean;
   setFailNext: (on: boolean) => void;
@@ -147,6 +165,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [checkedLayouts, setCheckedLayouts] = useState<string[]>([]);
   const [asked, setAsked] = useState<string[]>([]);
   const [capture, setCapture] = useState<CaptureSession | null>(null);
+  const [scenario, setScenarioState] = useState<string | null>(null);
   const [qrExhibitionId, setQrExhibitionId] = useState<string | null>(null);
   const [failNext, setFailNextState] = useState(false);
 
@@ -175,6 +194,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setCapture(readJSON<CaptureSession | null>(sessionStorage, SESSION.capture, null));
     setQrExhibitionId(sessionStorage.getItem(SESSION.qrEntry));
     setFailNextState(sessionStorage.getItem(SESSION.failNext) === "1");
+    setScenarioState(sessionStorage.getItem(SESSION.scenario));
 
     let wanted = readJSON<string[] | null>(localStorage, KEYS.wantedIds, null);
     if (nextRole === "visitor-member" && localStorage.getItem(KEYS.memberWantedInit) !== "1") {
@@ -319,28 +339,36 @@ export function Providers({ children }: { children: React.ReactNode }) {
     else {
       const draftRaw = localStorage.getItem(KEYS.leafletDraft);
       const ret = localStorage.getItem(KEYS.returnTo);
+      const visitId =
+        sessionStorage.getItem(SESSION.visitId) ??
+        readJSON<CaptureSession | null>(sessionStorage, SESSION.capture, null)?.visitId ??
+        null;
       if (draftRaw) {
         const draft = JSON.parse(draftRaw) as Leaflet;
         draft.inArchive = true;
         const stored = readSavedLeaflets().filter((item) => item.id !== draft.id);
         writeSavedLeaflets([...stored, draft]);
         if (nextRole === "visitor-member") {
-          const hadAnon = listVisitorEvents(draft.id).some((e) => e.identityKind === "anonymous");
-          if (hadAnon) mergeIdentityForLeaflet(draft.id, "anonymous", "member", draft.id);
+          mergeVisitorOnLogin({ visitId: visitId ?? draft.id, leafletId: draft.id, role: nextRole });
         }
         localStorage.removeItem(KEYS.leafletDraft);
         localStorage.removeItem(KEYS.returnTo);
         dest = `/leaflets/${draft.id}`;
       } else if (ret) {
         const leafletMatch = ret.match(/^\/leaflets\/([^/?#]+)/);
-        if (leafletMatch && nextRole === "visitor-member") {
-          const lid = leafletMatch[1];
-          const hadAnon = listVisitorEvents(lid).some((e) => e.identityKind === "anonymous");
-          if (hadAnon) mergeIdentityForLeaflet(lid, "anonymous", "member", lid);
+        if (nextRole === "visitor-member") {
+          mergeVisitorOnLogin({
+            visitId: visitId ?? leafletMatch?.[1] ?? newVisitId(),
+            leafletId: leafletMatch?.[1] ?? null,
+            role: nextRole,
+          });
         }
         localStorage.removeItem(KEYS.returnTo);
         dest = ret;
       } else {
+        if (nextRole === "visitor-member" && visitId) {
+          mergeVisitorOnLogin({ visitId, role: nextRole });
+        }
         dest = "/";
       }
     }
@@ -362,11 +390,125 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const addPhoto = useCallback((exhibitionId: string, photo: LeafletPhoto) => {
     setCapture((prev) => {
-      const base = prev && prev.exhibitionId === exhibitionId ? prev : { exhibitionId, photos: [] };
-      const next = { exhibitionId, photos: [...base.photos, photo] };
+      const base =
+        prev && prev.exhibitionId === exhibitionId
+          ? prev
+          : {
+              exhibitionId,
+              photos: [] as LeafletPhoto[],
+              records: [] as VisitRecord[],
+              visitId: sessionStorage.getItem(SESSION.visitId) ?? newVisitId(),
+              cameraIndex: 0,
+            };
+      const next = { ...base, photos: [...base.photos, photo] };
       sessionStorage.setItem(SESSION.capture, JSON.stringify(next));
       return next;
     });
+  }, []);
+
+  const ensureVisit = useCallback((exhibitionId: string) => {
+    const existing = readJSON<CaptureSession | null>(sessionStorage, SESSION.capture, null);
+    if (existing?.exhibitionId === exhibitionId && existing.visitId) {
+      sessionStorage.setItem(SESSION.visitId, existing.visitId);
+      setCapture(existing);
+      return existing.visitId;
+    }
+    // 문의로 식별된 고객: 새 익명 방문으로 리셋하지 않음
+    const kept = sessionStorage.getItem(SESSION.visitId);
+    const visitId =
+      kept && hasIdentifiedVisitor()
+        ? kept
+        : existing?.visitId && hasIdentifiedVisitor()
+          ? existing.visitId
+          : newVisitId();
+    sessionStorage.setItem(SESSION.visitId, visitId);
+    const next: CaptureSession = {
+      exhibitionId,
+      photos: existing?.exhibitionId === exhibitionId ? existing.photos : [],
+      records: existing?.exhibitionId === exhibitionId ? existing.records ?? [] : [],
+      visitId,
+      cameraIndex: existing?.exhibitionId === exhibitionId ? existing.cameraIndex ?? 0 : 0,
+    };
+    sessionStorage.setItem(SESSION.capture, JSON.stringify(next));
+    setCapture(next);
+    return visitId;
+  }, []);
+
+  const addRecord = useCallback(
+    (exhibitionId: string, record: VisitRecord, photo?: LeafletPhoto) => {
+      let added = true;
+      setCapture((prev) => {
+        const visitId =
+          (prev?.exhibitionId === exhibitionId && prev.visitId) ||
+          sessionStorage.getItem(SESSION.visitId) ||
+          newVisitId();
+        sessionStorage.setItem(SESSION.visitId, visitId);
+        const base =
+          prev && prev.exhibitionId === exhibitionId
+            ? prev
+            : {
+                exhibitionId,
+                photos: [] as LeafletPhoto[],
+                records: [] as VisitRecord[],
+                visitId,
+                cameraIndex: 0,
+              };
+        const records = [...(base.records ?? [])];
+        const last = records[records.length - 1];
+        if (
+          record.source === "camera" &&
+          last?.source === "camera" &&
+          last.artworkId === record.artworkId
+        ) {
+          records[records.length - 1] = {
+            ...last,
+            ...record,
+            emotionId: record.emotionId ?? last.emotionId,
+            photoUrl: record.photoUrl ?? last.photoUrl,
+          };
+          added = false;
+        } else {
+          records.push(record);
+          added = true;
+        }
+        const photos = photo ? [...base.photos, photo] : base.photos;
+        const cameraIndex =
+          record.source === "camera"
+            ? (base.cameraIndex ?? 0) + 1
+            : (base.cameraIndex ?? 0);
+        const next: CaptureSession = {
+          ...base,
+          visitId,
+          records,
+          photos,
+          cameraIndex,
+        };
+        sessionStorage.setItem(SESSION.capture, JSON.stringify(next));
+        return next;
+      });
+      return { added };
+    },
+    [],
+  );
+
+  const updateRecordEmotion = useCallback(
+    (exhibitionId: string, index: number, emotionId: string | null) => {
+      setCapture((prev) => {
+        if (!prev || prev.exhibitionId !== exhibitionId) return prev;
+        const records = [...(prev.records ?? [])];
+        if (!records[index]) return prev;
+        records[index] = { ...records[index], emotionId };
+        const next = { ...prev, records };
+        sessionStorage.setItem(SESSION.capture, JSON.stringify(next));
+        return next;
+      });
+    },
+    [],
+  );
+
+  const setScenario = useCallback((id: string) => {
+    sessionStorage.setItem(SESSION.scenario, id);
+    setScenarioState(id);
   }, []);
 
   const clearCapture = useCallback(() => {
@@ -550,9 +692,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       recommendedExhibitionIds: myRoomSeed.recommendedExhibitionIds,
       capture,
       addPhoto,
+      addRecord,
+      updateRecordEmotion,
+      ensureVisit,
       clearCapture,
       markQr,
       qrExhibitionId,
+      scenario,
+      setScenario,
       failNext,
       setFailNext,
       spacePick,
@@ -607,9 +754,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       toggleWanted,
       capture,
       addPhoto,
+      addRecord,
+      updateRecordEmotion,
+      ensureVisit,
       clearCapture,
       markQr,
       qrExhibitionId,
+      scenario,
+      setScenario,
       failNext,
       setFailNext,
       spacePick,

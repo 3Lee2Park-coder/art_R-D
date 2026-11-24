@@ -38,11 +38,16 @@ export default function ExhibitionPage() {
 
   function start() {
     const base = `/exhibitions/${exhibition!.id}`;
+    const qs = searchParams.toString();
+    const suffix = qs ? `?${qs}` : "?from=qr";
+    app.ensureVisit(exhibition!.id);
+    const scenario = searchParams.get("scenario");
+    if (scenario) app.setScenario(scenario);
     if (app.role === "visitor-member" && app.consentVersion) {
-      router.push(app.guideHidden ? `${base}/capture?from=qr` : `${base}/guide?from=qr`);
+      router.push(app.guideHidden ? `${base}/hub${suffix}` : `${base}/guide${suffix}`);
       return;
     }
-    router.push(`${base}/consent?from=qr`);
+    router.push(`${base}/consent${suffix}`);
   }
 
   return (

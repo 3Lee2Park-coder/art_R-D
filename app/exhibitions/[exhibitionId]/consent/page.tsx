@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useScenario } from "@/components/leaflet/useScenario";
 import { useApp } from "@/components/providers";
 import { useTitle } from "@/components/ui";
 import { useVisitGate } from "@/components/visit-gate";
@@ -8,9 +9,13 @@ import { oneParam } from "@/lib/format";
 
 export default function ConsentPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
+  const search = useSearchParams();
+  const qs = search.toString();
+  const suffix = qs ? `?${qs}` : "?from=qr";
   const router = useRouter();
   const app = useApp();
   useVisitGate(id);
+  useScenario();
   useTitle("관람 기록 안내");
 
   return (
@@ -24,7 +29,11 @@ export default function ConsentPage() {
             className="btn btn-accent"
             onClick={() => {
               if (app.role === "visitor-member") app.grantConsent();
-              router.push(app.guideHidden ? `/exhibitions/${id}/capture?from=qr` : `/exhibitions/${id}/guide?from=qr`);
+              router.push(
+                app.guideHidden
+                  ? `/exhibitions/${id}/hub${suffix}`
+                  : `/exhibitions/${id}/guide${suffix}`,
+              );
             }}
           >
             동의
