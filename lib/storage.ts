@@ -21,6 +21,10 @@ export const KEYS = {
   accountPatches: "restart.accountPatches",
   spacePick: "restart.spacePick",
   artworkPicks: "restart.artworkPicks",
+  /** 리플릿 관심 작품. 마이룸 artworkPicks와 분리 */
+  interestWorks: "restart.interestWorks",
+  visitorEvents: "restart.visitorEvents",
+  inquiries: "restart.inquiries",
   decorWall: "restart.decorWall",
   returnTo: "restart.returnTo",
   exhibitionTheme: "restart.exhibitionTheme",

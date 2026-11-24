@@ -1,38 +1,85 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import { InquirySheet } from "@/components/leaflet/InquirySheet";
+import { NewsSubscribeSheet } from "@/components/leaflet/NewsSubscribeSheet";
 import { leafletPillStyle, type LeafletTheme } from "@/components/leaflet/theme";
+import { useApp } from "@/components/providers";
 import { MockRegion } from "@/components/ui";
 import { mockDbWork } from "@/lib/leaflet/demoLeaflets";
 import type { LeafletResult } from "@/lib/leaflet/buildLeafletResult";
 import { COLOR_BY_NAME } from "@/lib/leaflet/colors";
 import { EMOTION_BY_ID, emotionNameKo, type EmotionId } from "@/lib/leaflet/emotions";
 import { formatPeriod } from "@/lib/format";
+import {
+  hasNewsSubscribe,
+  recordInquiryOpen,
+} from "@/lib/leaflet/inquiry";
+import { interestArtworkIdsForLeaflet } from "@/lib/leaflet/interest";
 import type { Exhibition, Gallery } from "@/lib/types";
 
 export function NextCard({
   result,
   theme,
   leafletId,
+  exhibitionId,
   nextExhibition,
   nextGallery,
   archived,
   onSave,
   readOnly = false,
+  artworkTitles = {},
 }: {
   result: LeafletResult;
   theme: LeafletTheme;
   leafletId: string;
+  exhibitionId: string;
   nextExhibition?: Exhibition;
   nextGallery?: Gallery;
   archived: boolean;
   onSave: () => void;
   readOnly?: boolean;
+  artworkTitles?: Record<string, string>;
 }) {
+  const app = useApp();
+  const [tick, setTick] = useState(0);
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+
+  const interestIds = useMemo(() => {
+    void tick;
+    return interestArtworkIdsForLeaflet(leafletId);
+  }, [tick, leafletId]);
+
+  const newsOn = useMemo(() => {
+    void tick;
+    return nextExhibition
+      ? hasNewsSubscribe(leafletId, nextExhibition.id)
+      : false;
+  }, [tick, leafletId, nextExhibition]);
+
   const recs = result.dbRecommendationIds
     .slice(0, 2)
     .map((id) => mockDbWork(id))
     .filter(Boolean);
+
+  const titles = useMemo(() => {
+    const map = { ...artworkTitles };
+    for (const id of interestIds) {
+      if (!map[id]) map[id] = id;
+    }
+    return map;
+  }, [artworkTitles, interestIds]);
+
+  function openInterestInquiry() {
+    recordInquiryOpen({
+      leafletId,
+      exhibitionId,
+      role: app.role,
+    });
+    setInquiryOpen(true);
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
@@ -44,45 +91,74 @@ export function NextCard({
       </h2>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
+        {/* [가안 배치] 다음 전시 정보 옆·아래에 소식 받기 */}
         {nextExhibition ? (
-          <div className="flex shrink-0 gap-3">
-            <div
-              className="flex w-[22%] max-w-[5.5rem] shrink-0 items-center justify-center overflow-hidden self-stretch"
-              style={{
-                border: `1px solid ${theme.border}`,
-                background: `${theme.text}10`,
-                minHeight: "clamp(3.5rem, 10svh, 6rem)",
-              }}
-            >
-              <img
-                src={nextExhibition.posterUrl}
-                alt=""
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
-            <div className="flex min-w-0 flex-col gap-1">
-              <p
-                className="m-0 font-semibold"
-                style={{ color: theme.text, fontSize: "clamp(0.875rem, 2.2svh, 0.9375rem)" }}
+          <div className="flex shrink-0 flex-col gap-2">
+            <div className="flex gap-3">
+              <div
+                className="flex w-[22%] max-w-[5.5rem] shrink-0 items-center justify-center overflow-hidden self-stretch"
+                style={{
+                  border: `1px solid ${theme.border}`,
+                  background: `${theme.text}10`,
+                  minHeight: "clamp(3.5rem, 10svh, 6rem)",
+                }}
               >
-                {nextExhibition.title}
-              </p>
-              {nextGallery ? (
+                <img
+                  src={nextExhibition.posterUrl}
+                  alt=""
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <p
+                  className="m-0 font-semibold"
+                  style={{ color: theme.text, fontSize: "clamp(0.875rem, 2.2svh, 0.9375rem)" }}
+                >
+                  {nextExhibition.title}
+                </p>
+                {nextGallery ? (
+                  <p
+                    className="m-0"
+                    style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.75rem)" }}
+                  >
+                    {nextGallery.name} · {nextGallery.region}
+                  </p>
+                ) : null}
                 <p
                   className="m-0"
                   style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.75rem)" }}
                 >
-                  {nextGallery.name} · {nextGallery.region}
+                  {formatPeriod(nextExhibition.startDate, nextExhibition.endDate)}
                 </p>
-              ) : null}
-              <p
-                className="m-0"
-                style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.75rem)" }}
-              >
-                {formatPeriod(nextExhibition.startDate, nextExhibition.endDate)}
-              </p>
+              </div>
             </div>
+            <button
+              type="button"
+              className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-4 font-medium"
+              style={{
+                ...leafletPillStyle(theme, "secondary"),
+                fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)",
+              }}
+              onClick={() => setNewsOpen(true)}
+            >
+              {/* [가안] 이미 동의하면 "소식 받는 중" */}
+              {newsOn ? "소식 받는 중" : "다음 전시 소식 받기"}
+            </button>
           </div>
+        ) : null}
+
+        {interestIds.length > 0 ? (
+          <button
+            type="button"
+            className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-4 font-medium"
+            style={{
+              ...leafletPillStyle(theme, "secondary"),
+              fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)",
+            }}
+            onClick={openInterestInquiry}
+          >
+            관심 작품 문의하기
+          </button>
         ) : null}
 
         <MockRegion>
@@ -209,7 +285,7 @@ export function NextCard({
       </div>
 
       {!readOnly ? (
-        <div className="mt-auto flex shrink-0 flex-col gap-2" data-next-cta>
+        <div className="mt-auto flex shrink-0 flex-col gap-2 pb-3" data-next-cta>
           {archived ? (
             <Link
               href="/my-room/archive"
@@ -247,6 +323,32 @@ export function NextCard({
           </Link>
         </div>
       ) : null}
+
+      {nextExhibition ? (
+        <NewsSubscribeSheet
+          open={newsOpen}
+          onClose={() => setNewsOpen(false)}
+          onSuccess={() => setTick((n) => n + 1)}
+          theme={theme}
+          leafletId={leafletId}
+          exhibitionId={nextExhibition.id}
+          role={app.role}
+        />
+      ) : null}
+
+      <InquirySheet
+        open={inquiryOpen}
+        onClose={() => {
+          setInquiryOpen(false);
+          setTick((n) => n + 1);
+        }}
+        theme={theme}
+        leafletId={leafletId}
+        exhibitionId={exhibitionId}
+        inquiredArtworkIds={interestIds}
+        artworkTitles={titles}
+        role={app.role}
+      />
     </div>
   );
 }

@@ -150,6 +150,8 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
       artworks={app.artworks}
       artists={app.artists}
       comment={comment}
+      leafletId={leaflet.id}
+      exhibitionId={leaflet.exhibitionId ?? ""}
     />,
     <EmotionsCard
       key="emotions"
@@ -169,11 +171,13 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
       result={result}
       theme={theme}
       leafletId={leaflet.id}
+      exhibitionId={leaflet.exhibitionId ?? ""}
       nextExhibition={nextExhibition}
       nextGallery={nextGallery}
       archived={app.isArchived(leaflet.id)}
       onSave={() => app.saveLeaflet(leaflet)}
       readOnly={readOnly}
+      artworkTitles={Object.fromEntries(app.artworks.map((a) => [a.id, a.title]))}
     />,
   ];
 
@@ -208,11 +212,11 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
                 height: "100%",
               }}
             >
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-10">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-14">
                 {card}
               </div>
               <div
-                className="absolute inset-x-0 bottom-0 flex h-10 items-center justify-center gap-1.5"
+                className="absolute inset-x-0 bottom-0 flex h-12 items-center justify-center gap-1.5"
                 role="tablist"
                 aria-label="카드"
               >

@@ -7,6 +7,7 @@ import { ArtworkCard } from "@/components/cards";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle, SectionHeader, Shelf, SiteFooter } from "@/components/ui";
 import { formatPeriod, oneParam } from "@/lib/format";
+import { KEYS } from "@/lib/storage";
 
 export default function ExhibitionPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
@@ -58,9 +59,34 @@ export default function ExhibitionPage() {
           {exhibition.ended ? " · 종료" : ""}
         </p>
         {canStart ? (
-          <button type="button" className="btn btn-primary mt-6" onClick={start}>
-            관람 시작
-          </button>
+          <div className="mt-6 flex flex-col items-start gap-3">
+            <button type="button" className="btn btn-primary" onClick={start}>
+              관람 시작
+            </button>
+            {/* 미정: 인앱 브라우저 세션 */}
+            <div className="flex gap-4 text-[13px]">
+              <button
+                type="button"
+                className="link bg-transparent p-0 font-normal text-[13px] opacity-70"
+                onClick={() => {
+                  localStorage.setItem(KEYS.returnTo, `/exhibitions/${exhibition.id}?from=qr`);
+                  router.push("/login");
+                }}
+              >
+                로그인
+              </button>
+              <button
+                type="button"
+                className="link bg-transparent p-0 font-normal text-[13px] opacity-70"
+                onClick={() => {
+                  localStorage.setItem(KEYS.returnTo, `/exhibitions/${exhibition.id}?from=qr`);
+                  router.push("/signup");
+                }}
+              >
+                회원가입
+              </button>
+            </div>
+          </div>
         ) : null}
         {showQrNote ? (
           <div className="mt-6 flex flex-col items-start gap-3">

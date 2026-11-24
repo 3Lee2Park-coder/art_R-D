@@ -1,12 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { InquirySheet } from "@/components/leaflet/InquirySheet";
+import { leafletPillStyle, type LeafletTheme } from "@/components/leaflet/theme";
+import { useApp } from "@/components/providers";
 import type { LeafletResult } from "@/lib/leaflet/buildLeafletResult";
 import type { VisitRecord } from "@/lib/leaflet/dwell";
 import { EMOTION_BY_ID, type EmotionId } from "@/lib/leaflet/emotions";
+import { recordInquiryOpen } from "@/lib/leaflet/inquiry";
+import { hasInterest, toggleInterestWork } from "@/lib/leaflet/interest";
 import type { Artist, Artwork } from "@/lib/types";
-import { leafletPillStyle, type LeafletTheme } from "@/components/leaflet/theme";
 
 export function RecordsCard({
   result,
@@ -15,6 +18,8 @@ export function RecordsCard({
   artworks,
   artists,
   comment,
+  leafletId,
+  exhibitionId,
 }: {
   result: LeafletResult;
   theme: LeafletTheme;
@@ -22,14 +27,28 @@ export function RecordsCard({
   artworks: Artwork[];
   artists: Artist[];
   comment?: string;
+  leafletId: string;
+  exhibitionId: string;
 }) {
+  const app = useApp();
   const items = records.length > 0 ? records : [];
   const [index, setIndex] = useState(0);
+  const [interestTick, setInterestTick] = useState(0);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const current = items[Math.min(index, Math.max(0, items.length - 1))];
-  const inquireId = current
-    ? artworks.find((a) => a.id === current.artworkId)?.id
-    : undefined;
+  const currentArtworkId = current?.artworkId;
+
+  const interested = useMemo(() => {
+    void interestTick;
+    return currentArtworkId ? hasInterest(leafletId, currentArtworkId) : false;
+  }, [interestTick, leafletId, currentArtworkId]);
+
+  const artworkTitles = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const a of artworks) map[a.id] = a.title;
+    return map;
+  }, [artworks]);
 
   const go = (i: number) => {
     const next = Math.max(0, Math.min(items.length - 1, i));
@@ -39,6 +58,28 @@ export function RecordsCard({
     const slide = el.children[next] as HTMLElement | undefined;
     slide?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
   };
+
+  function onToggleInterest() {
+    if (!currentArtworkId) return;
+    toggleInterestWork({
+      artworkId: currentArtworkId,
+      exhibitionId,
+      leafletId,
+      role: app.role,
+    });
+    setInterestTick((n) => n + 1);
+  }
+
+  function onOpenInquiry() {
+    if (!currentArtworkId) return;
+    recordInquiryOpen({
+      leafletId,
+      exhibitionId,
+      artworkId: currentArtworkId,
+      role: app.role,
+    });
+    setInquiryOpen(true);
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
@@ -58,7 +99,8 @@ export function RecordsCard({
         <>
           <div
             ref={trackRef}
-            className="flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-0 snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ flex: "1 1 auto", maxHeight: "62%" }}
             onScroll={(e) => {
               const el = e.currentTarget;
               const w = el.clientWidth * 0.82;
@@ -79,8 +121,10 @@ export function RecordsCard({
                   className="flex h-full min-h-0 w-[82%] shrink-0 snap-start flex-col"
                 >
                   <div
-                    className="flex min-h-0 flex-1 items-center justify-center overflow-hidden"
+                    className="flex min-h-0 items-center justify-center overflow-hidden"
                     style={{
+                      flex: "0 1 58%",
+                      maxHeight: "58%",
                       border: `1px solid ${theme.border}`,
                       background: `${theme.text}10`,
                     }}
@@ -189,18 +233,44 @@ export function RecordsCard({
         </p>
       )}
 
-      {inquireId ? (
-        <Link
-          href={`/artworks/${inquireId}`}
-          className="inline-flex h-9 w-fit shrink-0 items-center justify-center px-5 font-medium"
-          style={{
-            ...leafletPillStyle(theme, "secondary"),
-            fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
-          }}
-        >
-          작품 문의
-        </Link>
+      {currentArtworkId ? (
+        <div className="mb-1 flex shrink-0 gap-2">
+          <button
+            type="button"
+            className="inline-flex h-9 flex-1 items-center justify-center px-3 font-medium"
+            style={{
+              ...leafletPillStyle(theme, "secondary"),
+              fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
+            }}
+            onClick={onToggleInterest}
+          >
+            {/* [가안] 이미 관심이면 "관심 해제" */}
+            {interested ? "관심 해제" : "관심 작품"}
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-9 flex-1 items-center justify-center px-3 font-medium"
+            style={{
+              ...leafletPillStyle(theme, "secondary"),
+              fontSize: "clamp(0.8125rem, 2svh, 0.875rem)",
+            }}
+            onClick={onOpenInquiry}
+          >
+            작품 문의
+          </button>
+        </div>
       ) : null}
+
+      <InquirySheet
+        open={inquiryOpen}
+        onClose={() => setInquiryOpen(false)}
+        theme={theme}
+        leafletId={leafletId}
+        exhibitionId={exhibitionId}
+        inquiredArtworkIds={currentArtworkId ? [currentArtworkId] : []}
+        artworkTitles={artworkTitles}
+        role={app.role}
+      />
     </div>
   );
 }

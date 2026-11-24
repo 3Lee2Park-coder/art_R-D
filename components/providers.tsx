@@ -17,6 +17,7 @@ import {
   reportSeed,
 } from "@/lib/data";
 import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
+import { listVisitorEvents, mergeIdentityForLeaflet } from "@/lib/leaflet/events";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
   KEYS,
@@ -309,14 +310,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
         draft.inArchive = true;
         const stored = readSavedLeaflets().filter((item) => item.id !== draft.id);
         writeSavedLeaflets([...stored, draft]);
+        if (nextRole === "visitor-member") {
+          const hadAnon = listVisitorEvents(draft.id).some((e) => e.identityKind === "anonymous");
+          if (hadAnon) mergeIdentityForLeaflet(draft.id, "anonymous", "member", draft.id);
+        }
         localStorage.removeItem(KEYS.leafletDraft);
         localStorage.removeItem(KEYS.returnTo);
         dest = `/leaflets/${draft.id}`;
-      } else if (ret === "/my-room" || ret === "/my-room/intro") {
+      } else if (ret) {
+        const leafletMatch = ret.match(/^\/leaflets\/([^/?#]+)/);
+        if (leafletMatch && nextRole === "visitor-member") {
+          const lid = leafletMatch[1];
+          const hadAnon = listVisitorEvents(lid).some((e) => e.identityKind === "anonymous");
+          if (hadAnon) mergeIdentityForLeaflet(lid, "anonymous", "member", lid);
+        }
         localStorage.removeItem(KEYS.returnTo);
-        dest = "/my-room";
+        dest = ret;
       } else {
-        localStorage.removeItem(KEYS.returnTo);
         dest = "/";
       }
     }
