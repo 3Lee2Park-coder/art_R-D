@@ -16,8 +16,10 @@ import {
   myRoomSeed,
   reportSeed,
 } from "@/lib/data";
+import { computeCumulative } from "@/lib/leaflet/cumulative";
 import { buildDemoLeaflet } from "@/lib/leaflet/demoLeaflets";
 import type { VisitRecord } from "@/lib/leaflet/dwell";
+import { memberHistoryFromFixtures } from "@/lib/leaflet/fixtures";
 import {
   listInterestWorks,
   toggleInterestWork,
@@ -324,7 +326,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const saveLeaflet = useCallback((leaflet: Leaflet) => {
     const current = readRole();
     if (current === "visitor-member") {
-      const nextLeaflet = { ...leaflet, inArchive: true };
+      let nextLeaflet: Leaflet = { ...leaflet, inArchive: true };
+      if (nextLeaflet.result && nextLeaflet.exhibitionId) {
+        const cumulative = computeCumulative(memberHistoryFromFixtures(), {
+          exhibitionId: nextLeaflet.exhibitionId,
+          visitDate: nextLeaflet.visitDate,
+          top1EmotionId: nextLeaflet.result.top1EmotionId,
+          top1Color: nextLeaflet.result.top1Color,
+        });
+        nextLeaflet = {
+          ...nextLeaflet,
+          result: { ...nextLeaflet.result, cumulative },
+        };
+      }
       const stored = readSavedLeaflets().filter((item) => item.id !== leaflet.id);
       writeSavedLeaflets([...stored, nextLeaflet]);
       localStorage.removeItem(KEYS.leafletDraft);

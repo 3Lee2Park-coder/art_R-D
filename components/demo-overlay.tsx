@@ -2,7 +2,7 @@
 
 import { CONSENT_VERSION } from "@/lib/constants";
 import { FLOW_LINKS, SCREEN_INDEX, SCREEN_MEMOS, type FlowLink } from "@/lib/screens";
-import { KEYS } from "@/lib/storage";
+import { KEYS, SESSION } from "@/lib/storage";
 import type { Role } from "@/lib/types";
 import { useApp } from "@/components/providers";
 
@@ -29,6 +29,11 @@ function runFlow(flow: FlowLink) {
     localStorage.setItem(KEYS.guideHiddenUntil, until.toISOString());
   }
   if (flow.guide === "clear") localStorage.removeItem(KEYS.guideHiddenUntil);
+  if (flow.clearCapture) {
+    sessionStorage.removeItem(SESSION.capture);
+    sessionStorage.removeItem(SESSION.visitId);
+    sessionStorage.removeItem(SESSION.visitConsent);
+  }
   window.location.assign(flow.path);
 }
 

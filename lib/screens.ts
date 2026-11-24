@@ -90,12 +90,50 @@ export type FlowLink = {
   role: Role;
   consent?: "set" | "clear";
   guide?: "hide" | "clear";
+  /** 시연 시작 시 이전 capture·visit 세션을 비운다 */
+  clearCapture?: boolean;
 };
 
 export const FLOW_LINKS: FlowLink[] = [
   { id: "UF-01", label: "UF-01 현장 QR · 비회원", path: "/exhibitions/ex-edge?from=qr", role: "visitor-guest", consent: "clear", guide: "clear" },
   { id: "UF-01-member", label: "UF-01 회원 · 동의 후", path: "/exhibitions/ex-edge?from=qr", role: "visitor-member", consent: "set", guide: "clear" },
   { id: "UF-01-guide", label: "UF-01 가이드 숨김", path: "/exhibitions/ex-edge?from=qr", role: "visitor-member", consent: "set", guide: "hide" },
+  {
+    id: "UF-01-A",
+    label: "UF-01 시나리오 경이 몰입가",
+    path: "/exhibitions/ex-edge?from=qr&scenario=wonder-immersive",
+    role: "visitor-guest",
+    consent: "clear",
+    guide: "clear",
+    clearCapture: true,
+  },
+  {
+    id: "UF-01-B",
+    label: "UF-01 시나리오 설렘 탐험가",
+    path: "/exhibitions/ex-edge?from=qr&scenario=bright-explorer",
+    role: "visitor-guest",
+    consent: "clear",
+    guide: "clear",
+    clearCapture: true,
+  },
+  {
+    id: "UF-01-C",
+    label: "UF-01 시나리오 컬러 수집가",
+    path: "/exhibitions/ex-edge?from=qr&scenario=color-collector",
+    role: "visitor-guest",
+    consent: "clear",
+    guide: "clear",
+    clearCapture: true,
+  },
+  {
+    id: "UF-01-D",
+    label: "UF-01 시나리오 오늘의 산책자",
+    path: "/exhibitions/ex-edge?from=qr&scenario=walker",
+    role: "visitor-guest",
+    consent: "clear",
+    guide: "clear",
+    clearCapture: true,
+  },
   { id: "UF-02", label: "UF-02 미계약 기록", path: "/exhibitions", role: "visitor-guest" },
   { id: "UF-03", label: "UF-03 미등록 기록", path: "/record/new", role: "visitor-guest" },
   { id: "UF-04", label: "UF-04 비회원 저장", path: "/leaflets/demo-visit", role: "visitor-guest" },
@@ -194,6 +232,7 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
   "V-04": "작품 인식·이동 감지는 시나리오 순서 모의. 실제 기술 확인 전.",
+  "V-08": "판정 기준 v1-2026-11-20. 체류·이동·인식은 시나리오 모의.",
   "V-11": "공유 미리보기는 검토 중이라 확정 기능으로 두지 않는다. 링크는 발급하지 않는다.",
   "V-13": "가안. 입력 항목은 미정. 화면에는 전시명, 장소, 기간만 둔다.",
   "V-14": "비회원 리플릿 보관 기간은 미정. 만료는 없다.",
