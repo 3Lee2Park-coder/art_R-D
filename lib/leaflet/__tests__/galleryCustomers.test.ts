@@ -62,6 +62,15 @@ describe("galleryCustomers merge", () => {
     const list = buildExhibitionCustomers(source);
     expect(list).toHaveLength(1);
     expect(list[0].customerId).toBe(customerIdFromKeys(["email:a@b.c"]));
+    expect(list[0].customerId).toMatch(/^c-[0-9a-f]{16}$/);
+    expect(list[0].customerId).not.toContain("@");
+    expect(list[0].customerId).not.toMatch(/010\d{8}/);
+  });
+
+  it("같은 키 묶음이면 같은 해시 ID", () => {
+    expect(customerIdFromKeys(["email:a@b.c", "phone:010"])).toBe(
+      customerIdFromKeys(["phone:010", "email:a@b.c"]),
+    );
   });
 
   it("같은 숫자 전화(하이픈 유무)은 한 고객", () => {

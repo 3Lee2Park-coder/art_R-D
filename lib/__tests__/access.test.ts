@@ -56,6 +56,29 @@ describe("accessDecision studio login + contract", () => {
     });
   });
 
+  it("종료 계약은 QR·배치·테마·등록을 /studio로", () => {
+    const blocked = "이 페이지를 열 수 없습니다.";
+    for (const path of [
+      "/studio/exhibitions/ex-tide/qr",
+      "/studio/exhibitions/ex-tide/review",
+      "/studio/exhibitions/ex-tide/theme-color",
+      "/studio/exhibitions/new",
+    ]) {
+      expect(accessDecision("gallery-ended", path)).toEqual({
+        ok: false,
+        to: "/studio",
+        notice: blocked,
+      });
+      expect(
+        accessDecision("gallery-contracted", path, { contractState: "ended" }),
+      ).toEqual({
+        ok: false,
+        to: "/studio",
+        notice: blocked,
+      });
+    }
+  });
+
   it("계약 갤러리 리포트 허용", () => {
     expect(accessDecision("gallery-contracted", "/studio/reports/ex-edge")).toEqual({
       ok: true,

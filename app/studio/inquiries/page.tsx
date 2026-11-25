@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
+import { isOnOrBeforeContractEnd } from "@/lib/leaflet/contractCutoff";
 import { listInquiries, type Inquiry } from "@/lib/leaflet/inquiry";
 import { formatDate } from "@/lib/format";
 
 export default function StudioInquiriesPage() {
   const app = useApp();
+  const gallery = app.galleries.find((g) => g.id === app.myGalleryId);
   const [items, setItems] = useState<Inquiry[]>([]);
 
   useEffect(() => {
@@ -16,16 +18,24 @@ export default function StudioInquiriesPage() {
     setItems(listInquiries());
   }, [app.ready]);
 
-  const galleryShowIds = new Set(
-    app.exhibitions.filter((e) => e.galleryId === app.myGalleryId).map((e) => e.id),
-  );
-  const mine = items.filter((i) => galleryShowIds.has(i.exhibitionId));
+  const mine = useMemo(() => {
+    const galleryShowIds = new Set(
+      app.exhibitions.filter((e) => e.galleryId === app.myGalleryId).map((e) => e.id),
+    );
+    const endAt =
+      gallery?.contractState === "ended" ? gallery.contractEndAt : null;
+    return items.filter((i) => {
+      if (!galleryShowIds.has(i.exhibitionId)) return false;
+      if (endAt && !isOnOrBeforeContractEnd(i.createdAt, endAt)) return false;
+      return true;
+    });
+  }, [items, app.exhibitions, app.myGalleryId, gallery?.contractState, gallery?.contractEndAt]);
 
   return (
     <Frame width="utility">
-      <PageTitle title="문의" kicker="갤러리" />
+      <PageTitle title="문의 인박스" kicker={gallery?.name} />
       {mine.length === 0 ? (
-        <p className="text-[14px] text-mute">문의가 없습니다.</p>
+        <p className="text-[14px] text-mute">데이터 부족</p>
       ) : (
         <ul className="border-t border-hairline">
           {mine.map((inq) => {
