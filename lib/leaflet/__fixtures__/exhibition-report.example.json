@@ -35,8 +35,18 @@
       "total": 2
     }
   },
+  "contactsSecured": { "count": 0 },
   "interestByArtwork": [
     { "artworkId": "aw-e01", "count": 2 }
+  ],
+  "artworkStats": [
+    {
+      "artworkId": "aw-e01",
+      "recordCount": 1,
+      "interestCount": 2,
+      "inquiryCount": 0,
+      "recommendationCount": 0
+    }
   ],
   "inquiries": {
     "total": 1,

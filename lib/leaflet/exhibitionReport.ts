@@ -1,4 +1,4 @@
-/** 전시 리포트 집계 (순수). STEP5a — UI/스텁 reports.json 미사용. */
+/** 전시 리포트 집계 (순수). UI/스텁 reports.json 미사용. */
 
 import type { VisitRecord } from "@/lib/leaflet/dwell";
 import { dwellSeconds, mergeConsecutiveCamera } from "@/lib/leaflet/dwell";
@@ -58,6 +58,15 @@ export type ExhibitionReportZones =
     }
   | { available: false };
 
+export type ExhibitionReportArtworkStat = {
+  artworkId: string;
+  title?: string;
+  recordCount: number;
+  interestCount: number;
+  inquiryCount: number;
+  recommendationCount: number;
+};
+
 export type ExhibitionReport = {
   exhibitionId: string;
   exhibitionTitle: string | null;
@@ -70,7 +79,10 @@ export type ExhibitionReport = {
     stored: ExhibitionReportVisitorsStored;
     report: ExhibitionReportVisitorsReport;
   };
+  /** 유효 연락처 고유 수. visitors.report.identified 와 분리 */
+  contactsSecured: { count: number };
   interestByArtwork: { artworkId: string; count: number; title?: string }[];
+  artworkStats: ExhibitionReportArtworkStat[];
   inquiries: {
     total: number;
     byStatus: Record<InquiryStatus, number>;
@@ -93,7 +105,12 @@ export type ExhibitionReportSourceLeaflet = {
   exhibitionId: string | null;
   themeColor?: string | null;
   records?: VisitRecord[];
-  result?: { style?: StyleId; typeName?: string } | null;
+  result?: {
+    style?: StyleId;
+    typeName?: string;
+    similar?: { artworkId?: string };
+  } | null;
+  recommendationArtworkIds?: string[];
   /** 체류 평균용. 없으면 해당 구역 dwell.available=false */
   generateAtSec?: number;
 };
@@ -105,6 +122,10 @@ export type ExhibitionReportSourceInquiry = {
   status?: unknown;
   saleResult?: unknown;
   identityKind?: VisitorIdentityKind;
+  contactMethod?: "email" | "phone" | null;
+  contactValue?: string;
+  consentContact?: boolean;
+  inquiredArtworkIds?: string[];
 };
 
 export type ExhibitionReportSource = {
@@ -149,6 +170,22 @@ function emptyStyles(): Record<ReportStyleId, number> {
   };
 }
 
+/** 이메일 lower/trim, 전화 숫자만 [가안] */
+export function normalizeContactKey(
+  contactValue: string,
+  contactMethod?: "email" | "phone" | null,
+): string | null {
+  const raw = contactValue.trim();
+  if (!raw) return null;
+  const looksPhone =
+    contactMethod === "phone" || (!contactMethod && /^[\d\s+\-()]+$/.test(raw));
+  if (looksPhone) {
+    const digits = raw.replace(/\D/g, "");
+    return digits.length > 0 ? `phone:${digits}` : null;
+  }
+  return `email:${raw.toLowerCase()}`;
+}
+
 /** 이벤트 최신 identity → 문의 identity → unspecified. 저장값 수정 없음. */
 export function resolveReportIdentity(
   leafletId: string,
@@ -176,6 +213,49 @@ export function resolveReportIdentity(
 
 function bumpCount(map: Map<string, number>, key: string) {
   map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+function countContactsSecured(
+  exhibitionId: string,
+  leafletIds: Set<string>,
+  inquiries: ExhibitionReportSourceInquiry[],
+  events: VisitorEvent[],
+): number {
+  const keys = new Set<string>();
+
+  for (const inq of inquiries) {
+    const forShow =
+      inq.exhibitionId === exhibitionId || leafletIds.has(inq.leafletId);
+    if (!forShow) continue;
+    if (!inq.consentContact) continue;
+    const key = normalizeContactKey(inq.contactValue ?? "", inq.contactMethod);
+    if (key) keys.add(key);
+  }
+
+  for (const e of events) {
+    if (e.type !== "news_subscribe") continue;
+    if (e.exhibitionId !== exhibitionId && !leafletIds.has(e.leafletId)) continue;
+    const value =
+      typeof e.payload?.contactValue === "string" ? e.payload.contactValue : "";
+    const method =
+      e.payload?.contactMethod === "phone" || e.payload?.contactMethod === "email"
+        ? e.payload.contactMethod
+        : null;
+    const key = normalizeContactKey(value, method);
+    if (key) keys.add(key);
+  }
+
+  return keys.size;
+}
+
+function recommendationIdsForLeaflet(l: ExhibitionReportSourceLeaflet): string[] {
+  const set = new Set<string>();
+  for (const id of l.recommendationArtworkIds ?? []) {
+    if (id) set.add(id);
+  }
+  const similar = l.result?.similar?.artworkId;
+  if (similar) set.add(similar);
+  return [...set];
 }
 
 /**
@@ -223,6 +303,15 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     total: reportIdentified + stored.anonymous + stored.unspecified,
   };
 
+  const contactsSecured = {
+    count: countContactsSecured(
+      input.exhibitionId,
+      leafletIds,
+      input.inquiries,
+      input.events,
+    ),
+  };
+
   const interestMap = new Map<string, number>();
   for (const w of input.interests) {
     if (!leafletIds.has(w.leafletId)) continue;
@@ -236,6 +325,18 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     })
     .sort((a, b) => b.count - a.count || a.artworkId.localeCompare(b.artworkId));
 
+  const recordMap = new Map<string, number>();
+  const recommendMap = new Map<string, number>();
+  for (const l of leaflets) {
+    for (const r of l.records ?? []) {
+      bumpCount(recordMap, r.artworkId);
+    }
+    for (const id of recommendationIdsForLeaflet(l)) {
+      bumpCount(recommendMap, id);
+    }
+  }
+
+  const inquiryArtMap = new Map<string, number>();
   const byStatus = emptyStatusCounts();
   const bySaleResult = emptySaleCounts();
   let inquiryTotal = 0;
@@ -248,7 +349,47 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     const sale = normalizeSaleResult(inq.saleResult);
     if (sale === null) bySaleResult.미입력 += 1;
     else bySaleResult[sale] += 1;
+    for (const artId of inq.inquiredArtworkIds ?? []) {
+      bumpCount(inquiryArtMap, artId);
+    }
   }
+
+  const artIds = new Set<string>([
+    ...recordMap.keys(),
+    ...interestMap.keys(),
+    ...inquiryArtMap.keys(),
+    ...recommendMap.keys(),
+  ]);
+  const artworkStats: ExhibitionReportArtworkStat[] = [...artIds]
+    .map((artworkId) => {
+      const recordCount = recordMap.get(artworkId) ?? 0;
+      const interestCount = interestMap.get(artworkId) ?? 0;
+      const inquiryCount = inquiryArtMap.get(artworkId) ?? 0;
+      const recommendationCount = recommendMap.get(artworkId) ?? 0;
+      const title = input.artworkTitles?.[artworkId];
+      const row: ExhibitionReportArtworkStat = {
+        artworkId,
+        recordCount,
+        interestCount,
+        inquiryCount,
+        recommendationCount,
+      };
+      if (title) row.title = title;
+      return row;
+    })
+    .filter(
+      (r) =>
+        r.recordCount > 0 ||
+        r.interestCount > 0 ||
+        r.inquiryCount > 0 ||
+        r.recommendationCount > 0,
+    )
+    .sort(
+      (a, b) =>
+        b.recordCount + b.interestCount + b.inquiryCount + b.recommendationCount -
+          (a.recordCount + a.interestCount + a.inquiryCount + a.recommendationCount) ||
+        a.artworkId.localeCompare(b.artworkId),
+    );
 
   const styles = emptyStyles();
   const typeMap = new Map<string, number>();
@@ -333,7 +474,9 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     themeColorName: input.themeColorName,
     leaflets: { count: items.length, items },
     visitors: { stored, report: visitorsReport },
+    contactsSecured,
     interestByArtwork,
+    artworkStats,
     inquiries: { total: inquiryTotal, byStatus, bySaleResult },
     styles,
     styleLabels: { ...STYLE_LABELS },
