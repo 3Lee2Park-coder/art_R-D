@@ -1,12 +1,21 @@
+import {
+  isGalleryRole,
+  isLoggedOut,
+  pathNeedsContractLanding,
+} from "@/lib/studioAccess";
 import type { Role } from "@/lib/types";
 
 export function homeFor(role: Role) {
   if (role === "operator") return "/operator/accounts";
-  if (role === "gallery-contracted" || role === "gallery-uncontracted") return "/studio";
+  if (isGalleryRole(role)) return "/studio";
   return "/";
 }
 
-export function accessDecision(role: Role, path: string): { ok: true } | { ok: false; to: string; notice?: string } {
+export type AccessDecision =
+  | { ok: true }
+  | { ok: false; to: string; notice?: string; returnTo?: string };
+
+export function accessDecision(role: Role, path: string): AccessDecision {
   if (path === "/login" || path === "/signup") return { ok: true };
 
   const studio = path.startsWith("/studio");
@@ -14,17 +23,27 @@ export function accessDecision(role: Role, path: string): { ok: true } | { ok: f
   const room = path.startsWith("/my-room");
   const blocked = "이 페이지를 열 수 없습니다.";
 
+  if (studio && isLoggedOut(role)) {
+    return { ok: false, to: "/login", returnTo: path };
+  }
+
   if (role === "operator") {
     if (operator) return { ok: true };
     return { ok: false, to: homeFor(role), notice: blocked };
   }
 
-  if (role === "gallery-contracted" || role === "gallery-uncontracted") {
+  if (isGalleryRole(role)) {
     if (!studio) return { ok: false, to: homeFor(role), notice: blocked };
-    const restricted = /\/review$/.test(path) || /\/qr$/.test(path) || path.startsWith("/studio/reports");
-    if (role === "gallery-uncontracted" && restricted) {
+
+    if (role === "gallery-uncontracted" && pathNeedsContractLanding(path)) {
+      return { ok: false, to: "/studio/contract" };
+    }
+
+    const opsRestricted = /\/review$/.test(path) || /\/qr$/.test(path);
+    if (role === "gallery-uncontracted" && opsRestricted) {
       return { ok: false, to: "/studio", notice: blocked };
     }
+
     return { ok: true };
   }
 

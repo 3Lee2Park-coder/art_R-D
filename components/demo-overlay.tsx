@@ -11,6 +11,7 @@ const ROLES: { id: Role; label: string }[] = [
   { id: "visitor-member", label: "관람객 · 회원" },
   { id: "gallery-contracted", label: "계약 갤러리" },
   { id: "gallery-uncontracted", label: "미계약 갤러리" },
+  { id: "gallery-ended", label: "종료 계약 갤러리" },
   { id: "operator", label: "운영자" },
 ];
 

@@ -53,6 +53,7 @@ const ROLES: Role[] = [
   "visitor-member",
   "gallery-contracted",
   "gallery-uncontracted",
+  "gallery-ended",
   "operator",
 ];
 

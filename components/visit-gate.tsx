@@ -18,15 +18,22 @@ export function useVisitGate(exhibitionId: string) {
     if (!app.ready) return;
     if (fromQr) app.markQr(exhibitionId);
     const exhibition = app.exhibitions.find((item) => item.id === exhibitionId);
+    const gallery = exhibition?.galleryId
+      ? app.galleries.find((g) => g.id === exhibition.galleryId)
+      : undefined;
+    const contractEnded = gallery?.contractState === "ended";
     const allowed = Boolean(
       exhibition &&
+        !contractEnded &&
         exhibition.status === "contracted" &&
         exhibition.leafletEnabled &&
         !exhibition.ended &&
         (fromQr || app.qrExhibitionId === exhibitionId),
     );
     if (!allowed) {
-      router.replace(`/exhibitions/${exhibitionId}`);
+      const qs = searchParams.toString();
+      const suffix = qs ? `?${qs}` : fromQr ? "?from=qr" : "";
+      router.replace(`/exhibitions/${exhibitionId}${suffix}`);
       return;
     }
     if (onConsent) return;
@@ -47,6 +54,7 @@ export function useVisitGate(exhibitionId: string) {
   }, [
     app.ready,
     app.exhibitions,
+    app.galleries,
     app.qrExhibitionId,
     app.markQr,
     app.capture,

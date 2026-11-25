@@ -116,6 +116,8 @@ export type ExhibitionReportSourceLeaflet = {
   recommendationArtworkIds?: string[];
   /** 체류 평균용. 없으면 해당 구역 dwell.available=false */
   generateAtSec?: number;
+  /** 기록 시각 (컷오프용). 리플릿 visitDate 등 */
+  recordedAt?: string | null;
 };
 
 export type ExhibitionReportSourceInquiry = {
@@ -129,6 +131,8 @@ export type ExhibitionReportSourceInquiry = {
   contactValue?: string;
   consentContact?: boolean;
   inquiredArtworkIds?: string[];
+  /** 문의 생성 시각 (컷오프용) */
+  createdAt?: string | null;
 };
 
 export type ExhibitionReportSource = {
@@ -145,6 +149,11 @@ export type ExhibitionReportSource = {
   /** optional artwork titles for interest rows */
   artworkTitles?: Record<string, string | undefined>;
 };
+
+/** 5f: 동일 ExhibitionReportSource로 고객 목록을 만든다. 별도 저장소 읽기 금지. */
+export function buildExhibitionCustomers(_source: ExhibitionReportSource): null {
+  return null;
+}
 
 function emptyStatusCounts(): Record<InquiryStatus, number> {
   return {

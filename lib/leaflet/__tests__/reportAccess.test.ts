@@ -62,4 +62,24 @@ describe("canViewExhibitionReport", () => {
   it("거절 문구 상수", () => {
     expect(REPORT_ACCESS_DENIED).toBe("리포트를 볼 수 없습니다");
   });
+
+  it("종료 해변 + ex-tide 허용, 한남 전시는 거절", () => {
+    expect(
+      canViewExhibitionReport({
+        role: "gallery-ended",
+        myGalleryId: "g-busan",
+        contractState: "ended",
+        exhibitionGalleryId: "g-busan",
+      }),
+    ).toBe(true);
+    expect(
+      canViewExhibitionReport({
+        role: "gallery-ended",
+        myGalleryId: "g-busan",
+        contractState: "ended",
+        exhibitionGalleryId: "g-hannam",
+      }),
+    ).toBe(false);
+  });
 });
+

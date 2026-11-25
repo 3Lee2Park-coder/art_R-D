@@ -2,6 +2,17 @@ export const CONSENT_VERSION = "2026-11-16";
 
 export const HANN_GALLERY_ID = "g-hannam";
 export const SEOCHON_GALLERY_ID = "g-seochon";
+export const BUSAN_GALLERY_ID = "g-busan";
+
+/** 랜딩 HTML과 동일. 임의로 바꾸지 않는다. */
+export const COMPANY_INQUIRY_EMAIL = "restart@restart-official.com";
+
+/** 랜딩 HTML mailto subject와 동일 */
+export const COMPANY_INQUIRY_SUBJECT = "RestArt 갤러리 솔루션 도입 상담";
+
+export const COMPANY_INQUIRY_MAILTO = `mailto:${COMPANY_INQUIRY_EMAIL}?subject=${encodeURIComponent(COMPANY_INQUIRY_SUBJECT)}`;
+
+export const COMPANY_INQUIRY_MAILTO_PLAIN = `mailto:${COMPANY_INQUIRY_EMAIL}`;
 
 export const REASON_CHIPS = ["색", "형태", "자리", "크기", "재료"];
 

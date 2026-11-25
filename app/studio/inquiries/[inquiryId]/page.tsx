@@ -13,11 +13,14 @@ import {
   type SaleResult,
 } from "@/lib/leaflet/inquiryStatus";
 import { formatDate, oneParam } from "@/lib/format";
+import { canMutateStudioInquiry } from "@/lib/studioAccess";
 
 export default function StudioInquiryDetailPage() {
   const id = oneParam(useParams<{ inquiryId: string }>().inquiryId);
   const app = useApp();
   const router = useRouter();
+  const gallery = app.galleries.find((g) => g.id === app.myGalleryId);
+  const canMutate = canMutateStudioInquiry(app.role, gallery?.contractState);
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [status, setStatus] = useState<InquiryStatus>("신규");
   const [saleResult, setSaleResult] = useState<SaleResult>(null);
@@ -60,6 +63,7 @@ export default function StudioInquiryDetailPage() {
 
   function onSave(event: FormEvent) {
     event.preventDefault();
+    if (!canMutate) return;
     const next = updateInquiry(inquiry!.id, { status, saleResult });
     if (next) {
       setInquiry(next);
@@ -85,6 +89,7 @@ export default function StudioInquiryDetailPage() {
           <select
             className="field"
             value={status}
+            disabled={!canMutate}
             onChange={(e) => setStatus(e.target.value as InquiryStatus)}
           >
             {INQUIRY_STATUSES.map((s) => (
@@ -99,6 +104,7 @@ export default function StudioInquiryDetailPage() {
           <select
             className="field"
             value={saleResult ?? ""}
+            disabled={!canMutate}
             onChange={(e) => {
               const v = e.target.value;
               setSaleResult(v === "" ? null : (v as Exclude<SaleResult, null>));
@@ -113,9 +119,11 @@ export default function StudioInquiryDetailPage() {
           </select>
         </label>
         <div className="mt-4 flex flex-wrap gap-2">
-          <button type="submit" className="btn btn-primary">
-            저장
-          </button>
+          {canMutate ? (
+            <button type="submit" className="btn btn-primary">
+              저장
+            </button>
+          ) : null}
           <button type="button" className="btn btn-secondary" onClick={() => router.push("/studio/inquiries")}>
             목록
           </button>

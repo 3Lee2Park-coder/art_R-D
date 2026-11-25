@@ -44,6 +44,12 @@ function itemsFor(role: Role): Item[] {
       { href: "/", label: "로그아웃", logout: true },
     ];
   }
+  if (role === "gallery-ended") {
+    return [
+      { href: "/studio", label: "내 전시" },
+      { href: "/", label: "로그아웃", logout: true },
+    ];
+  }
   return [
     { href: "/operator/accounts", label: "갤러리 계정" },
     { href: "/operator/exhibitions", label: "전시 확인" },

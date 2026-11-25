@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { PageTitle } from "@/components/ui";
 import { todayISO } from "@/lib/format";
@@ -8,10 +8,11 @@ import type { Leaflet } from "@/lib/types";
 
 export default function RecordNewPage() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [venue, setVenue] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const searchParams = useSearchParams();
+  const [title, setTitle] = useState(() => searchParams.get("title") ?? "");
+  const [venue, setVenue] = useState(() => searchParams.get("venue") ?? "");
+  const [start, setStart] = useState(() => searchParams.get("start") ?? "");
+  const [end, setEnd] = useState(() => searchParams.get("end") ?? "");
   const [error, setError] = useState("");
 
   function submit(event: FormEvent) {

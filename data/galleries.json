@@ -5,6 +5,8 @@
     "region": "서울",
     "initial": "ㅎ",
     "contractState": "contracted",
+    "contractStartAt": "2024-01-01",
+    "contractEndAt": null,
     "bio": "한남동에서 동시대 회화와 설치를 소개합니다."
   },
   {
@@ -13,6 +15,8 @@
     "region": "서울",
     "initial": "ㅅ",
     "contractState": "uncontracted",
+    "contractStartAt": null,
+    "contractEndAt": null,
     "bio": null
   },
   {
@@ -21,6 +25,8 @@
     "region": "부산",
     "initial": "ㅎ",
     "contractState": "ended",
+    "contractStartAt": "2025-06-01",
+    "contractEndAt": "2025-08-20T23:59:59.999Z",
     "bio": "광안리에서 지역 작가를 소개합니다."
   }
 ]

@@ -47,13 +47,26 @@ export default function LoginPage() {
           <h2 className="text-[17px] font-semibold">갤러리 계정</h2>
           <div className="mt-4 flex flex-col gap-3">
             {galleries
-              .filter((gallery) => gallery.id === "g-hannam" || gallery.id === "g-seochon")
+              .filter(
+                (gallery) =>
+                  gallery.id === "g-hannam" ||
+                  gallery.id === "g-seochon" ||
+                  gallery.id === "g-busan",
+              )
               .map((gallery) => (
                 <button
                   key={gallery.id}
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => login(gallery.id === "g-hannam" ? "gallery-contracted" : "gallery-uncontracted")}
+                  onClick={() =>
+                    login(
+                      gallery.id === "g-hannam"
+                        ? "gallery-contracted"
+                        : gallery.id === "g-busan"
+                          ? "gallery-ended"
+                          : "gallery-uncontracted",
+                    )
+                  }
                 >
                   {gallery.name}
                 </button>
