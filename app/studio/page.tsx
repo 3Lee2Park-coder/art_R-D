@@ -10,17 +10,22 @@ export default function StudioPage() {
   const app = useApp();
   const gallery = app.galleries.find((item) => item.id === app.myGalleryId);
   const shows = app.exhibitions.filter((item) => item.galleryId === app.myGalleryId);
-  const contracted = app.role === "gallery-contracted";
+  const contracted = app.role === "gallery-contracted" && gallery?.contractState === "contracted";
+  const archive = app.role === "gallery-ended" || gallery?.contractState === "ended";
+  const canReport = contracted || archive;
+  const canInquiry = contracted || archive;
 
   return (
     <Frame width="utility">
       <PageTitle title="내 전시" kicker={gallery?.name} />
       {gallery ? <p className="mb-6 text-[14px] text-mute">{contractLabel(gallery.contractState)}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <Link href="/studio/exhibitions/new" className="btn btn-primary">
-          전시 등록
-        </Link>
-        {contracted ? (
+        {contracted || app.role === "gallery-uncontracted" ? (
+          <Link href="/studio/exhibitions/new" className="btn btn-primary">
+            전시 등록
+          </Link>
+        ) : null}
+        {canInquiry ? (
           <Link href="/studio/inquiries" className="btn btn-secondary">
             문의
           </Link>
@@ -54,7 +59,7 @@ export default function StudioPage() {
                     QR
                   </Link>
                 ) : null}
-                {contracted ? (
+                {canReport ? (
                   <Link href={`/studio/reports/${exhibition.id}`} className="btn btn-secondary min-h-11 px-4">
                     리포트
                   </Link>

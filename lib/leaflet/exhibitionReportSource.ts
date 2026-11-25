@@ -1,6 +1,7 @@
 /** 리포트용 저장소 파사드. HTTP/MSW 없음 (STEP5a). */
 
 import { artworkSeed, exhibitionSeed } from "@/lib/data";
+import { filterSourceByContractEnd } from "@/lib/leaflet/contractCutoff";
 import type { VisitorEvent } from "@/lib/leaflet/events";
 import {
   buildExhibitionReport,
@@ -16,6 +17,11 @@ import type { Leaflet } from "@/lib/types";
 
 export type ReportStorage = Pick<Storage, "getItem">;
 
+export type ReadExhibitionReportSourceOptions = {
+  /** 종료 계약 아카이브: recordedAt ≤ contractEndAt */
+  contractEndAt?: string | null;
+};
+
 function readList<T>(storage: ReportStorage, key: string): T[] {
   return readJSON<T[]>(storage as Storage, key, []);
 }
@@ -27,6 +33,7 @@ function leafletToSource(l: Leaflet): ExhibitionReportSourceLeaflet {
     themeColor: l.themeColor ?? null,
     records: l.records,
     recommendationArtworkIds: l.recommendationArtworkIds,
+    recordedAt: l.visitDate ?? null,
     result: l.result
       ? {
           style: l.result.style,
@@ -45,6 +52,7 @@ function leafletToSource(l: Leaflet): ExhibitionReportSourceLeaflet {
 export function readExhibitionReportSource(
   exhibitionId: string,
   storage?: ReportStorage,
+  options?: ReadExhibitionReportSourceOptions,
 ): ExhibitionReportSource {
   const store =
     storage ??
@@ -78,7 +86,7 @@ export function readExhibitionReportSource(
     store,
   );
 
-  return {
+  const source: ExhibitionReportSource = {
     exhibitionId,
     exhibitionTitle: exhibition?.title ?? null,
     themeColorName,
@@ -89,11 +97,18 @@ export function readExhibitionReportSource(
     zonesByArtwork,
     artworkTitles,
   };
+
+  const endAt = options?.contractEndAt;
+  if (endAt) return filterSourceByContractEnd(source, endAt);
+  return source;
 }
 
 export function loadExhibitionReport(
   exhibitionId: string,
   storage?: ReportStorage,
+  options?: ReadExhibitionReportSourceOptions,
 ): ExhibitionReport {
-  return buildExhibitionReport(readExhibitionReportSource(exhibitionId, storage));
+  return buildExhibitionReport(
+    readExhibitionReportSource(exhibitionId, storage, options),
+  );
 }

@@ -5,7 +5,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { DemoOverlay } from "@/components/demo-overlay";
 import { Header } from "@/components/header";
 import { accessDecision } from "@/lib/access";
-import { CONSENT_VERSION, HANN_GALLERY_ID, SEOCHON_GALLERY_ID } from "@/lib/constants";
+import {
+  BUSAN_GALLERY_ID,
+  CONSENT_VERSION,
+  HANN_GALLERY_ID,
+  SEOCHON_GALLERY_ID,
+} from "@/lib/constants";
+import { isGalleryRole } from "@/lib/studioAccess";
 import {
   artistSeed,
   artworkSeed,
@@ -141,6 +147,7 @@ export function useApp() {
 function galleryIdFor(role: Role) {
   if (role === "gallery-contracted") return HANN_GALLERY_ID;
   if (role === "gallery-uncontracted") return SEOCHON_GALLERY_ID;
+  if (role === "gallery-ended") return BUSAN_GALLERY_ID;
   return null;
 }
 
@@ -229,6 +236,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const decision = accessDecision(role, pathname);
     if (decision.ok) return;
     if (decision.notice) sessionStorage.setItem(SESSION.notice, decision.notice);
+    if ("returnTo" in decision && decision.returnTo) {
+      localStorage.setItem(KEYS.returnTo, decision.returnTo);
+    }
     router.replace(decision.to);
   }, [ready, role, pathname, router]);
 
@@ -362,8 +372,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const login = useCallback((nextRole: Role) => {
     localStorage.setItem(KEYS.role, nextRole);
     let dest = "/";
-    if (nextRole === "gallery-contracted" || nextRole === "gallery-uncontracted") dest = "/studio";
-    else if (nextRole === "operator") dest = "/operator/accounts";
+    if (isGalleryRole(nextRole)) {
+      const ret = localStorage.getItem(KEYS.returnTo);
+      if (ret && ret.startsWith("/studio")) {
+        dest = ret;
+        localStorage.removeItem(KEYS.returnTo);
+      } else {
+        dest = "/studio";
+      }
+    } else if (nextRole === "operator") dest = "/operator/accounts";
     else {
       const draftRaw = localStorage.getItem(KEYS.leafletDraft);
       const ret = localStorage.getItem(KEYS.returnTo);

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="전시 참여 기록을 작품·고객·공간의 인사이트로 연결하는 RestArt 갤러리 솔루션. 작품 기록, 관심, 문의, 구역별 반응을 전시 운영에 활용하세요." />
+  <meta name="theme-color" content="#17272b" />
+  <title>For Galleries — RestArt</title>
+  <style>
+    :root {
+      --ink: #17272b;
+      --ink-2: #26383b;
+      --paper: #f4f2ed;
+      --paper-2: #e9e7df;
+      --white: #fffefa;
+      --muted: #778184;
+      --muted-light: #b4c0bf;
+      --line: rgba(23,39,43,.14);
+      --mint: #c5e6d9;
+      --lime: #d8ed82;
+      --coral: #e77e68;
+      --blue: #6e9eae;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      --radius: 22px;
+      --shadow: 0 24px 70px rgba(15,32,36,.14);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); line-height: 1.6; letter-spacing: -.025em; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .wrap { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; opacity: .65; }
+    .serif { font-family: var(--serif); font-weight: 400; letter-spacing: -.045em; }
+    .topbar { position: sticky; top: 0; z-index: 20; background: rgba(244,242,237,.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(23,39,43,.08); }
+    .nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 850; letter-spacing: -.055em; font-size: 22px; }
+    .brand-mark { width: 27px; height: 27px; position: relative; display: inline-block; border-radius: 50%; background: var(--ink); overflow: hidden; }
+    .brand-mark::before, .brand-mark::after { content: ""; position: absolute; border: 1px solid var(--lime); border-radius: 50%; width: 19px; height: 19px; left: 7px; top: -4px; }
+    .brand-mark::after { width: 15px; height: 15px; left: -4px; top: 11px; border-color: var(--coral); }
+    .brand small { display: block; font-size: 9px; font-weight: 700; letter-spacing: .17em; color: #738083; margin-top: -3px; }
+    .nav-links { display: flex; align-items: center; gap: 30px; color: #586568; font-size: 13px; font-weight: 650; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .text-link { font-size: 12px; font-weight: 700; color: #667477; }
+    .button { display: inline-flex; justify-content: center; align-items: center; gap: 11px; border: 0; border-radius: 999px; padding: 14px 20px; font-size: 13px; font-weight: 800; transition: transform .2s ease, background .2s ease; cursor: pointer; }
+    .button:hover { transform: translateY(-2px); }
+    .button-dark { background: var(--ink); color: #fff; }
+    .button-dark:hover { background: #30464a; }
+    .button-light { color: var(--ink); background: var(--lime); }
+    .button-outline { border: 1px solid rgba(255,255,255,.32); color: white; background: transparent; }
+    .arrow { font-size: 17px; line-height: 1; }
+    .hero { background: var(--ink); color: white; position: relative; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; width: 740px; height: 740px; border: 1px solid rgba(197,230,217,.1); border-radius: 50%; right: -190px; top: -390px; box-shadow: 0 0 0 70px rgba(197,230,217,.025), 0 0 0 140px rgba(197,230,217,.02); }
+    .hero::after { content: ""; position: absolute; width: 270px; height: 270px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(216,237,130,.26), rgba(216,237,130,0) 68%); left: 30%; bottom: -165px; }
+    .hero-grid { position: relative; z-index: 1; min-height: 650px; display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; gap: 50px; padding: 84px 0 90px; }
+    .hero-copy { max-width: 570px; }
+    .hero .eyebrow { color: var(--mint); }
+    h1 { margin: 26px 0 22px; font-size: clamp(42px, 5.4vw, 68px); line-height: 1.12; font-weight: 650; letter-spacing: -.075em; }
+    h1 em { color: var(--lime); font-style: normal; font-family: var(--serif); font-weight: 400; letter-spacing: -.06em; }
+    .hero-copy p { color: #bdc9c8; font-size: 16px; line-height: 1.9; max-width: 520px; margin: 0 0 30px; }
+    .hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .hero-note { margin-top: 24px; color: #809093; font-size: 11px; }
+    .dashboard-shell { background: #f7f6f0; color: var(--ink); border-radius: 18px; box-shadow: 0 34px 90px rgba(0,0,0,.3); padding: 18px; transform: rotate(1.4deg); position: relative; }
+    .dashboard-shell::before { content: ""; position: absolute; z-index: -1; inset: 22px -16px -18px 22px; border: 1px solid rgba(216,237,130,.38); border-radius: 18px; }
+    .dash-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e4e4dc; padding: 3px 2px 15px; }
+    .dash-brand { font-size: 12px; font-weight: 900; letter-spacing: -.04em; }
+    .dash-label { font-size: 9px; letter-spacing: .14em; color: #7f8b8d; font-weight: 800; }
+    .sample-tag { background: #e5edc9; border-radius: 99px; color: #506129; font-size: 9px; font-weight: 900; padding: 5px 8px; letter-spacing: .08em; }
+    .dash-heading { display: flex; justify-content: space-between; align-items: end; padding: 18px 2px 16px; }
+    .dash-heading h3 { margin: 4px 0 0; font-size: 19px; letter-spacing: -.055em; }
+    .dash-date { font-size: 10px; color: #879194; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .metric { background: white; border: 1px solid #eaebe5; border-radius: 10px; padding: 11px 10px; min-height: 76px; }
+    .metric span { display: block; font-size: 9px; color: #768284; font-weight: 700; }
+    .metric strong { display: block; font-size: 21px; letter-spacing: -.06em; margin-top: 4px; }
+    .metric small { font-size: 9px; color: #9aa3a2; }
+    .dash-lower { display: grid; grid-template-columns: 1fr .86fr; gap: 10px; margin-top: 10px; }
+    .dash-card { background: white; border: 1px solid #eaebe5; border-radius: 10px; padding: 13px; }
+    .dash-card h4 { margin: 0 0 12px; font-size: 11px; }
+    .bar-row { display: grid; grid-template-columns: 42px 1fr 24px; align-items: center; gap: 6px; margin: 10px 0; font-size: 9px; color: #6c797b; }
+    .bar-track { height: 7px; background: #edf0e9; border-radius: 20px; overflow: hidden; }
+    .bar-fill { display: block; height: 100%; border-radius: 20px; background: #8bb7a5; }
+    .bar-row:nth-child(3) .bar-fill { background: #d5a47d; }
+    .bar-row:nth-child(4) .bar-fill { background: #7e9eb2; }
+    .bar-row:nth-child(5) .bar-fill { background: #c0c982; }
+    .rank-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #eff0ea; font-size: 9px; color: #566366; }
+    .rank-row:last-child { border: 0; }
+    .art-thumb { width: 27px; height: 27px; border-radius: 5px; flex: none; background: linear-gradient(140deg,#d99c75 0 40%,#607d75 40% 63%,#d9d1b8 63%); }
+    .rank-row:nth-child(3) .art-thumb { background: linear-gradient(130deg,#627f9b 0 45%,#e8d5a8 45% 65%,#b36e62 65%); }
+    .rank-row:nth-child(4) .art-thumb { background: linear-gradient(135deg,#a8ad8c 0 35%,#d0a36e 35% 55%,#484e45 55%); }
+    .rank-row strong { margin-left: auto; font-size: 10px; color: var(--ink); }
+    .dash-foot { display: flex; justify-content: space-between; padding: 13px 2px 0; font-size: 9px; color: #94a09f; }
+    .section { padding: 112px 0; }
+    .section-head { display: flex; justify-content: space-between; gap: 40px; align-items: end; margin-bottom: 52px; }
+    .section-head .intro { max-width: 430px; color: #697678; font-size: 14px; line-height: 1.85; }
+    .section h2 { font-size: clamp(34px, 4.3vw, 52px); line-height: 1.18; letter-spacing: -.07em; font-weight: 650; margin: 16px 0 0; }
+    .section h2 em { font-family: var(--serif); font-weight: 400; }
+    .problem { background: var(--paper); }
+    .problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .problem-card { background: #ebe9e1; border-radius: 16px; padding: 28px; min-height: 225px; display: flex; flex-direction: column; justify-content: space-between; }
+    .problem-number { font-family: var(--serif); font-size: 18px; color: #a1aaa4; }
+    .problem-card h3 { margin: 0 0 9px; font-size: 19px; letter-spacing: -.05em; }
+    .problem-card p { margin: 0; color: #687477; font-size: 13px; line-height: 1.8; }
+    .dark-section { background: #e7e6de; }
+    .steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; counter-reset: steps; }
+    .step { border-top: 1px solid #aeb7b1; padding: 22px 16px 0 0; min-height: 220px; counter-increment: steps; }
+    .step::before { content: "0" counter(steps); display: block; font-family: var(--serif); font-size: 18px; color: #83928e; margin-bottom: 34px; }
+    .step h3 { font-size: 18px; margin: 0 0 9px; letter-spacing: -.045em; }
+    .step p { margin: 0; color: #6f7b7b; font-size: 13px; line-height: 1.8; }
+    .step-pill { display: inline-block; border: 1px solid #bbc4bb; border-radius: 99px; padding: 5px 9px; font-size: 10px; color: #5b6d6a; margin-top: 18px; }
+    .features { background: var(--ink); color: white; }
+    .features .eyebrow { color: var(--mint); }
+    .features .section-head .intro { color: #a9b8b7; }
+    .feature-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    .feature-card { border: 1px solid rgba(255,255,255,.15); border-radius: 18px; padding: 30px; min-height: 245px; position: relative; overflow: hidden; }
+    .feature-icon { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--lime); font-size: 17px; font-weight: 900; margin-bottom: 34px; }
+    .feature-card:nth-child(2) .feature-icon { background: var(--coral); }
+    .feature-card:nth-child(3) .feature-icon { background: var(--mint); }
+    .feature-card:nth-child(4) .feature-icon { background: #b6c7e5; }
+    .feature-card h3 { margin: 0 0 9px; font-size: 22px; letter-spacing: -.05em; }
+    .feature-card p { margin: 0; color: #aebcbb; font-size: 13px; line-height: 1.85; max-width: 430px; }
+    .feature-no { position: absolute; right: 25px; top: 15px; font-family: var(--serif); color: rgba(255,255,255,.15); font-size: 48px; }
+    .showcase { background: var(--white); }
+    .showcase-grid { display: grid; grid-template-columns: .75fr 1.25fr; gap: 56px; align-items: center; }
+    .showcase-copy p { font-size: 14px; color: #6c797b; line-height: 1.9; margin: 20px 0 26px; }
+    .showcase-list { list-style: none; padding: 0; margin: 0; }
+    .showcase-list li { border-top: 1px solid var(--line); padding: 12px 0; font-size: 13px; display: flex; gap: 10px; align-items: center; }
+    .showcase-list li::before { content: "↗"; color: #7d9b8a; font-size: 15px; }
+    .report-preview { background: #f2f1eb; border: 1px solid #e7e7df; border-radius: 18px; padding: 22px; box-shadow: var(--shadow); }
+    .report-header { display: flex; justify-content: space-between; align-items: start; padding-bottom: 17px; border-bottom: 1px solid #dedfd7; }
+    .report-header b { font-size: 14px; }
+    .report-header small { color: #8a9695; font-size: 10px; display: block; margin-top: 4px; }
+    .report-header span { font-size: 9px; color: #637b67; background: #e1ebd9; border-radius: 99px; padding: 6px 9px; font-weight: 800; }
+    .report-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; padding: 16px 0; }
+    .report-stat { background: white; border-radius: 9px; padding: 13px; }
+    .report-stat label { display: block; color: #899493; font-size: 9px; }
+    .report-stat strong { font-size: 23px; letter-spacing: -.06em; }
+    .report-main { display: grid; grid-template-columns: 1fr .9fr; gap: 10px; }
+    .report-panel { background: white; border-radius: 9px; padding: 15px; }
+    .report-panel h4 { font-size: 11px; margin: 0 0 14px; }
+    .mini-bars { height: 125px; display: flex; align-items: end; gap: 9px; border-bottom: 1px solid #e7e9e1; padding: 0 4px; }
+    .mini-bars span { flex: 1; background: #89ad9a; border-radius: 5px 5px 0 0; }
+    .mini-bars span:nth-child(2n) { background: #d8b28a; }
+    .mini-bars span:nth-child(3n) { background: #849eb1; }
+    .legend { display: flex; justify-content: space-between; color: #9aa3a0; font-size: 9px; margin-top: 8px; }
+    .insight { display: flex; gap: 10px; align-items: start; border-top: 1px solid #eff0e9; padding: 9px 0; font-size: 10px; color: #657375; line-height: 1.6; }
+    .insight-mark { color: #748e75; font-size: 15px; }
+    .report-disclaimer { padding-top: 13px; color: #8e9998; font-size: 9px; }
+    .trust { background: #e4ece5; }
+    .trust-grid { display: grid; grid-template-columns: .9fr 1.1fr; align-items: start; gap: 65px; }
+    .trust-copy p { color: #62716f; font-size: 14px; line-height: 1.9; margin-top: 20px; }
+    .trust-points { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .trust-item { background: rgba(255,255,255,.65); border-radius: 13px; padding: 20px; min-height: 132px; }
+    .trust-item b { display: block; font-size: 14px; margin-bottom: 7px; }
+    .trust-item span { display: block; font-size: 12px; color: #6e7d7b; line-height: 1.7; }
+    .audience { background: var(--paper); }
+    .audience-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+    .audience-card { background: #e9e7df; border-radius: 16px; padding: 25px; min-height: 190px; }
+    .audience-card .label { font-size: 10px; color: #8b9693; font-weight: 800; letter-spacing: .12em; }
+    .audience-card h3 { font-size: 19px; letter-spacing: -.05em; margin: 26px 0 8px; }
+    .audience-card p { margin: 0; color: #687576; font-size: 12px; line-height: 1.8; }
+    .faq { background: var(--white); }
+    .faq-grid { display: grid; grid-template-columns: .75fr 1.25fr; gap: 60px; }
+    .faq-list details { border-top: 1px solid var(--line); padding: 18px 0; }
+    .faq-list details:last-child { border-bottom: 1px solid var(--line); }
+    .faq-list summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; font-size: 14px; font-weight: 750; }
+    .faq-list summary::-webkit-details-marker { display: none; }
+    .faq-list summary::after { content: "+"; font-size: 20px; font-weight: 400; color: #7c8b87; }
+    .faq-list details[open] summary::after { content: "−"; }
+    .faq-list p { margin: 13px 30px 0 0; color: #71807f; font-size: 13px; line-height: 1.85; }
+    .contact { background: var(--ink); color: white; padding: 90px 0; position: relative; overflow: hidden; }
+    .contact::after { content: "R"; font-family: var(--serif); position: absolute; right: 5%; top: -150px; font-size: 520px; line-height: 1; color: rgba(255,255,255,.025); pointer-events: none; }
+    .contact-inner { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 40px; }
+    .contact .eyebrow { color: var(--lime); }
+    .contact h2 { font-size: clamp(36px,4.5vw,56px); line-height: 1.17; letter-spacing: -.075em; margin: 17px 0; }
+    .contact p { color: #b0bfbe; font-size: 14px; margin: 0; }
+    .contact-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 220px; }
+    .contact-actions small { color: #849394; font-size: 10px; }
+    footer { background: #111e21; color: #d4ddda; padding: 32px 0; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 25px; }
+    .footer-brand { font-size: 19px; font-weight: 850; letter-spacing: -.06em; }
+    .footer-links { display: flex; gap: 22px; font-size: 11px; color: #a8b6b4; }
+    .copyright { font-size: 10px; color: #6d7d7d; }
+    .mobile-toggle { display: none; background: none; color: var(--ink); border: 0; font-size: 22px; cursor: pointer; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 55px; padding-top: 75px; }
+      .hero-copy { max-width: 700px; }
+      .dashboard-shell { max-width: 620px; width: 100%; justify-self: center; }
+      .showcase-grid,.trust-grid,.faq-grid { grid-template-columns: 1fr; gap: 38px; }
+      .section-head { display: block; }
+      .section-head .intro { margin-top: 20px; }
+    }
+    @media (max-width: 680px) {
+      .wrap { width: min(100% - 32px, 540px); }
+      .nav { height: 66px; }
+      .mobile-toggle { display: block; }
+      .nav-links { display: none; position: absolute; top: 66px; left: 0; right: 0; padding: 18px 24px 22px; background: var(--paper); border-bottom: 1px solid var(--line); flex-direction: column; align-items: flex-start; gap: 18px; }
+      .nav-links.open { display: flex; }
+      .nav-actions .text-link { display: none; }
+      .nav-actions .button { padding: 10px 13px; font-size: 11px; }
+      .brand { font-size: 19px; }
+      .hero-grid { min-height: unset; padding: 68px 0 75px; }
+      h1 { font-size: clamp(41px, 12vw, 58px); }
+      .hero-copy p { font-size: 14px; }
+      .dashboard-shell { padding: 12px; transform: none; }
+      .metric-grid { grid-template-columns: repeat(2,1fr); }
+      .metric { min-height: 70px; }
+      .dash-lower { grid-template-columns: 1fr; }
+      .section { padding: 76px 0; }
+      .section-head { margin-bottom: 35px; }
+      .section h2 { font-size: 36px; }
+      .problem-grid,.steps,.feature-grid,.audience-grid { grid-template-columns: 1fr; }
+      .problem-card { min-height: 175px; }
+      .step { min-height: 0; padding-bottom: 25px; }
+      .step::before { margin-bottom: 18px; }
+      .feature-card { min-height: 215px; }
+      .report-preview { padding: 13px; }
+      .report-stats { grid-template-columns: repeat(3,1fr); gap: 5px; }
+      .report-stat { padding: 10px 8px; }
+      .report-stat strong { font-size: 19px; }
+      .report-main { grid-template-columns: 1fr; }
+      .trust-points { grid-template-columns: 1fr; }
+      .contact-inner { display: block; }
+      .contact-actions { margin-top: 30px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .footer-links { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#top" aria-label="RestArt 홈"><span class="brand-mark" aria-hidden="true"></span><span>RestArt<small>ART & EXPERIENCE</small></span></a>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+      <nav class="nav-links" id="navLinks" aria-label="주요 메뉴">
+        <a href="#why">필요한 이유</a>
+        <a href="#how">이용 흐름</a>
+        <a href="#features">주요 기능</a>
+        <a href="#data">리포트 예시</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="text-link" href="https://restart-official.com/">일반 관람객 페이지 ↗</a>
+        <a class="button button-dark" href="#contact">도입 상담 <span class="arrow">↗</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">FOR GALLERIES · EXHIBITION INTELLIGENCE</span>
+          <h1>전시가 끝난 뒤에도,<br /><em>관람객의 반응</em>은<br />남습니다.</h1>
+          <p>작품 기록부터 관심과 문의, 구역별 반응까지. 전시장 안에서 만들어진 관람 데이터를 연결해 다음 전시와 고객 관계를 더 깊이 이해하도록 돕습니다.</p>
+          <div class="hero-actions">
+            <a class="button button-light" href="#contact">RestArt와 이야기하기 <span class="arrow">↗</span></a>
+            <a class="button button-outline" href="#data">리포트 살펴보기 <span class="arrow">↓</span></a>
+          </div>
+          <div class="hero-note">전시 참여 기록 기반 · 갤러리 운영자와 큐레이터를 위한 서비스</div>
+        </div>
+
+        <div class="dashboard-shell" aria-label="가상 데이터로 구성한 전시 리포트 예시">
+          <div class="dash-top"><div><div class="dash-brand">RestArt <span style="font-weight:500;color:#899594">/ GALLERY REPORT</span></div><div class="dash-label">EXHIBITION INTELLIGENCE</div></div><span class="sample-tag">SAMPLE DATA</span></div>
+          <div class="dash-heading"><div><div class="dash-label">EXHIBITION OVERVIEW</div><h3>빛과 시선, 공간의 기록</h3></div><div class="dash-date">2026. 10. 01 — 10. 21</div></div>
+          <div class="metric-grid">
+            <div class="metric"><span>참여 세션</span><strong>48</strong><small>서비스 참여 기준</small></div>
+            <div class="metric"><span>작품 기록</span><strong>126</strong><small>촬영 이벤트</small></div>
+            <div class="metric"><span>관심 등록</span><strong>19</strong><small>명시적 선택</small></div>
+            <div class="metric"><span>작품 문의</span><strong>07</strong><small>문의 제출</small></div>
+          </div>
+          <div class="dash-lower">
+            <div class="dash-card"><h4>구역별 작품 기록</h4>
+              <div class="bar-row"><span>ZONE A</span><div class="bar-track"><i class="bar-fill" style="width:82%"></i></div><b>34</b></div>
+              <div class="bar-row"><span>ZONE B</span><div class="bar-track"><i class="bar-fill" style="width:62%"></i></div><b>26</b></div>
+              <div class="bar-row"><span>ZONE C</span><div class="bar-track"><i class="bar-fill" style="width:48%"></i></div><b>20</b></div>
+              <div class="bar-row"><span>ZONE D</span><div class="bar-track"><i class="bar-fill" style="width:35%"></i></div><b>14</b></div>
+            </div>
+            <div class="dash-card"><h4>작품 반응 TOP</h4>
+              <div class="rank-row"><span class="art-thumb"></span><span>작품 A</span><strong>18</strong></div>
+              <div class="rank-row"><span class="art-thumb"></span><span>작품 B</span><strong>14</strong></div>
+              <div class="rank-row"><span class="art-thumb"></span><span>작품 C</span><strong>11</strong></div>
+            </div>
+          </div>
+          <div class="dash-foot"><span>참여 기록을 바탕으로 한 예시 화면입니다.</span><span>REPORT PREVIEW ↗</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section problem" id="why">
+      <div class="wrap">
+        <div class="section-head">
+          <div><span class="eyebrow">WHY RESTART</span><h2>방문객 수를 넘어,<br /><em>무엇이 기억되었는지</em>를.</h2></div>
+          <p class="intro">전시가 끝나면 관람객은 돌아가고, 현장의 기억도 흩어집니다. 어떤 작품이 기록되었는지, 누가 관심을 표현했는지, 어떤 구역에서 반응이 나타났는지 다시 살펴볼 수 있다면 다음 전시를 준비하는 관점도 달라집니다.</p>
+        </div>
+        <div class="problem-grid">
+          <article class="problem-card"><span class="problem-number">01</span><div><h3>관람객의 반응을 알기 어렵습니다</h3><p>입장객 수만으로는 어떤 작품이 관람객의 시선을 끌었는지 확인하기 어렵습니다.</p></div></article>
+          <article class="problem-card"><span class="problem-number">02</span><div><h3>관심과 문의가 흩어집니다</h3><p>작품에 대한 질문과 연락처, 후속 소통의 단서가 여러 채널에 나뉘어 남습니다.</p></div></article>
+          <article class="problem-card"><span class="problem-number">03</span><div><h3>다음 전시의 근거가 부족합니다</h3><p>작품 배치와 안내를 개선하고 싶어도 현장 경험을 데이터로 되짚기 어렵습니다.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark-section" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <div><span class="eyebrow">HOW IT WORKS</span><h2>전시 준비부터<br /><em>다음 기획까지</em> 연결합니다.</h2></div>
+          <p class="intro">갤러리는 전시 정보를 등록하고, 관람객은 QR을 통해 기록을 남깁니다. RestArt는 그 기록을 작품과 전시 공간에 연결해 갤러리가 확인할 수 있는 형태로 정리합니다.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><h3>전시 정보 등록</h3><p>전시 기본 정보와 포스터, 작품 목록, 배치도를 등록합니다.</p><span class="step-pill">EXHIBITION SETUP</span></article>
+          <article class="step"><h3>작품·구역 데이터 검수</h3><p>작품과 구역의 연결을 확인하고, 필요한 정보는 운영자가 보완합니다.</p><span class="step-pill">HUMAN REVIEW</span></article>
+          <article class="step"><h3>관람객의 기록 축적</h3><p>관람객은 QR로 진입해 작품을 촬영하고 리플릿과 관심 기록을 남깁니다.</p><span class="step-pill">VISITOR EXPERIENCE</span></article>
+          <article class="step"><h3>리포트와 다음 인사이트</h3><p>작품·고객·구역 반응을 살펴보고 다음 전시 운영의 참고 자료로 활용합니다.</p><span class="step-pill">GALLERY REPORT</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section features" id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <div><span class="eyebrow">WHAT YOU CAN LEARN</span><h2>하나의 전시를<br /><em>네 가지 관점</em>으로.</h2></div>
+          <p class="intro">단순한 숫자 나열이 아닌, 관람객과 작품 그리고 공간 사이에 남은 기록을 구분해서 보여줍니다.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card"><span class="feature-no">01</span><div class="feature-icon">◎</div><h3>고객 인텔리전스</h3><p>전시별 참여 고객과 전체 고객을 구분해 확인하고, 고객별 방문 전시와 관심 작품, 문의 이력을 연결합니다.</p></article>
+          <article class="feature-card"><span class="feature-no">02</span><div class="feature-icon">✳</div><h3>작품 반응 분석</h3><p>작품 촬영 기록, 명시적 관심 등록, 문의, 추천 노출을 구분해 작품별 반응을 살펴봅니다.</p></article>
+          <article class="feature-card"><span class="feature-no">03</span><div class="feature-icon">⌁</div><h3>구역별 공간 반응</h3><p>구역과 작품 배치에 연결된 기록을 살펴보고, 촬영 기록 기반 구역 전환과 체류 추정치를 확인합니다.</p></article>
+          <article class="feature-card"><span class="feature-no">04</span><div class="feature-icon">↗</div><h3>전시 개선 인사이트</h3><p>전시 목표와 관측 지표를 비교하고, 근거와 데이터 한계를 함께 표시한 개선 가설을 제공합니다.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section showcase" id="data">
+      <div class="wrap showcase-grid">
+        <div class="showcase-copy">
+          <span class="eyebrow">INSIDE THE REPORT</span>
+          <h2>전시가 남긴 기록을<br /><em>한눈에 살펴보세요.</em></h2>
+          <p>작품 기록과 리플릿, 연락처 확보 고객을 구분하고, 작품·구역별 데이터를 함께 확인할 수 있습니다. 고객 상세와 전시별 리포트가 연결되어 있어 분석에서 다음 행동으로 이어지는 구조를 지향합니다.</p>
+          <ul class="showcase-list">
+            <li>전시 참여 및 작품 기록 추이</li>
+            <li>연락처 확보 고객과 전시별 유입 출처</li>
+            <li>작품 기록·관심·문의 반응 비교</li>
+            <li>구역별 기록 및 촬영 순서 기반 전환</li>
+          </ul>
+        </div>
+        <div class="report-preview" aria-label="가상 데이터로 구성한 리포트 미리보기">
+          <div class="report-header"><div><b>Exhibition Overview</b><small>전시 리포트 · 예시 데이터</small></div><span>DEMO PREVIEW</span></div>
+          <div class="report-stats">
+            <div class="report-stat"><label>참여 세션</label><strong>48</strong></div>
+            <div class="report-stat"><label>연락처 확보 고객</label><strong>21</strong></div>
+            <div class="report-stat"><label>작품 기록</label><strong>126</strong></div>
+          </div>
+          <div class="report-main">
+            <div class="report-panel"><h4>시간대별 참여 기록</h4><div class="mini-bars"><span style="height:38%"></span><span style="height:56%"></span><span style="height:45%"></span><span style="height:83%"></span><span style="height:68%"></span><span style="height:95%"></span><span style="height:61%"></span><span style="height:74%"></span><span style="height:50%"></span></div><div class="legend"><span>오전</span><span>오후</span><span>저녁</span></div></div>
+            <div class="report-panel"><h4>운영 검토 포인트</h4>
+              <div class="insight"><span class="insight-mark">↗</span><span>작품 기록이 상대적으로 많이 모인 구역을 확인하세요.</span></div>
+              <div class="insight"><span class="insight-mark">◎</span><span>관심 등록과 문의가 이어진 작품을 살펴보세요.</span></div>
+              <div class="insight"><span class="insight-mark">⌁</span><span>기록이 부족한 구역은 안내·배치 조건을 함께 검토하세요.</span></div>
+            </div>
+          </div>
+          <div class="report-disclaimer">※ 화면과 수치는 기능 설명을 위한 가상 데이터입니다. 실제 갤러리 성과를 나타내지 않습니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trust">
+      <div class="wrap trust-grid">
+        <div class="trust-copy"><span class="eyebrow">MEASURE WITH CONTEXT</span><h2>데이터의 의미와<br /><em>한계까지 투명하게.</em></h2><p>좋은 리포트는 숫자를 크게 보여주는 것보다, 그 숫자가 무엇을 의미하는지 정확히 설명하는 데서 시작합니다. RestArt는 참여 기록과 추정치를 구분해 해석하도록 설계합니다.</p></div>
+        <div class="trust-points">
+          <div class="trust-item"><b>참여 데이터 기준</b><span>서비스에 참여한 세션 기준입니다. 전시장 전체 입장객 수와 동일하지 않습니다.</span></div>
+          <div class="trust-item"><b>기록과 관심의 구분</b><span>촬영 기록은 관심 등록이나 구매 의사로 자동 해석하지 않습니다.</span></div>
+          <div class="trust-item"><b>추정치의 명시</b><span>체류 시간과 구역 전환은 촬영 기록에서 추정하며 실제 이동 경로가 아닙니다.</span></div>
+          <div class="trust-item"><b>사람의 검수</b><span>작품과 구역 데이터는 자동 생성 결과를 사람이 검토·보완하는 방식을 지향합니다.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section audience">
+      <div class="wrap">
+        <div class="section-head"><div><span class="eyebrow">MADE FOR GALLERIES</span><h2>갤러리의 규모보다<br /><em>운영 방식에 맞게.</em></h2></div><p class="intro">전시와 관람객을 더 잘 이해하고 싶은 갤러리, 큐레이터, 전시 운영 조직을 위한 서비스 방향입니다.</p></div>
+        <div class="audience-grid">
+          <article class="audience-card"><span class="label">01 / GALLERY</span><h3>상업 갤러리</h3><p>전시별 작품 반응과 잠재 고객의 관심 단서를 확인하고, 후속 관계를 이어가고 싶은 갤러리.</p></article>
+          <article class="audience-card"><span class="label">02 / CURATOR</span><h3>큐레이터·전시 기획자</h3><p>작품 배치와 구역 구성, 관람객의 반응을 다음 전시 기획의 참고 자료로 활용하고 싶은 팀.</p></article>
+          <article class="audience-card"><span class="label">03 / EXHIBITION</span><h3>전시 공간·기관</h3><p>반복적으로 전시를 운영하며 관람객 경험과 공간 운영을 꾸준히 살펴보고 싶은 조직.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="wrap faq-grid">
+        <div><span class="eyebrow">QUESTIONS</span><h2>도입 전에<br /><em>궁금한 점.</em></h2></div>
+        <div class="faq-list">
+          <details><summary>RestArt는 갤러리 CRM인가요?</summary><p>현재 소개하는 핵심은 전시 참여 데이터와 작품·구역 반응을 연결하는 갤러리 인텔리전스입니다. 일반적인 영업 CRM, 재고·회계·판매 관리 전체를 제공한다고 설명하지 않습니다.</p></details>
+          <details><summary>전시장에 방문한 모든 관람객이 분석되나요?</summary><p>아닙니다. 리포트는 RestArt 관람 경험에 참여해 기록을 남긴 세션을 기반으로 합니다. 전시장 전체 입장객을 대표하는 통계로 해석해서는 안 됩니다.</p></details>
+          <details><summary>작품에 얼마나 오래 머물렀는지 정확히 알 수 있나요?</summary><p>촬영 시각과 작품·구역 연결을 바탕으로 체류를 추정하는 방향입니다. 실제 감상 시간이나 실내 위치를 직접 측정하는 기능으로 표현하지 않으며, 근거가 부족한 경우 추정 불가로 처리해야 합니다.</p></details>
+          <details><summary>어떤 자료를 준비해야 하나요?</summary><p>기본적으로 전시 정보, 포스터, 작품 목록, 배치도 자료를 기준으로 설계되어 있습니다. 실제 도입 시 파일 형식과 필수 항목은 전시 환경을 확인한 뒤 안내합니다.</p></details>
+          <details><summary>지금 바로 실제 서비스를 도입할 수 있나요?</summary><p>이 페이지는 서비스 방향과 기능을 설명하는 영업용 시안입니다. 실제 데이터 연동, 운영 정책, 도입 가능 범위와 일정은 상담을 통해 별도로 확인해야 합니다.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="wrap contact-inner">
+        <div><span class="eyebrow">LET'S TALK ABOUT YOUR NEXT EXHIBITION</span><h2>다음 전시를 준비하는<br /><em>새로운 관점.</em></h2><p>갤러리의 전시 운영 방식과 필요한 데이터를 들려주세요.</p></div>
+        <div class="contact-actions"><a class="button button-light" href="mailto:restart@restart-official.com?subject=RestArt%20%EA%B0%A4%EB%9F%AC%EB%A6%AC%20%EC%86%94%EB%A3%A8%EC%85%98%20%EB%8F%84%EC%9E%85%20%EC%83%81%EB%8B%B4">도입 상담 문의하기 <span class="arrow">↗</span></a><small>restart@restart-official.com</small></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div><div class="footer-brand">RestArt</div><div class="copyright">© RestArt. Art & Experience.</div></div>
+      <div class="footer-links"><a href="https://restart-official.com/">일반 관람객 사이트</a><a href="#top">페이지 맨 위로 ↑</a><a href="mailto:restart@restart-official.com">문의하기</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const toggle = document.getElementById('mobileToggle');
+      const links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', function () {
+          const open = links.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.textContent = open ? '×' : '☰';
+        });
+        links.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            links.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.textContent = '☰';
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -41,14 +41,18 @@ export default function GalleryReportPage() {
       setModel(null);
       return;
     }
-    const source = readExhibitionReportSource(id);
+    const cutoff =
+      gallery?.contractState === "ended" ? gallery.contractEndAt : null;
+    const source = readExhibitionReportSource(id, undefined, {
+      contractEndAt: cutoff,
+    });
     const report = buildExhibitionReport(source);
     setModel(
       toExhibitionReportView(report, {
         totalRecords: totalRecordsFromLeaflets(source.leaflets, id),
       }),
     );
-  }, [app.ready, allowed, id]);
+  }, [app.ready, allowed, id, gallery?.contractState, gallery?.contractEndAt]);
 
   if (!allowed) {
     return (

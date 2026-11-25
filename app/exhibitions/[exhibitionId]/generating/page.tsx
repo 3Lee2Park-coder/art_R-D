@@ -39,8 +39,12 @@ export default function GeneratingPage() {
     const current = appRef.current;
     const fromQr = new URLSearchParams(window.location.search).get("from") === "qr";
     const exhibition = current.exhibitions.find((item) => item.id === id);
+    const gallery = exhibition?.galleryId
+      ? current.galleries.find((g) => g.id === exhibition.galleryId)
+      : undefined;
     const allowed = Boolean(
       exhibition &&
+        gallery?.contractState !== "ended" &&
         exhibition.status === "contracted" &&
         exhibition.leafletEnabled &&
         !exhibition.ended &&

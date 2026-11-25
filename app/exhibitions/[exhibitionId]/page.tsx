@@ -7,7 +7,16 @@ import { ArtworkCard } from "@/components/cards";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle, SectionHeader, Shelf, SiteFooter } from "@/components/ui";
 import { exhibitionReturnPath, formatPeriod, oneParam } from "@/lib/format";
+import {
+  canUseLeafletService,
+  isContractEnded,
+} from "@/lib/leaflet/galleryContract";
 import { KEYS } from "@/lib/storage";
+
+/** [가안] t186u-4 */
+const EXPIRED_QR_MESSAGE = "만료된 QR입니다";
+/** [가안] t186u-4 */
+const UNREGISTERED_RECORD_CTA = "미등록 전시 등록하기";
 
 export default function ExhibitionPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
@@ -30,10 +39,14 @@ export default function ExhibitionPage() {
     );
   }
 
-  const gallery = exhibition.galleryId ? app.galleries.find((item) => item.id === exhibition.galleryId) : undefined;
+  const gallery = exhibition.galleryId
+    ? app.galleries.find((item) => item.id === exhibition.galleryId)
+    : undefined;
   const works = app.artworks.filter((item) => item.exhibitionId === exhibition.id);
-  const canStart = fromQr && exhibition.status === "contracted" && exhibition.leafletEnabled && !exhibition.ended;
-  const showQrNote = !fromQr && exhibition.status === "contracted" && exhibition.leafletEnabled && !exhibition.ended;
+  const contractExpired = fromQr && isContractEnded(gallery);
+  const canStart = fromQr && canUseLeafletService(exhibition, gallery);
+  const showQrNote =
+    !fromQr && canUseLeafletService(exhibition, gallery);
   const wanted = app.wantedIds.includes(exhibition.id);
 
   function start() {
@@ -50,6 +63,16 @@ export default function ExhibitionPage() {
     router.push(`${base}/consent${suffix}`);
   }
 
+  function goUnregisteredRecord() {
+    const show = exhibition!;
+    const q = new URLSearchParams();
+    q.set("title", show.title);
+    q.set("venue", show.venue);
+    q.set("start", show.startDate);
+    q.set("end", show.endDate);
+    router.push(`/record/new?${q.toString()}`);
+  }
+
   return (
     <>
       <div className="keyvisual">
@@ -63,6 +86,14 @@ export default function ExhibitionPage() {
           {exhibition.venue}
           {exhibition.ended ? " · 종료" : ""}
         </p>
+        {contractExpired ? (
+          <div className="mt-6 flex flex-col items-start gap-3">
+            <p className="m-0">{EXPIRED_QR_MESSAGE}</p>
+            <button type="button" className="btn btn-primary" onClick={goUnregisteredRecord}>
+              {UNREGISTERED_RECORD_CTA}
+            </button>
+          </div>
+        ) : null}
         {canStart ? (
           <div className="mt-6 flex flex-col items-start gap-3">
             <button type="button" className="btn btn-primary" onClick={start}>

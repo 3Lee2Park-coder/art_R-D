@@ -6,6 +6,7 @@ export type Role =
   | "visitor-member"
   | "gallery-contracted"
   | "gallery-uncontracted"
+  | "gallery-ended"
   | "operator";
 
 export type Mode = "light" | "dark" | "utility";
@@ -62,6 +63,10 @@ export type Gallery = {
   region: string;
   initial: string;
   contractState: "contracted" | "uncontracted" | "ended";
+  /** ISO 날짜 또는 일시. 없으면 컷오프 없음 */
+  contractStartAt: string | null;
+  /** ISO 날짜 또는 일시. 종료 계약 아카이브 컷오프 (recordedAt ≤ 이 값) */
+  contractEndAt: string | null;
   bio: string | null;
 };
 
