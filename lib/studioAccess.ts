@@ -16,7 +16,11 @@ export function isLoggedOut(role: Role): boolean {
 }
 
 export function pathNeedsContractLanding(path: string): boolean {
-  return path.startsWith("/studio/reports") || path.startsWith("/studio/inquiries");
+  if (path.startsWith("/studio/reports")) return true;
+  if (path.startsWith("/studio/inquiries")) return true;
+  if (path.startsWith("/studio/customers")) return true;
+  if (/^\/studio\/exhibitions\/[^/]+\/customers/.test(path)) return true;
+  return false;
 }
 
 export function isUncontractedGallery(

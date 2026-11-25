@@ -23,12 +23,15 @@ describe("accessDecision studio login + contract", () => {
     });
   });
 
-  it("비계약 리포트·문의 → /studio/contract (notice 없음)", () => {
+  it("비계약 리포트·문의·고객 → /studio/contract (notice 없음)", () => {
     for (const path of [
       "/studio/reports/ex-alley",
       "/studio/reports/ex-edge",
       "/studio/inquiries",
       "/studio/inquiries/inq-1",
+      "/studio/customers",
+      "/studio/customers/c-email.a%40b.c",
+      "/studio/exhibitions/ex-alley/customers",
     ]) {
       expect(accessDecision("gallery-uncontracted", path)).toEqual({
         ok: false,

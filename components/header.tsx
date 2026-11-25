@@ -33,7 +33,7 @@ function itemsFor(role: Role): Item[] {
     return [
       { href: "/studio", label: "내 전시" },
       { href: "/studio/exhibitions/new", label: "전시 등록" },
-      { href: "/studio", label: "고객 리포트" },
+      { href: "/studio/customers", label: "고객" },
       { href: "/", label: "로그아웃", logout: true },
     ];
   }
@@ -47,6 +47,7 @@ function itemsFor(role: Role): Item[] {
   if (role === "gallery-ended") {
     return [
       { href: "/studio", label: "내 전시" },
+      { href: "/studio/customers", label: "고객" },
       { href: "/", label: "로그아웃", logout: true },
     ];
   }

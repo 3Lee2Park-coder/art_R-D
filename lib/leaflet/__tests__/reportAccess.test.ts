@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canViewExhibitionReport,
+  canViewGalleryCustomers,
   REPORT_ACCESS_DENIED,
 } from "@/lib/leaflet/reportAccess";
 
@@ -78,6 +79,32 @@ describe("canViewExhibitionReport", () => {
         myGalleryId: "g-busan",
         contractState: "ended",
         exhibitionGalleryId: "g-hannam",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("canViewGalleryCustomers", () => {
+  it("계약·종료만 허용, 비계약 거절", () => {
+    expect(
+      canViewGalleryCustomers({
+        role: "gallery-contracted",
+        myGalleryId: "g-hannam",
+        contractState: "contracted",
+      }),
+    ).toBe(true);
+    expect(
+      canViewGalleryCustomers({
+        role: "gallery-ended",
+        myGalleryId: "g-busan",
+        contractState: "ended",
+      }),
+    ).toBe(true);
+    expect(
+      canViewGalleryCustomers({
+        role: "gallery-uncontracted",
+        myGalleryId: "g-seochon",
+        contractState: "uncontracted",
       }),
     ).toBe(false);
   });
