@@ -211,7 +211,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
       { id: "G-06", name: "리플릿 테마 색", path: "/studio/exhibitions/ex-edge/theme-color", role: "gallery-contracted" },
       { id: "G-03", name: "배치 검토", path: "/studio/exhibitions/ex-pending/review", role: "gallery-contracted" },
       { id: "G-04", name: "전시 QR", path: "/studio/exhibitions/ex-edge/qr", role: "gallery-contracted" },
-      { id: "G-05", name: "고객 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
+      { id: "G-05", name: "전시 리포트", path: "/studio/reports/ex-edge", role: "gallery-contracted" },
     ],
   },
   {

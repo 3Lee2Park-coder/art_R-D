@@ -33,7 +33,7 @@ function itemsFor(role: Role): Item[] {
     return [
       { href: "/studio", label: "내 전시" },
       { href: "/studio/exhibitions/new", label: "전시 등록" },
-      { href: "/studio/reports/ex-winter", label: "고객 리포트" },
+      { href: "/studio", label: "고객 리포트" },
       { href: "/", label: "로그아웃", logout: true },
     ];
   }
