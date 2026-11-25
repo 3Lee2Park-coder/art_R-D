@@ -13,7 +13,8 @@
     "published": true,
     "approvalState": "approved",
     "ended": false,
-    "floorPlanUrl": "/images/exhibitions/ex-edge-floorplan.svg"
+    "floorPlanUrl": "/images/exhibitions/ex-edge-floorplan.svg",
+    "themeColorName": "Persian Indigo"
   },
   {
     "id": "ex-winter",
@@ -29,7 +30,8 @@
     "published": true,
     "approvalState": "approved",
     "ended": true,
-    "floorPlanUrl": null
+    "floorPlanUrl": null,
+    "themeColorName": null
   },
   {
     "id": "ex-alley",
@@ -45,7 +47,8 @@
     "published": true,
     "approvalState": "none",
     "ended": false,
-    "floorPlanUrl": null
+    "floorPlanUrl": null,
+    "themeColorName": null
   },
   {
     "id": "ex-tide",
@@ -61,7 +64,8 @@
     "published": true,
     "approvalState": "approved",
     "ended": true,
-    "floorPlanUrl": null
+    "floorPlanUrl": null,
+    "themeColorName": null
   },
   {
     "id": "ex-pending",
@@ -77,6 +81,7 @@
     "published": false,
     "approvalState": "pending",
     "ended": false,
-    "floorPlanUrl": null
+    "floorPlanUrl": null,
+    "themeColorName": null
   }
 ]

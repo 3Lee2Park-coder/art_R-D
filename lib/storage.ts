@@ -28,6 +28,8 @@ export const KEYS = {
   decorWall: "restart.decorWall",
   returnTo: "restart.returnTo",
   exhibitionTheme: "restart.exhibitionTheme",
+  /** 전시 리플릿 테마 색(65색). A-03 exhibitionTheme 과 분리 (CL-009) */
+  exhibitionThemeColor: "restart.exhibitionThemeColor",
   layoutChecked: "restart.layoutChecked",
   reviewAsked: "restart.reviewAsked",
   /** 회원가입 이름. 허브 인사에만 사용 [가안] */

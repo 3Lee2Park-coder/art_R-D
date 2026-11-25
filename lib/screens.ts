@@ -26,9 +26,11 @@ export function screenIdFor(path: string) {
   if (path === "/my-room/intro") return "R-07";
   if (path === "/studio") return "G-01";
   if (path === "/studio/exhibitions/new") return "G-02";
+  if (/^\/studio\/exhibitions\/[^/]+\/theme-color$/.test(path)) return "G-06";
   if (/^\/studio\/exhibitions\/[^/]+\/review$/.test(path)) return "G-03";
   if (/^\/studio\/exhibitions\/[^/]+\/qr$/.test(path)) return "G-04";
   if (path.startsWith("/studio/reports/")) return "G-05";
+  if (path.startsWith("/studio/inquiries")) return "G-01";
   if (path === "/operator/accounts") return "A-01";
   if (path === "/operator/exhibitions") return "A-02";
   if (/^\/operator\/exhibitions\/[^/]+\/theme$/.test(path)) return "A-03";
@@ -206,6 +208,7 @@ export const SCREEN_INDEX: { group: string; items: ScreenLink[] }[] = [
     items: [
       { id: "G-01", name: "내 전시", path: "/studio", role: "gallery-contracted" },
       { id: "G-02", name: "전시 등록", path: "/studio/exhibitions/new", role: "gallery-contracted" },
+      { id: "G-06", name: "리플릿 테마 색", path: "/studio/exhibitions/ex-edge/theme-color", role: "gallery-contracted" },
       { id: "G-03", name: "배치 검토", path: "/studio/exhibitions/ex-pending/review", role: "gallery-contracted" },
       { id: "G-04", name: "전시 QR", path: "/studio/exhibitions/ex-edge/qr", role: "gallery-contracted" },
       { id: "G-05", name: "고객 리포트", path: "/studio/reports/ex-winter", role: "gallery-contracted" },
@@ -230,6 +233,7 @@ export const SCREEN_MEMOS: Record<string, string> = {
   "C-11": "가안. 메인 홈 전용 요구사항은 아직 없다. 섹션 순서와 더보기(전시, 마이룸, 갤러리, 작가)는 후보.",
   "C-01": "가안. 회원 헤더의 로그인 자리는 로그아웃만 둔다. 원문은 마이룸/로그아웃.",
   "G-01": "가안. 갤러리 로고는 내 전시로 이동한다.",
+  "G-06": "가안. G-06 전시 상세가 기준에 합쳐지기 전, 테마 색은 /theme-color 경로. CL-009.",
   "A-01": "가안. 운영자 로고는 갤러리 계정으로 이동한다.",
   "V-04": "작품 인식·이동 감지는 시나리오 순서 모의. 실제 기술 확인 전.",
   "V-08": "판정 기준 v1-2026-11-20. 체류·이동·인식은 시나리오 모의.",
