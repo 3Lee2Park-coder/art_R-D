@@ -8,6 +8,7 @@ import {
   type VisitRecord,
 } from "@/lib/leaflet/dwell";
 import { EMOTION_BY_ID, type EmotionId } from "@/lib/leaflet/emotions";
+import { customerIdsByLeaflet } from "@/lib/leaflet/customersFromSource";
 import type { ExhibitionReportSource } from "@/lib/leaflet/exhibitionReport";
 import type { InterestWork } from "@/lib/leaflet/interest";
 
@@ -366,10 +367,10 @@ export function buildRecommendationHistoryRows(
     (l) => l.exhibitionId === source.exhibitionId,
   );
   const rows: RecommendationHistoryRow[] = [];
+  const customerByLeaflet = customerIdsByLeaflet(source);
 
   for (const l of leaflets) {
-    const customerId =
-      source.inquiries.find((q) => q.leafletId === l.id)?.name ?? "";
+    const customerId = customerByLeaflet.get(l.id) ?? "";
     const at = l.recordedAt ?? "";
 
     const sim = similarId(l);

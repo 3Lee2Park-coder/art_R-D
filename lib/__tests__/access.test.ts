@@ -84,4 +84,36 @@ describe("accessDecision studio login + contract", () => {
       ok: true,
     });
   });
+
+  it("비계약은 전시 등록·테마 색을 열 수 있고 배치·QR만 막힌다 (C1)", () => {
+    for (const path of [
+      "/studio/exhibitions/new",
+      "/studio/exhibitions/ex-alley/theme-color",
+    ]) {
+      expect(accessDecision("gallery-uncontracted", path)).toEqual({ ok: true });
+    }
+    for (const path of [
+      "/studio/exhibitions/ex-alley/review",
+      "/studio/exhibitions/ex-alley/qr",
+    ]) {
+      expect(accessDecision("gallery-uncontracted", path)).toEqual({
+        ok: false,
+        to: "/studio",
+        notice: "이 페이지를 열 수 없습니다.",
+      });
+    }
+  });
+
+  it("종료 갤러리는 등록·테마 색을 여전히 막는다 (C1)", () => {
+    for (const path of [
+      "/studio/exhibitions/new",
+      "/studio/exhibitions/ex-tide/theme-color",
+    ]) {
+      expect(accessDecision("gallery-ended", path)).toEqual({
+        ok: false,
+        to: "/studio",
+        notice: "이 페이지를 열 수 없습니다.",
+      });
+    }
+  });
 });

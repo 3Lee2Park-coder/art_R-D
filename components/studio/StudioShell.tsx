@@ -9,6 +9,7 @@ import {
   STUDIO_NAV_UNCONTRACTED,
   crumbLabel,
   resolveSelectedExhibitionId,
+  visibleNavItems,
   type StudioNavItem,
 } from "@/lib/studio/nav";
 import { KEYS } from "@/lib/storage";
@@ -44,6 +45,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
   );
   const uncontracted =
     app.role === "gallery-uncontracted" || gallery?.contractState === "uncontracted";
+  const ended = app.role === "gallery-ended" || gallery?.contractState === "ended";
 
   const [storedExId, setStoredExId] = useState<string | null>(null);
 
@@ -104,7 +106,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
 
         {uncontracted ? (
           <nav className="studio-nav" aria-label="스튜디오">
-            {STUDIO_NAV_UNCONTRACTED.map((item) => (
+            {visibleNavItems(STUDIO_NAV_UNCONTRACTED, ended).map((item) => (
               <NavLink
                 key={item.id}
                 item={item}
@@ -119,7 +121,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
               <div key={group.label}>
                 <div className="studio-nav-label">{group.label}</div>
                 <nav className="studio-nav" aria-label={group.label}>
-                  {group.items.map((item) => (
+                  {visibleNavItems(group.items, ended).map((item) => (
                     <NavLink
                       key={item.id}
                       item={item}

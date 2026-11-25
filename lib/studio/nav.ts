@@ -14,11 +14,22 @@ export type StudioNavItem = {
   /** path builder; exhibition-scoped items need selectedExhibitionId */
   href: (selectedExhibitionId: string | null) => string;
   match: (pathname: string) => boolean;
+  /** 종료 갤러리에서 숨김 */
+  hideWhenEnded?: boolean;
 };
 
 export type StudioNavGroup = {
   label: string;
   items: StudioNavItem[];
+};
+
+const REGISTER_NAV_ITEM: StudioNavItem = {
+  id: "register",
+  label: "전시 등록",
+  ico: "＋",
+  href: () => "/studio/exhibitions/new?step=1",
+  match: (p) => p.startsWith("/studio/exhibitions/new"),
+  hideWhenEnded: true,
 };
 
 /** 계약·종료 갤러리 제품 네비 */
@@ -67,11 +78,12 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
         href: () => "/studio",
         match: (p) =>
           p === "/studio" ||
-          p.startsWith("/studio/exhibitions/new") ||
           (p.startsWith("/studio/exhibitions/") &&
+            !p.startsWith("/studio/exhibitions/new") &&
             !/\/customers$/.test(p) &&
             !/\/theme-color$/.test(p)),
       },
+      REGISTER_NAV_ITEM,
       {
         id: "reports",
         label: "전시 리포트",
@@ -100,7 +112,7 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
     items: [
       {
         id: "connections",
-        label: "외부 연동",
+        label: "외부 서비스 연동",
         ico: "⇄",
         href: () => "/studio/connections",
         match: (p) => p.startsWith("/studio/connections"),
@@ -123,8 +135,12 @@ export const STUDIO_NAV_UNCONTRACTED: StudioNavItem[] = [
     label: "전시 관리",
     ico: "▧",
     href: () => "/studio",
-    match: (p) => p === "/studio" || p.startsWith("/studio/exhibitions/"),
+    match: (p) =>
+      p === "/studio" ||
+      (p.startsWith("/studio/exhibitions/") &&
+        !p.startsWith("/studio/exhibitions/new")),
   },
+  REGISTER_NAV_ITEM,
   {
     id: "contract",
     label: "계약 안내",
@@ -153,7 +169,7 @@ export function crumbLabel(pathname: string): string {
   if (pathname.startsWith("/studio/interests")) return "작품 관심 분석";
   if (pathname.startsWith("/studio/spaces")) return "구역별 반응";
   if (pathname.startsWith("/studio/insights")) return "전시 개선 인사이트";
-  if (pathname.startsWith("/studio/connections")) return "외부 연동";
+  if (pathname.startsWith("/studio/connections")) return "외부 서비스 연동";
   if (pathname.startsWith("/studio/settings")) return "갤러리 설정";
   if (pathname === "/studio/exhibitions/new") return "새 전시 등록";
   if (/\/theme-color$/.test(pathname)) return "테마 색";
@@ -188,4 +204,12 @@ export function resolveSelectedExhibitionId(
   if (fromPath && shows.some((e) => e.id === fromPath)) return fromPath;
   if (storedId && shows.some((e) => e.id === storedId)) return storedId;
   return pickDefaultExhibitionId(shows);
+}
+
+/** 갤러리 상태에 맞는 네비 항목 (종료 갤러리는 등록 숨김). */
+export function visibleNavItems(
+  items: StudioNavItem[],
+  ended: boolean,
+): StudioNavItem[] {
+  return ended ? items.filter((i) => !i.hideWhenEnded) : items;
 }

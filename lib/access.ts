@@ -20,7 +20,13 @@ export type AccessOptions = {
   contractState?: Gallery["contractState"] | null;
 };
 
-function isEndedOpsPath(path: string): boolean {
+/** 비계약: review·qr만 막음 (5g) */
+function isUncontractedBlockedOpsPath(path: string): boolean {
+  return /\/(review|qr)$/.test(path);
+}
+
+/** 종료: 등록·테마·배치·QR 막음 */
+function isEndedBlockedOpsPath(path: string): boolean {
   if (path === "/studio/exhibitions/new") return true;
   return /\/(review|qr|theme-color)$/.test(path);
 }
@@ -53,12 +59,14 @@ export function accessDecision(
       return { ok: false, to: "/studio/contract" };
     }
 
-    const opsRestricted = isEndedOpsPath(path);
-    if (role === "gallery-uncontracted" && opsRestricted) {
+    if (role === "gallery-uncontracted" && isUncontractedBlockedOpsPath(path)) {
       return { ok: false, to: "/studio", notice: blocked };
     }
 
-    if (isEndedGallery(role, options?.contractState) && opsRestricted) {
+    if (
+      isEndedGallery(role, options?.contractState) &&
+      isEndedBlockedOpsPath(path)
+    ) {
       return { ok: false, to: "/studio", notice: blocked };
     }
 

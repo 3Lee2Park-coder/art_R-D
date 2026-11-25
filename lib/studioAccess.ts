@@ -50,3 +50,11 @@ export function canMutateStudioInquiry(
   if (role !== "gallery-contracted") return false;
   return contractState === "contracted";
 }
+
+/** 갤러리 설정 편집. 종료 계약은 읽기 전용. */
+export function canEditGallerySettings(
+  role: Role,
+  contractState?: Gallery["contractState"] | null,
+): boolean {
+  return !isEndedGallery(role, contractState);
+}

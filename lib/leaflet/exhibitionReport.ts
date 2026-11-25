@@ -153,6 +153,8 @@ export type ExhibitionReportSource = {
   zonesByArtwork: Record<string, string | null | undefined>;
   /** optional artwork titles for interest rows */
   artworkTitles?: Record<string, string | undefined>;
+  /** 갤러리 리포트용 체크인 세션 (5j). 없으면 추이·퍼널 앞단계 추정 불가 */
+  checkInSessions?: import("@/lib/mock/studioFixtures").CheckInSession[];
 };
 
 

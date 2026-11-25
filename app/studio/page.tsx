@@ -7,6 +7,9 @@ import { Frame, PageTitle } from "@/components/ui";
 import { formatPeriod } from "@/lib/format";
 import { contractLabel } from "@/lib/labels";
 import { readSavedLeaflets } from "@/lib/storage";
+import { buildCheckInMetrics } from "@/lib/leaflet/checkInMetrics";
+import { readExhibitionReportSource } from "@/lib/leaflet/exhibitionReportSource";
+import { EMPTY_INESTIMABLE } from "@/lib/leaflet/exhibitionReportView";
 import {
   buildExhibitionOpsRows,
   filterExhibitionOpsRows,
@@ -17,7 +20,10 @@ type PeriodFilter = "전체" | "준비 중" | "진행 중" | "종료";
 export default function StudioPage() {
   const app = useApp();
   const gallery = app.galleries.find((item) => item.id === app.myGalleryId);
-  const shows = app.exhibitions.filter((item) => item.galleryId === app.myGalleryId);
+  const shows = useMemo(
+    () => app.exhibitions.filter((item) => item.galleryId === app.myGalleryId),
+    [app.exhibitions, app.myGalleryId],
+  );
   const contracted =
     app.role === "gallery-contracted" && gallery?.contractState === "contracted";
   const archive = app.role === "gallery-ended" || gallery?.contractState === "ended";
@@ -28,18 +34,35 @@ export default function StudioPage() {
 
   const rows = useMemo(() => {
     if (!app.ready) return [];
-    const leaflets = typeof localStorage !== "undefined" ? readSavedLeaflets() : [];
+    const cutoff =
+      gallery?.contractState === "ended" ? gallery.contractEndAt : null;
     const leafletCounts: Record<string, number> = {};
-    for (const l of leaflets) {
-      if (!l.exhibitionId) continue;
-      leafletCounts[l.exhibitionId] = (leafletCounts[l.exhibitionId] ?? 0) + 1;
+    const uniqueCheckIns: Record<string, number | null> = {};
+    if (!(contracted || archive)) {
+      for (const l of readSavedLeaflets()) {
+        if (!l.exhibitionId) continue;
+        leafletCounts[l.exhibitionId] = (leafletCounts[l.exhibitionId] ?? 0) + 1;
+      }
+    } else {
+      for (const e of shows) {
+        const source = readExhibitionReportSource(e.id, undefined, {
+          contractEndAt: cutoff,
+        });
+        leafletCounts[e.id] = source.leaflets.length;
+        uniqueCheckIns[e.id] = buildCheckInMetrics(
+          source.checkInSessions ?? [],
+          e.id,
+          cutoff,
+        ).uniqueCheckIns;
+      }
     }
     return buildExhibitionOpsRows({
       exhibitions: shows,
       artworks: app.artworks,
       leafletCounts,
+      uniqueCheckIns,
     });
-  }, [app.ready, app.artworks, shows]);
+  }, [app.ready, app.artworks, shows, gallery, contracted, archive]);
 
   const visible = filterExhibitionOpsRows(rows, filter);
 
@@ -80,10 +103,11 @@ export default function StudioPage() {
                 <th>전시</th>
                 <th>기간</th>
                 <th>상태</th>
-                <th>작가</th>
+                <th>참여 작가</th>
+                <th>작품</th>
+                <th>고유 체크인</th>
                 <th>리플릿</th>
-                <th>체크인</th>
-                <th>작업</th>
+                <th aria-label="작업" />
               </tr>
             </thead>
             <tbody>
@@ -98,12 +122,13 @@ export default function StudioPage() {
                     <td>{formatPeriod(e.startDate, e.endDate)}</td>
                     <td>{row.state}</td>
                     <td>{row.artistCount}</td>
-                    <td>{row.leafletCount}</td>
+                    <td>{row.artworkCount}</td>
                     <td>
                       {row.uniqueCheckIns == null
-                        ? "데이터 부족"
+                        ? EMPTY_INESTIMABLE
                         : row.uniqueCheckIns}
                     </td>
+                    <td>{row.leafletCount}</td>
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {contracted ? (
@@ -121,7 +146,7 @@ export default function StudioPage() {
                             href={`/studio/exhibitions/${e.id}/theme-color`}
                             className="btn btn-secondary min-h-9 px-2"
                           >
-                            테마
+                            테마 색
                           </Link>
                         ) : null}
                         {contracted &&

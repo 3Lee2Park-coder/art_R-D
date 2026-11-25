@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
-import { listInquiries, updateInquiry, type Inquiry } from "@/lib/leaflet/inquiry";
+import { listStudioInquiries, updateInquiry, type Inquiry } from "@/lib/leaflet/inquiry";
 import {
   INQUIRY_STATUSES,
   SALE_RESULTS,
@@ -29,7 +29,7 @@ export default function StudioInquiryDetailPage() {
 
   useEffect(() => {
     if (!app.ready) return;
-    const found = listInquiries().find((i) => i.id === id) ?? null;
+    const found = listStudioInquiries().find((i) => i.id === id) ?? null;
     setInquiry(found);
     if (found) {
       setStatus(found.status);

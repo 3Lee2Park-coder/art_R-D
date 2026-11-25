@@ -45,8 +45,7 @@ export default function StudioCustomerDetailPage() {
     allowed,
     app.myGalleryId,
     app.exhibitions,
-    gallery?.contractState,
-    gallery?.contractEndAt,
+    gallery,
     customerId,
   ]);
 

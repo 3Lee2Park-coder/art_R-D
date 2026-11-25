@@ -1,5 +1,7 @@
 # 전시 운영 데이터 (5h)
 
+체크인 세션 계약: [CHECKIN_DATA_CONTRACT.md](./CHECKIN_DATA_CONTRACT.md)
+
 ## ExhibitionGoals
 
 전시별 운영 목표. **시드 JSON에 가짜 목표를 넣지 않는다.** 갤러리가 등록 마법사·설정에서 저장한 값만 쓴다.

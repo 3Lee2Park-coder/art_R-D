@@ -250,6 +250,7 @@ describe("galleryCustomers scope via facade storage", () => {
       galleryId: "g-hannam",
       exhibitionIds: ["ex-edge", "ex-winter"],
       storage: store,
+      skipFixtures: true,
     });
     expect(all.map((c) => c.name).sort()).toEqual(["Edge", "Winter"]);
 
@@ -258,6 +259,7 @@ describe("galleryCustomers scope via facade storage", () => {
       exhibitionIds: ["ex-edge", "ex-winter"],
       exhibitionId: "ex-edge",
       storage: store,
+      skipFixtures: true,
     });
     expect(edgeOnly).toHaveLength(1);
     expect(edgeOnly[0].name).toBe("Edge");
@@ -318,6 +320,7 @@ describe("galleryCustomers scope via facade storage", () => {
       exhibitionIds: ["ex-tide"],
       contractEndAt: end,
       storage: store,
+      skipFixtures: true,
     });
     expect(list.map((c) => c.name)).toEqual(["In"]);
 
@@ -326,6 +329,7 @@ describe("galleryCustomers scope via facade storage", () => {
       exhibitionIds: ["ex-tide"],
       contractEndAt: end,
       storage: store,
+      skipFixtures: true,
       customerId: list[0].customerId,
     });
     expect(detail?.emails).toEqual(["in@x.com"]);

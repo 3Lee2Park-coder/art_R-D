@@ -5,6 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { ExhibitionReportView } from "@/components/leaflet/ExhibitionReportView";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
+import {
+  buildZonesAnalytics,
+  formatZoneDwellSec,
+  resolveZonesForExhibition,
+} from "@/lib/leaflet/analytics/zones";
+import { buildCheckInMetrics } from "@/lib/leaflet/checkInMetrics";
 import { buildExhibitionReport } from "@/lib/leaflet/exhibitionReport";
 import { readExhibitionReportSource } from "@/lib/leaflet/exhibitionReportSource";
 import {
@@ -17,6 +23,7 @@ import {
   REPORT_ACCESS_DENIED,
 } from "@/lib/leaflet/reportAccess";
 import { formatPeriod, oneParam } from "@/lib/format";
+import { zonesForExhibition } from "@/lib/studio/exhibitionOps";
 
 export default function GalleryReportPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
@@ -47,12 +54,43 @@ export default function GalleryReportPage() {
       contractEndAt: cutoff,
     });
     const report = buildExhibitionReport(source);
+    const checkIn = buildCheckInMetrics(
+      source.checkInSessions ?? [],
+      id,
+      cutoff,
+    );
+    const zones = resolveZonesForExhibition(
+      id,
+      zonesForExhibition(app.exhibitionZones, id),
+      app.artworks,
+    );
+    const zoneA = buildZonesAnalytics({
+      source,
+      zones,
+      artworks: app.artworks,
+    });
+    const zoneDwellLabels: Record<string, string | null> = {};
+    for (const z of zoneA.rows) {
+      zoneDwellLabels[z.name] = formatZoneDwellSec(z.averageDwellSec);
+    }
     setModel(
       toExhibitionReportView(report, {
         totalRecords: totalRecordsFromLeaflets(source.leaflets, id),
+        checkIn,
+        zoneDwellLabels,
+        exhibitionArtworkIds: app.artworks
+          .filter((a) => a.exhibitionId === id)
+          .map((a) => a.id),
       }),
     );
-  }, [app.ready, allowed, id, gallery?.contractState, gallery?.contractEndAt]);
+  }, [
+    app.ready,
+    allowed,
+    id,
+    gallery,
+    app.exhibitionZones,
+    app.artworks,
+  ]);
 
   if (!allowed) {
     return (

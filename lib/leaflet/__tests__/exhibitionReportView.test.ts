@@ -3,7 +3,6 @@ import example from "@/lib/leaflet/__fixtures__/exhibition-report.example.json";
 import { buildExhibitionReport, type ExhibitionReport } from "@/lib/leaflet/exhibitionReport";
 import {
   EMPTY_INESTIMABLE,
-  EMPTY_INSUFFICIENT,
   EMPTY_RECOMMENDATIONS,
   LABEL_UNSPECIFIED,
   toExhibitionReportView,
@@ -30,7 +29,7 @@ describe("toExhibitionReportView", () => {
     expect(view.leafletCount).toBe(0);
     expect(view.contactsSecuredCount).toBe(0);
     expect(view.artworkRows).toEqual([]);
-    expect(view.visitTrendEmpty).toBe(EMPTY_INSUFFICIENT);
+    expect(view.visitTrendEmpty).toBe(EMPTY_INESTIMABLE);
     expect(view.recommendationsAllEmpty).toBe(true);
     expect(view.similarAllEmpty).toBe(true);
     expect(view.zonesAvailable).toBe(false);

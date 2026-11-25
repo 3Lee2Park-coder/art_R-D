@@ -383,6 +383,17 @@ export function buildCustomersFromSources(
     });
 }
 
+/** 리플릿 → 고객 ID (화면 고객 ID와 동일). 익명·연락처 없음은 맵에 없다. */
+export function customerIdsByLeaflet(
+  source: ExhibitionReportSource,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const c of buildCustomersFromSources([source])) {
+    for (const v of c.visits) map.set(v.leafletId, c.customerId);
+  }
+  return map;
+}
+
 export function buildExhibitionCustomers(
   source: ExhibitionReportSource,
 ): GalleryCustomerListItem[] {
