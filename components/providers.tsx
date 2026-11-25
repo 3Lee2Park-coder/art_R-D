@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DemoOverlay } from "@/components/demo-overlay";
 import { Header } from "@/components/header";
+import { StudioShell } from "@/components/studio/StudioShell";
 import { accessDecision } from "@/lib/access";
 import {
   BUSAN_GALLERY_ID,
@@ -835,11 +836,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   /** V-09 리플릿 카드: 사이트 헤더 숨김 (로고·날짜는 카드 1만) */
   const hideSiteHeader =
     /^\/leaflets\/[^/]+$/.test(pathname) || /^\/my-room\/leaflets\/[^/]+$/.test(pathname);
+  /** 갤러리 /studio/* 는 StudioShell이 헤더·네비를 담당 (5g) */
+  const useStudioShell = isGalleryRole(role) && pathname.startsWith("/studio");
+  const hideChrome = hideSiteHeader || useStudioShell;
 
   return (
     <AppContext.Provider value={value}>
       <div data-ready="true" data-mode={mode} data-screen={screenId} data-demo={demo ? "1" : "0"} className="min-h-dvh">
-        {hideSiteHeader ? null : <Header />}
+        {hideChrome ? null : <Header />}
         {notice ? (
           <div className="bg-parchment text-ink flex items-center justify-between gap-3 px-4 py-3 text-[14px]">
             <p>{notice}</p>
@@ -848,7 +852,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         ) : null}
-        <main>{children}</main>
+        {useStudioShell ? <StudioShell>{children}</StudioShell> : <main>{children}</main>}
         {hideSiteHeader ? null : <DemoOverlay />}
       </div>
     </AppContext.Provider>
