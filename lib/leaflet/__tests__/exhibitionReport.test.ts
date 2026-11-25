@@ -53,7 +53,9 @@ describe("buildExhibitionReport", () => {
       unspecified: 0,
       total: 0,
     });
+    expect(report.contactsSecured).toEqual({ count: 0 });
     expect(report.interestByArtwork).toEqual([]);
+    expect(report.artworkStats).toEqual([]);
     expect(report.inquiries.total).toBe(0);
     expect(report.styles).toEqual({
       collector: 0,
@@ -64,6 +66,119 @@ describe("buildExhibitionReport", () => {
     expect(report.emotions).toEqual([]);
     expect(report.zones).toEqual({ available: false });
     expect(assertNoImmerserKey(report)).toBe(true);
+  });
+
+  it("회원만 있고 연락처 없으면 contactsSecured 0, identified 1", () => {
+    const report = buildExhibitionReport(
+      emptySource({
+        leaflets: [{ id: "v-m", exhibitionId: "ex-edge" }],
+        events: [evt("v-m", "member", "2026-11-01T00:00:00.000Z")],
+      }),
+    );
+    expect(report.visitors.report.identified).toBe(1);
+    expect(report.contactsSecured.count).toBe(0);
+  });
+
+  it("같은 이메일 문의 2건·소식 동의 동일 연락처 → contactsSecured 1", () => {
+    const report = buildExhibitionReport(
+      emptySource({
+        leaflets: [{ id: "v1", exhibitionId: "ex-edge" }],
+        inquiries: [
+          {
+            id: "i1",
+            leafletId: "v1",
+            exhibitionId: "ex-edge",
+            contactMethod: "email",
+            contactValue: " A@B.C ",
+            consentContact: true,
+          },
+          {
+            id: "i2",
+            leafletId: "v1",
+            exhibitionId: "ex-edge",
+            contactMethod: "email",
+            contactValue: "a@b.c",
+            consentContact: true,
+          },
+        ],
+        events: [
+          {
+            id: "n1",
+            at: "2026-11-01T00:00:00.000Z",
+            type: "news_subscribe",
+            leafletId: "v1",
+            exhibitionId: "ex-edge",
+            visitorKey: "v1",
+            identityKind: "identified",
+            payload: { contactMethod: "email", contactValue: "a@b.c" },
+          },
+        ],
+      }),
+    );
+    expect(report.contactsSecured.count).toBe(1);
+  });
+
+  it("작품 A 기록2·관심1·문의1·추천1 → artworkStats 한 행", () => {
+    const report = buildExhibitionReport(
+      emptySource({
+        artworkTitles: { "aw-a": "작품 A" },
+        leaflets: [
+          {
+            id: "v1",
+            exhibitionId: "ex-edge",
+            recommendationArtworkIds: ["aw-a", "aw-a"],
+            result: { similar: { artworkId: "aw-a" } },
+            records: [
+              {
+                artworkId: "aw-a",
+                source: "camera",
+                atSec: 0,
+                movingSec: 0,
+                emotionId: null,
+              },
+              {
+                artworkId: "aw-a",
+                source: "camera",
+                atSec: 10,
+                movingSec: 0,
+                emotionId: null,
+              },
+            ],
+          },
+        ],
+        interests: [
+          {
+            artworkId: "aw-a",
+            exhibitionId: "ex-edge",
+            leafletId: "v1",
+            addedAt: "2026-11-01T00:00:00.000Z",
+          },
+        ],
+        inquiries: [
+          {
+            id: "i1",
+            leafletId: "v1",
+            exhibitionId: "ex-edge",
+            inquiredArtworkIds: ["aw-a"],
+            contactValue: "010-1111-2222",
+            contactMethod: "phone",
+            consentContact: true,
+          },
+        ],
+      }),
+    );
+    expect(report.leaflets.count).toBe(1);
+    expect(report.artworkStats).toEqual([
+      {
+        artworkId: "aw-a",
+        title: "작품 A",
+        recordCount: 2,
+        interestCount: 1,
+        inquiryCount: 1,
+        recommendationCount: 1,
+      },
+    ]);
+    expect(report.contactsSecured.count).toBe(1);
   });
 
   it("member+identified+anonymous → report.identified=2, stored에 member 유지", () => {

@@ -3,8 +3,9 @@
 import { SectionHeader } from "@/components/ui";
 import {
   EMPTY_ARTWORK_ROWS,
-  EMPTY_DATA,
-  EMPTY_ZONES,
+  EMPTY_INESTIMABLE,
+  EMPTY_INSUFFICIENT,
+  EMPTY_RECOMMENDATIONS,
   LABEL_UNSPECIFIED,
   type ExhibitionReportViewModel,
 } from "@/lib/leaflet/exhibitionReportView";
@@ -17,7 +18,7 @@ function KpiGrid({ items }: { items: ExhibitionReportViewModel["kpis"] }) {
           <p className="m-0 text-[13px] text-mute">{kpi.label}</p>
           <p className="mt-1 mb-0 text-[20px] font-semibold tabular-nums">
             {kpi.value === null ? (
-              <span className="text-[14px] font-normal text-mute">{EMPTY_DATA}</span>
+              <span className="text-[14px] font-normal text-mute">{EMPTY_INSUFFICIENT}</span>
             ) : (
               <>
                 {kpi.value}
@@ -33,7 +34,7 @@ function KpiGrid({ items }: { items: ExhibitionReportViewModel["kpis"] }) {
 
 function BarList({ rows }: { rows: { label: string; value: number; pct: number }[] }) {
   if (rows.every((r) => r.value === 0)) {
-    return <p className="m-0 text-[14px] text-mute">{EMPTY_DATA}</p>;
+    return <p className="m-0 text-[14px] text-mute">{EMPTY_INSUFFICIENT}</p>;
   }
   return (
     <ul className="m-0 flex list-none flex-col gap-2 p-0">
@@ -41,10 +42,7 @@ function BarList({ rows }: { rows: { label: string; value: number; pct: number }
         <li key={row.label} className="flex items-center gap-3 text-[14px]">
           <span className="w-28 shrink-0">{row.label}</span>
           <div className="h-2 min-w-0 flex-1 rounded-sm bg-hairline">
-            <div
-              className="h-2 rounded-sm bg-ink"
-              style={{ width: `${row.pct}%` }}
-            />
+            <div className="h-2 rounded-sm bg-ink" style={{ width: `${row.pct}%` }} />
           </div>
           <span className="w-10 shrink-0 text-right tabular-nums">{row.value}</span>
         </li>
@@ -53,11 +51,10 @@ function BarList({ rows }: { rows: { label: string; value: number; pct: number }
   );
 }
 
-function EmptyCard({ title, kicker, message }: { title: string; kicker?: string; message: string }) {
+function EmptyCard({ title, message }: { title: string; message: string }) {
   return (
     <section className="utility-panel">
       <SectionHeader title={title} />
-      {kicker ? <p className="mt-0 mb-3 text-[13px] text-mute">{kicker}</p> : null}
       <p className="m-0 text-[14px] text-mute">{message}</p>
     </section>
   );
@@ -66,7 +63,9 @@ function EmptyCard({ title, kicker, message }: { title: string; kicker?: string;
 export function ExhibitionReportView({ model }: { model: ExhibitionReportViewModel }) {
   return (
     <div className="flex flex-col gap-8">
-      <p className="m-0 text-[13px] text-mute">테마 색 · {model.themeColorName}</p>
+      <p className="m-0 text-[13px]">
+        <span className="text-mute">테마 색</span> {model.themeColorName}
+      </p>
 
       <section>
         <SectionHeader title="요약" />
@@ -74,28 +73,19 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <EmptyCard
-          title="날짜별 전시 방문 추이"
-          kicker="고유 QR 체크인 세션 · 날짜별"
-          message={model.visitTrendEmpty}
-        />
-        <EmptyCard
-          title="시간대별 전시 방문 추이"
-          kicker="고유 QR 체크인 세션 · 2시간 단위"
-          message={model.hourlyTrendEmpty}
-        />
+        <EmptyCard title="날짜별 전시 방문 추이" message={model.visitTrendEmpty} />
+        <EmptyCard title="시간대별 전시 방문 추이" message={model.hourlyTrendEmpty} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className="utility-panel">
           <SectionHeader title="관람 참여 퍼널" />
-          <p className="mt-0 mb-3 text-[13px] text-mute">동일한 전시·기간 기준</p>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {model.funnel.map((step) => (
               <li key={step.label} className="flex justify-between gap-3 text-[14px]">
                 <span>{step.label}</span>
                 <span className="tabular-nums text-mute">
-                  {step.value === null ? EMPTY_DATA : step.value}
+                  {step.value === null ? EMPTY_INSUFFICIENT : step.value}
                 </span>
               </li>
             ))}
@@ -104,7 +94,6 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
 
         <section className="utility-panel">
           <SectionHeader title="관람 스타일 분포" />
-          <p className="mt-0 mb-3 text-[13px] text-mute">리플릿 기준 v1 · 실험 지표</p>
           <BarList rows={model.styles} />
           {model.typeNames.length > 0 ? (
             <div className="mt-6">
@@ -117,28 +106,44 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
 
       <section className="utility-panel">
         <SectionHeader title="작품별 관람·관심 데이터" />
-        <p className="mt-0 mb-3 text-[13px] text-mute">촬영 기록 · 관심 등록 · 문의 · 체류 시간</p>
-        {model.interests.length === 0 ? (
+        {model.artworkRows.length === 0 ? (
           <p className="m-0 text-[14px] text-mute">{EMPTY_ARTWORK_ROWS}</p>
         ) : (
-          <ul className="m-0 list-none border-t border-hairline p-0">
-            {model.interests.map((row) => (
-              <li
-                key={row.artworkId}
-                className="flex justify-between gap-3 border-b border-hairline py-2 text-[14px]"
-              >
-                <span>{row.label}</span>
-                <span className="tabular-nums text-mute">관심 {row.count}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[32rem] border-collapse text-left text-[14px]">
+              <thead>
+                <tr className="border-b border-hairline">
+                  <th className="py-2 pr-3 font-semibold">작품</th>
+                  <th className="py-2 pr-3 font-semibold">촬영 기록</th>
+                  <th className="py-2 pr-3 font-semibold">관심 등록</th>
+                  <th className="py-2 pr-3 font-semibold">문의</th>
+                  <th className="py-2 font-semibold">추천</th>
+                </tr>
+              </thead>
+              <tbody>
+                {model.artworkRows.map((row) => (
+                  <tr key={row.artworkId} className="border-b border-hairline">
+                    <td className="py-2 pr-3">{row.label}</td>
+                    <td className="py-2 pr-3 tabular-nums">{row.recordCount}</td>
+                    <td className="py-2 pr-3 tabular-nums">{row.interestCount}</td>
+                    <td className="py-2 pr-3 tabular-nums">{row.inquiryCount}</td>
+                    <td className="py-2 tabular-nums">
+                      {model.recommendationsAllEmpty
+                        ? EMPTY_RECOMMENDATIONS
+                        : row.recommendationCount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
       <section className="utility-panel">
         <SectionHeader title="구역" />
         {!model.zonesAvailable || model.zones.length === 0 ? (
-          <p className="m-0 text-[14px] text-mute">{EMPTY_ZONES}</p>
+          <p className="m-0 text-[14px] text-mute">{EMPTY_INSUFFICIENT}</p>
         ) : (
           <ul className="m-0 list-none border-t border-hairline p-0">
             {model.zones.map((z) => (
@@ -149,7 +154,8 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
                 <span>{z.zone}</span>
                 <span className="text-mute">
                   기록 {z.recordCount}
-                  {z.dwellLabel ? ` · 평균 ${z.dwellLabel}` : ""}
+                  {" · "}
+                  {z.dwellLabel ? `평균 ${z.dwellLabel}` : EMPTY_INESTIMABLE}
                 </span>
               </li>
             ))}
@@ -157,15 +163,10 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
         )}
       </section>
 
-      <EmptyCard
-        title="가장 닮은 작품 추천 성과"
-        kicker="리플릿에 실제 노출된 추천 작품 기준"
-        message={model.recommendationsEmpty}
-      />
+      <EmptyCard title="가장 닮은 작품 추천 성과" message={model.recommendationsEmpty} />
 
       <section className="utility-panel">
         <SectionHeader title="이 전시의 고객·리플릿 세션" />
-        <p className="mt-0 mb-3 text-[13px] text-mute">연락처 확인 고객과 익명 방문을 분리해 표시</p>
         <ul className="m-0 list-none border-t border-hairline p-0">
           <li className="flex justify-between gap-3 border-b border-hairline py-2 text-[14px]">
             <span>식별</span>
@@ -217,7 +218,7 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
 
         <p className="mt-6 mb-2 text-[14px] font-semibold">감성</p>
         {model.emotions.length === 0 ? (
-          <p className="m-0 text-[14px] text-mute">{EMPTY_DATA}</p>
+          <p className="m-0 text-[14px] text-mute">{EMPTY_INSUFFICIENT}</p>
         ) : (
           <ul className="m-0 list-none border-t border-hairline p-0">
             {model.emotions.map((e) => (

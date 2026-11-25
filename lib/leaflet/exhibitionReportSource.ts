@@ -26,8 +26,15 @@ function leafletToSource(l: Leaflet): ExhibitionReportSourceLeaflet {
     exhibitionId: l.exhibitionId,
     themeColor: l.themeColor ?? null,
     records: l.records,
+    recommendationArtworkIds: l.recommendationArtworkIds,
     result: l.result
-      ? { style: l.result.style, typeName: l.result.typeName }
+      ? {
+          style: l.result.style,
+          typeName: l.result.typeName,
+          similar: l.result.similar
+            ? { artworkId: l.result.similar.artworkId }
+            : undefined,
+        }
       : null,
   };
 }

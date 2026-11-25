@@ -1,24 +1,26 @@
-/** 전시 리포트 화면용 뷰 모델 (순수). 5a ExhibitionReport → 표시 전용. */
+/** 전시 리포트 화면용 뷰 모델 (순수). ExhibitionReport → 표시 전용. */
 
 import { EMOTION_BY_ID, type EmotionId } from "@/lib/leaflet/emotions";
 import {
   REPORT_STYLE_IDS,
   STYLE_LABELS,
   type ExhibitionReport,
+  type ExhibitionReportArtworkStat,
   type ReportStyleId,
 } from "@/lib/leaflet/exhibitionReport";
 import type { InquiryStatus } from "@/lib/leaflet/inquiryStatus";
 
-export const EMPTY_DATA = "데이터 없음";
-export const EMPTY_VISIT_TREND = "아직 수집된 방문 데이터가 없습니다.";
+/** QR·추이 등 표본 없음 */
+export const EMPTY_INSUFFICIENT = "데이터 부족";
+/** 체류 등 근거 없는 추정 */
+export const EMPTY_INESTIMABLE = "추정 불가";
 export const EMPTY_RECOMMENDATIONS = "추천 결과가 없습니다.";
 export const EMPTY_ARTWORK_ROWS = "해당 전시에 집계할 작품 기록이 없습니다.";
-export const EMPTY_ZONES = "데이터 없음";
 export const LABEL_UNSPECIFIED = "유형 미확인";
 
 export type ReportKpi = {
   label: string;
-  /** null = 값 없음(빈 상태). 0은 실제 0건 */
+  /** null = 빈 상태(데이터 부족). 0은 실제 0건 */
   value: number | null;
   unit: string;
 };
@@ -26,7 +28,6 @@ export type ReportKpi = {
 export type ReportBarRow = {
   label: string;
   value: number;
-  /** 0–100, 분모가 0이면 0 */
   pct: number;
 };
 
@@ -35,15 +36,19 @@ export type ReportFunnelStep = {
   value: number | null;
 };
 
-export type ReportInterestRow = {
+export type ReportArtworkRow = {
   artworkId: string;
   label: string;
-  count: number;
+  recordCount: number;
+  interestCount: number;
+  inquiryCount: number;
+  recommendationCount: number;
 };
 
 export type ReportZoneRow = {
   zone: string;
   recordCount: number;
+  /** null → 화면 「추정 불가」 */
   dwellLabel: string | null;
 };
 
@@ -52,13 +57,16 @@ export type ExhibitionReportViewModel = {
   exhibitionTitle: string | null;
   themeColorName: string;
   leafletCount: number;
+  contactsSecuredCount: number;
   kpis: ReportKpi[];
   visitTrendEmpty: string;
   hourlyTrendEmpty: string;
   funnel: ReportFunnelStep[];
   styles: ReportBarRow[];
   typeNames: ReportBarRow[];
-  interests: ReportInterestRow[];
+  artworkRows: ReportArtworkRow[];
+  /** 추천 건수가 전부 0이면 true → 열에 빈 문구 */
+  recommendationsAllEmpty: boolean;
   inquiryTotal: number;
   inquiryByStatus: { label: InquiryStatus; count: number }[];
   saleSummary: { label: string; count: number }[];
@@ -71,13 +79,11 @@ export type ExhibitionReportViewModel = {
   zonesAvailable: boolean;
   zones: ReportZoneRow[];
   recommendationsEmpty: string;
-  /** 화면 문구에 immerser / 회원 단독 칸이 없어야 함 — 테스트용 */
   hasMemberOnlyBucket: false;
   styleKeys: ReportStyleId[];
 };
 
 export type ExhibitionReportViewExtras = {
-  /** 작품 기록(VisitRecord) 총 건수. 없으면 KPI는 빈 상태 */
   totalRecords?: number | null;
 };
 
@@ -93,9 +99,20 @@ function formatDwellSec(sec: number): string {
   return s > 0 ? `${m}분 ${s}초` : `${m}분`;
 }
 
+function toArtworkRow(r: ExhibitionReportArtworkStat): ReportArtworkRow {
+  return {
+    artworkId: r.artworkId,
+    label: r.title ?? r.artworkId,
+    recordCount: r.recordCount,
+    interestCount: r.interestCount,
+    inquiryCount: r.inquiryCount,
+    recommendationCount: r.recommendationCount,
+  };
+}
+
 /**
- * 5a 집계 → 화면 모델. localStorage 없음.
- * QR/체크인/추천 등 5a에 없는 지표는 value null(빈 상태).
+ * 집계 → 화면 모델. localStorage 없음.
+ * QR/체크인 등 없는 지표는 value null → 「데이터 부족」.
  */
 export function toExhibitionReportView(
   report: ExhibitionReport,
@@ -105,23 +122,16 @@ export function toExhibitionReportView(
   const interestTotal = report.interestByArtwork.reduce((s, r) => s + r.count, 0);
   const totalRecords =
     extras.totalRecords === undefined ? null : extras.totalRecords;
+  const contactsSecuredCount = report.contactsSecured.count;
 
   const kpis: ReportKpi[] = [
     { label: "QR 접속", value: null, unit: "회" },
     { label: "고유 QR 체크인", value: null, unit: "건" },
     { label: "리플릿 생성", value: leafletCount, unit: "건" },
-    {
-      label: "작품 기록",
-      value: totalRecords,
-      unit: "회",
-    },
+    { label: "작품 기록", value: totalRecords, unit: "회" },
     { label: "관심 등록", value: interestTotal, unit: "건" },
     { label: "작품 문의", value: report.inquiries.total, unit: "건" },
-    {
-      label: "연락처 확보 고객",
-      value: report.visitors.report.identified,
-      unit: "명",
-    },
+    { label: "연락처 확보 고객", value: contactsSecuredCount, unit: "명" },
     { label: "추천 후 관심 등록", value: null, unit: "회" },
   ];
 
@@ -149,11 +159,10 @@ export function toExhibitionReportView(
     { label: "작품 문의", value: report.inquiries.total },
   ];
 
-  const interests: ReportInterestRow[] = report.interestByArtwork.map((r) => ({
-    artworkId: r.artworkId,
-    label: r.title ?? r.artworkId,
-    count: r.count,
-  }));
+  const artworkRows = report.artworkStats.map(toArtworkRow);
+  const recommendationsAllEmpty =
+    artworkRows.length === 0 ||
+    artworkRows.every((r) => r.recommendationCount === 0);
 
   const inquiryByStatus = (
     ["신규", "연락 완료", "후속 예정", "종료"] as const
@@ -193,13 +202,15 @@ export function toExhibitionReportView(
     exhibitionTitle: report.exhibitionTitle,
     themeColorName: report.themeColorName,
     leafletCount,
+    contactsSecuredCount,
     kpis,
-    visitTrendEmpty: EMPTY_VISIT_TREND,
-    hourlyTrendEmpty: EMPTY_VISIT_TREND,
+    visitTrendEmpty: EMPTY_INSUFFICIENT,
+    hourlyTrendEmpty: EMPTY_INSUFFICIENT,
     funnel,
     styles,
     typeNames,
-    interests,
+    artworkRows,
+    recommendationsAllEmpty,
     inquiryTotal: report.inquiries.total,
     inquiryByStatus,
     saleSummary,

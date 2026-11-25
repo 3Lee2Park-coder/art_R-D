@@ -48,7 +48,7 @@ export default function GalleryReportPage() {
     <Frame width="utility">
       <PageTitle title={exhibition.title} kicker="전시 리포트" />
       <p className="text-[14px] text-mute">{formatPeriod(exhibition.startDate, exhibition.endDate)}</p>
-      {exhibition.ended ? <p className="mt-2 text-[14px]">종료된 전시의 리포트입니다.</p> : null}
+      <p className="mt-2 text-[14px]">{exhibition.ended ? "종료" : "진행 중"}</p>
       <div className="mt-6">
         {model ? <ExhibitionReportView model={model} /> : null}
       </div>
