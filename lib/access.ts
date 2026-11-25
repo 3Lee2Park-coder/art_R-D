@@ -1,9 +1,10 @@
 import {
+  isEndedGallery,
   isGalleryRole,
   isLoggedOut,
   pathNeedsContractLanding,
 } from "@/lib/studioAccess";
-import type { Role } from "@/lib/types";
+import type { Gallery, Role } from "@/lib/types";
 
 export function homeFor(role: Role) {
   if (role === "operator") return "/operator/accounts";
@@ -15,7 +16,20 @@ export type AccessDecision =
   | { ok: true }
   | { ok: false; to: string; notice?: string; returnTo?: string };
 
-export function accessDecision(role: Role, path: string): AccessDecision {
+export type AccessOptions = {
+  contractState?: Gallery["contractState"] | null;
+};
+
+function isEndedOpsPath(path: string): boolean {
+  if (path === "/studio/exhibitions/new") return true;
+  return /\/(review|qr|theme-color)$/.test(path);
+}
+
+export function accessDecision(
+  role: Role,
+  path: string,
+  options?: AccessOptions,
+): AccessDecision {
   if (path === "/login" || path === "/signup") return { ok: true };
 
   const studio = path.startsWith("/studio");
@@ -39,8 +53,12 @@ export function accessDecision(role: Role, path: string): AccessDecision {
       return { ok: false, to: "/studio/contract" };
     }
 
-    const opsRestricted = /\/review$/.test(path) || /\/qr$/.test(path);
+    const opsRestricted = isEndedOpsPath(path);
     if (role === "gallery-uncontracted" && opsRestricted) {
+      return { ok: false, to: "/studio", notice: blocked };
+    }
+
+    if (isEndedGallery(role, options?.contractState) && opsRestricted) {
       return { ok: false, to: "/studio", notice: blocked };
     }
 

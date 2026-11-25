@@ -228,6 +228,125 @@
   max-width: none;
 }
 
+/* 본문 토큰 — HTML .page-head / .btn / .card / .table / .eyebrow */
+.studio-app .page-headline {
+  margin-bottom: 22px;
+}
+
+.studio-app .page-headline .eyebrow,
+.studio-app .eyebrow {
+  font-size: 9px;
+  color: var(--studio-green);
+  letter-spacing: 1.7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.studio-app .page-headline h1 {
+  font-size: 24px;
+  letter-spacing: -0.8px;
+  margin: 4px 0 5px;
+  font-weight: 700;
+  color: var(--studio-ink);
+  line-height: 1.25;
+}
+
+.studio-app .page-headline .lead {
+  margin: 0;
+  color: var(--studio-muted);
+  font-size: 11px;
+}
+
+.studio-app .btn {
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  min-height: unset;
+  box-shadow: 0 3px 8px rgba(52, 121, 99, 0.12);
+}
+
+.studio-app .btn-primary {
+  background: var(--studio-green);
+  color: #fff;
+  border: 0;
+}
+
+.studio-app .btn-primary:hover {
+  background: var(--studio-green-dark);
+}
+
+.studio-app .btn-secondary {
+  background: #fff;
+  color: #536158;
+  border: 1px solid var(--studio-line);
+  box-shadow: none;
+}
+
+.studio-app .btn-secondary:hover {
+  background: var(--studio-green-soft);
+  color: var(--studio-green);
+}
+
+.studio-app .studio-card,
+.studio-app .utility-panel {
+  background: var(--studio-paper);
+  border: 1px solid var(--studio-line);
+  border-radius: var(--studio-r);
+  padding: 18px;
+  box-shadow: var(--studio-shadow);
+}
+
+.studio-app .table-wrap {
+  overflow: auto;
+  border: 1px solid var(--studio-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.studio-app table.studio-table,
+.studio-app .studio-table,
+.studio-app .studio-content table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.studio-app .studio-table th,
+.studio-app .studio-content table th {
+  text-align: left;
+  background: #fafaf8;
+  color: #7e857e;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.studio-app .studio-table td,
+.studio-app .studio-content table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #f0f0eb;
+  font-size: 10px;
+  vertical-align: middle;
+  color: var(--studio-ink);
+}
+
+.studio-app .border-hairline {
+  border-color: var(--studio-line);
+}
+
+.studio-app .text-mute,
+.studio-app .caption {
+  color: var(--studio-muted);
+}
+
+.studio-app a.link {
+  color: var(--studio-green);
+  font-weight: 600;
+}
+
 @media (max-width: 1120px) {
   .studio-app {
     --studio-sidebar: 215px;

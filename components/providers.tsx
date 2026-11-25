@@ -234,14 +234,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    const decision = accessDecision(role, pathname);
+    const myGallery = gallerySeed
+      .map((g) => (accounts[g.id] ? { ...g, contractState: accounts[g.id] } : g))
+      .find((g) => g.id === galleryIdFor(role));
+    const decision = accessDecision(role, pathname, {
+      contractState: myGallery?.contractState,
+    });
     if (decision.ok) return;
     if (decision.notice) sessionStorage.setItem(SESSION.notice, decision.notice);
     if ("returnTo" in decision && decision.returnTo) {
       localStorage.setItem(KEYS.returnTo, decision.returnTo);
     }
     router.replace(decision.to);
-  }, [ready, role, pathname, router]);
+  }, [ready, role, pathname, router, accounts]);
 
   const setDemo = useCallback((on: boolean) => {
     localStorage.setItem(KEYS.demo, on ? "1" : "0");

@@ -6,6 +6,7 @@ import {
   STYLE_LABELS,
   type ExhibitionReportSource,
 } from "@/lib/leaflet/exhibitionReport";
+import { buildExhibitionCustomers } from "@/lib/leaflet/customersFromSource";
 import type { VisitorEvent } from "@/lib/leaflet/events";
 
 function emptySource(over: Partial<ExhibitionReportSource> = {}): ExhibitionReportSource {
@@ -116,6 +117,33 @@ describe("buildExhibitionReport", () => {
       }),
     );
     expect(report.contactsSecured.count).toBe(1);
+  });
+
+  it("한 리플릿 이메일+전화 → 연락처 확보 1 (고객 목록과 동일)", () => {
+    const source = emptySource({
+      leaflets: [{ id: "v1", exhibitionId: "ex-edge", recordedAt: "2026-01-01" }],
+      inquiries: [
+        {
+          id: "i-mail",
+          leafletId: "v1",
+          exhibitionId: "ex-edge",
+          contactMethod: "email",
+          contactValue: "a@b.c",
+          consentContact: true,
+        },
+        {
+          id: "i-phone",
+          leafletId: "v1",
+          exhibitionId: "ex-edge",
+          contactMethod: "phone",
+          contactValue: "010-1111-2222",
+          consentContact: true,
+        },
+      ],
+    });
+    const report = buildExhibitionReport(source);
+    expect(report.contactsSecured.count).toBe(1);
+    expect(buildExhibitionCustomers(source)).toHaveLength(1);
   });
 
   it("추천과 가장 닮은 작품 ID가 다르면 각각 센다", () => {

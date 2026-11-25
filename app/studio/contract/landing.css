@@ -51,7 +51,7 @@
     .hero-grid { position: relative; z-index: 1; min-height: 650px; display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; gap: 50px; padding: 84px 0 90px; }
     .hero-copy { max-width: 570px; }
     .hero .eyebrow { color: var(--mint); }
-    h1 { margin: 26px 0 22px; font-size: clamp(42px, 5.4vw, 68px); line-height: 1.12; font-weight: 650; letter-spacing: -.075em; }
+    h1 { margin: 26px 0 22px; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.2; font-weight: 650; letter-spacing: -.075em; word-break: keep-all; overflow-wrap: normal; }
     h1 em { color: var(--lime); font-style: normal; font-family: var(--serif); font-weight: 400; letter-spacing: -.06em; }
     .hero-copy p { color: #bdc9c8; font-size: 16px; line-height: 1.9; max-width: 520px; margin: 0 0 30px; }
     .hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -196,7 +196,7 @@
       .nav-actions .button { padding: 10px 13px; font-size: 11px; }
       .brand { font-size: 19px; }
       .hero-grid { min-height: unset; padding: 68px 0 75px; }
-      h1 { font-size: clamp(41px, 12vw, 58px); }
+      h1 { font-size: clamp(30px, 9vw, 48px); word-break: keep-all; }
       .hero-copy p { font-size: 14px; }
       .dashboard-shell { padding: 12px; transform: none; }
       .metric-grid { grid-template-columns: repeat(2,1fr); }

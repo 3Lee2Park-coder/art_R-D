@@ -9,8 +9,11 @@ import {
   normalizeSaleResult,
   type InquiryStatus,
 } from "@/lib/leaflet/inquiryStatus";
+import { countExhibitionCustomers } from "@/lib/leaflet/customersFromSource";
 import type { StyleId } from "@/lib/leaflet/style";
 import type { VisitorIdentityKind } from "@/lib/leaflet/visitorIdentity";
+
+export { normalizeContactKey } from "@/lib/leaflet/contactKey";
 
 export const REPORT_STYLE_IDS = ["collector", "explorer", "immersive", "walker"] as const;
 export type ReportStyleId = (typeof REPORT_STYLE_IDS)[number];
@@ -180,22 +183,6 @@ function emptyStyles(): Record<ReportStyleId, number> {
   };
 }
 
-/** 이메일 lower/trim, 전화 숫자만 [가안] */
-export function normalizeContactKey(
-  contactValue: string,
-  contactMethod?: "email" | "phone" | null,
-): string | null {
-  const raw = contactValue.trim();
-  if (!raw) return null;
-  const looksPhone =
-    contactMethod === "phone" || (!contactMethod && /^[\d\s+\-()]+$/.test(raw));
-  if (looksPhone) {
-    const digits = raw.replace(/\D/g, "");
-    return digits.length > 0 ? `phone:${digits}` : null;
-  }
-  return `email:${raw.toLowerCase()}`;
-}
-
 /** 이벤트 최신 identity → 문의 identity → unspecified. 저장값 수정 없음. */
 export function resolveReportIdentity(
   leafletId: string,
@@ -223,39 +210,6 @@ export function resolveReportIdentity(
 
 function bumpCount(map: Map<string, number>, key: string) {
   map.set(key, (map.get(key) ?? 0) + 1);
-}
-
-function countContactsSecured(
-  exhibitionId: string,
-  leafletIds: Set<string>,
-  inquiries: ExhibitionReportSourceInquiry[],
-  events: VisitorEvent[],
-): number {
-  const keys = new Set<string>();
-
-  for (const inq of inquiries) {
-    const forShow =
-      inq.exhibitionId === exhibitionId || leafletIds.has(inq.leafletId);
-    if (!forShow) continue;
-    if (!inq.consentContact) continue;
-    const key = normalizeContactKey(inq.contactValue ?? "", inq.contactMethod);
-    if (key) keys.add(key);
-  }
-
-  for (const e of events) {
-    if (e.type !== "news_subscribe") continue;
-    if (e.exhibitionId !== exhibitionId && !leafletIds.has(e.leafletId)) continue;
-    const value =
-      typeof e.payload?.contactValue === "string" ? e.payload.contactValue : "";
-    const method =
-      e.payload?.contactMethod === "phone" || e.payload?.contactMethod === "email"
-        ? e.payload.contactMethod
-        : null;
-    const key = normalizeContactKey(value, method);
-    if (key) keys.add(key);
-  }
-
-  return keys.size;
 }
 
 /** 리플릿당 추천 ID (배열 내 중복은 1). similar와 합치지 않음. */
@@ -318,12 +272,7 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
   };
 
   const contactsSecured = {
-    count: countContactsSecured(
-      input.exhibitionId,
-      leafletIds,
-      input.inquiries,
-      input.events,
-    ),
+    count: countExhibitionCustomers(input),
   };
 
   const interestMap = new Map<string, number>();

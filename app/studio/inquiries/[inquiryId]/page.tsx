@@ -12,6 +12,7 @@ import {
   type InquiryStatus,
   type SaleResult,
 } from "@/lib/leaflet/inquiryStatus";
+import { isOnOrBeforeContractEnd } from "@/lib/leaflet/contractCutoff";
 import { formatDate, oneParam } from "@/lib/format";
 import { canMutateStudioInquiry } from "@/lib/studioAccess";
 
@@ -36,6 +37,16 @@ export default function StudioInquiryDetailPage() {
     }
   }, [app.ready, id]);
 
+  const galleryShowIds = new Set(
+    app.exhibitions.filter((e) => e.galleryId === app.myGalleryId).map((e) => e.id),
+  );
+  const endAt =
+    gallery?.contractState === "ended" ? gallery.contractEndAt : null;
+  const allowed =
+    inquiry &&
+    galleryShowIds.has(inquiry.exhibitionId) &&
+    !(endAt && !isOnOrBeforeContractEnd(inquiry.createdAt, endAt));
+
   if (!app.ready) {
     return (
       <Frame width="utility">
@@ -44,7 +55,7 @@ export default function StudioInquiryDetailPage() {
     );
   }
 
-  if (!inquiry) {
+  if (!allowed) {
     return (
       <Frame width="utility">
         <PageTitle title="문의" />
@@ -58,8 +69,8 @@ export default function StudioInquiryDetailPage() {
     );
   }
 
-  const art = app.artworks.find((a) => a.id === inquiry.inquiredArtworkIds[0]);
-  const exhibition = app.exhibitions.find((e) => e.id === inquiry.exhibitionId);
+  const art = app.artworks.find((a) => a.id === inquiry!.inquiredArtworkIds[0]);
+  const exhibition = app.exhibitions.find((e) => e.id === inquiry!.exhibitionId);
 
   function onSave(event: FormEvent) {
     event.preventDefault();
