@@ -49,7 +49,25 @@ import {
   type AccountPatches,
   type ExhibitionPatch,
 } from "@/lib/storage";
-import type { CaptureSession, DecorState, Exhibition, Gallery, Leaflet, LeafletPhoto, Role } from "@/lib/types";
+import {
+  applyGalleryProfile,
+  mergeArtists,
+  mergeArtworks,
+  type GalleryProfilePatch,
+} from "@/lib/studio/exhibitionOps";
+import type {
+  Artist,
+  Artwork,
+  CaptureSession,
+  DecorState,
+  Exhibition,
+  ExhibitionGoals,
+  ExhibitionZone,
+  Gallery,
+  Leaflet,
+  LeafletPhoto,
+  Role,
+} from "@/lib/types";
 
 type AppState = {
   ready: boolean;
@@ -75,12 +93,19 @@ type AppState = {
   removeFromCart: (id: string) => void;
   exhibitions: Exhibition[];
   galleries: Gallery[];
-  artists: typeof artistSeed;
-  artworks: typeof artworkSeed;
+  artists: Artist[];
+  artworks: Artwork[];
+  exhibitionGoals: ExhibitionGoals[];
+  exhibitionZones: ExhibitionZone[];
   reports: typeof reportSeed;
   errors: typeof errorSeed;
   myGalleryId: string | null;
   upsertExhibition: (exhibition: Exhibition) => void;
+  upsertArtist: (artist: Artist) => void;
+  upsertArtwork: (artwork: Artwork) => void;
+  saveExhibitionGoals: (goals: ExhibitionGoals) => void;
+  saveExhibitionZones: (exhibitionId: string, zones: ExhibitionZone[]) => void;
+  patchGalleryProfile: (patch: GalleryProfilePatch) => void;
   patchExhibition: (id: string, patch: ExhibitionPatch) => void;
   setContract: (galleryId: string, state: Gallery["contractState"]) => void;
   savedLeaflets: Leaflet[];
@@ -169,6 +194,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [saved, setSaved] = useState<Leaflet[]>([]);
   const [wantedIds, setWantedIds] = useState<string[]>([]);
   const [added, setAdded] = useState<Exhibition[]>([]);
+  const [addedArtists, setAddedArtists] = useState<Artist[]>([]);
+  const [addedArtworks, setAddedArtworks] = useState<Artwork[]>([]);
+  const [exhibitionGoals, setExhibitionGoals] = useState<ExhibitionGoals[]>([]);
+  const [exhibitionZones, setExhibitionZones] = useState<ExhibitionZone[]>([]);
+  const [galleryProfiles, setGalleryProfiles] = useState<
+    Record<string, GalleryProfilePatch>
+  >({});
   const [patches, setPatches] = useState<Record<string, ExhibitionPatch>>({});
   const [accounts, setAccounts] = useState<AccountPatches>({});
   const [spacePick, setSpacePickState] = useState<string | null>(null);
@@ -197,6 +229,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setCart(readJSON<string[]>(localStorage, KEYS.cart, []));
     setSaved(readSavedLeaflets());
     setAdded(readJSON<Exhibition[]>(localStorage, KEYS.studioAdded, []));
+    setAddedArtists(readJSON<Artist[]>(localStorage, KEYS.studioArtists, []));
+    setAddedArtworks(readJSON<Artwork[]>(localStorage, KEYS.studioArtworks, []));
+    setExhibitionGoals(readJSON<ExhibitionGoals[]>(localStorage, KEYS.exhibitionGoals, []));
+    setExhibitionZones(readJSON<ExhibitionZone[]>(localStorage, KEYS.exhibitionZones, []));
+    setGalleryProfiles(
+      readJSON<Record<string, GalleryProfilePatch>>(localStorage, KEYS.galleryProfiles, {}),
+    );
     setPatches(readJSON<Record<string, ExhibitionPatch>>(localStorage, KEYS.exhibitionPatches, {}));
     setAccounts(readJSON<AccountPatches>(localStorage, KEYS.accountPatches, {}));
     setSpacePickState(localStorage.getItem(KEYS.spacePick));
@@ -311,6 +350,58 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setAdded((prev) => {
       const next = [...prev.filter((item) => item.id !== exhibition.id), exhibition];
       localStorage.setItem(KEYS.studioAdded, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const upsertArtist = useCallback((artist: Artist) => {
+    setAddedArtists((prev) => {
+      const next = [...prev.filter((a) => a.id !== artist.id), artist];
+      localStorage.setItem(KEYS.studioArtists, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const upsertArtwork = useCallback((artwork: Artwork) => {
+    setAddedArtworks((prev) => {
+      const next = [...prev.filter((a) => a.id !== artwork.id), artwork];
+      localStorage.setItem(KEYS.studioArtworks, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const saveExhibitionGoals = useCallback((goals: ExhibitionGoals) => {
+    setExhibitionGoals((prev) => {
+      const next = [
+        ...prev.filter((g) => g.exhibitionId !== goals.exhibitionId),
+        goals,
+      ];
+      localStorage.setItem(KEYS.exhibitionGoals, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const saveExhibitionZones = useCallback(
+    (exhibitionId: string, zones: ExhibitionZone[]) => {
+      setExhibitionZones((prev) => {
+        const next = [
+          ...prev.filter((z) => z.exhibitionId !== exhibitionId),
+          ...zones,
+        ];
+        localStorage.setItem(KEYS.exhibitionZones, JSON.stringify(next));
+        return next;
+      });
+    },
+    [],
+  );
+
+  const patchGalleryProfile = useCallback((patch: GalleryProfilePatch) => {
+    setGalleryProfiles((prev) => {
+      const next = {
+        ...prev,
+        [patch.galleryId]: { ...prev[patch.galleryId], ...patch },
+      };
+      localStorage.setItem(KEYS.galleryProfiles, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -643,8 +734,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [added, patches]);
 
   const galleries = useMemo(
-    () => gallerySeed.map((gallery) => (accounts[gallery.id] ? { ...gallery, contractState: accounts[gallery.id] } : gallery)),
-    [accounts],
+    () =>
+      gallerySeed.map((gallery) => {
+        const withContract = accounts[gallery.id]
+          ? { ...gallery, contractState: accounts[gallery.id] }
+          : gallery;
+        return applyGalleryProfile(withContract, galleryProfiles[gallery.id]);
+      }),
+    [accounts, galleryProfiles],
+  );
+
+  const artists = useMemo(
+    () => mergeArtists(artistSeed, addedArtists),
+    [addedArtists],
+  );
+
+  const artworks = useMemo(
+    () => mergeArtworks(artworkSeed as Artwork[], addedArtworks),
+    [addedArtworks],
   );
 
   const archivedLeaflets = useMemo(() => {
@@ -722,12 +829,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
       removeFromCart,
       exhibitions,
       galleries,
-      artists: artistSeed,
-      artworks: artworkSeed,
+      artists,
+      artworks,
+      exhibitionGoals,
+      exhibitionZones,
       reports: reportSeed,
       errors: errorSeed,
       myGalleryId: galleryIdFor(role),
       upsertExhibition,
+      upsertArtist,
+      upsertArtwork,
+      saveExhibitionGoals,
+      saveExhibitionZones,
+      patchGalleryProfile,
       patchExhibition,
       setContract,
       savedLeaflets: saved,
@@ -793,7 +907,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
       removeFromCart,
       exhibitions,
       galleries,
+      artists,
+      artworks,
+      exhibitionGoals,
+      exhibitionZones,
       upsertExhibition,
+      upsertArtist,
+      upsertArtwork,
+      saveExhibitionGoals,
+      saveExhibitionZones,
+      patchGalleryProfile,
       patchExhibition,
       setContract,
       saved,

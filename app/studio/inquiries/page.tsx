@@ -7,6 +7,7 @@ import { Frame, PageTitle } from "@/components/ui";
 import { isOnOrBeforeContractEnd } from "@/lib/leaflet/contractCutoff";
 import { listInquiries, type Inquiry } from "@/lib/leaflet/inquiry";
 import { formatDate } from "@/lib/format";
+import { downloadCsv, inquiriesCsvRows } from "@/lib/studio/exportCsv";
 
 export default function StudioInquiriesPage() {
   const app = useApp();
@@ -31,9 +32,33 @@ export default function StudioInquiriesPage() {
     });
   }, [items, app.exhibitions, app.myGalleryId, gallery?.contractState, gallery?.contractEndAt]);
 
+  function exportCsv() {
+    downloadCsv(
+      "restart-inquiries.csv",
+      inquiriesCsvRows(
+        mine.map((q) => {
+          const art = app.artworks.find((a) => a.id === q.inquiredArtworkIds[0]);
+          return {
+            inquiryId: q.id,
+            customerId: q.name,
+            artworkTitle: art?.title ?? q.inquiredArtworkIds[0] ?? "",
+            message: q.message ?? "",
+            status: q.status,
+            createdAt: q.createdAt,
+          };
+        }),
+      ),
+    );
+  }
+
   return (
     <Frame width="utility">
-      <PageTitle title="문의 인박스" kicker={gallery?.name} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <PageTitle title="문의 인박스" kicker={gallery?.name} />
+        <button type="button" className="btn btn-secondary" onClick={exportCsv}>
+          문의 내보내기
+        </button>
+      </div>
       {mine.length === 0 ? (
         <p className="text-[14px] text-mute">데이터 부족</p>
       ) : (
@@ -60,7 +85,7 @@ export default function StudioInquiriesPage() {
       )}
       <p className="mt-8">
         <Link href="/studio" className="link">
-          내 전시
+          전시 관리
         </Link>
       </p>
     </Frame>

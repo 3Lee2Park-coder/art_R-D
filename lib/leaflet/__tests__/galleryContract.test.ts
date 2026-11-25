@@ -14,6 +14,9 @@ const busan: Gallery = {
   contractStartAt: "2025-06-01",
   contractEndAt: "2025-08-20T23:59:59.999Z",
   bio: null,
+  address: null,
+  contactPhone: null,
+  contactEmail: null,
 };
 
 const hannam: Gallery = {
@@ -25,6 +28,9 @@ const hannam: Gallery = {
   contractStartAt: "2024-01-01",
   contractEndAt: null,
   bio: null,
+  address: null,
+  contactPhone: null,
+  contactEmail: null,
 };
 
 const tide: Exhibition = {

@@ -1,14 +1,12 @@
 /**
- * 갤러리 스튜디오 네비 (5g).
+ * 갤러리 스튜디오 네비 (5g/5h).
  * HTML RestArt_Gallery_Management_v2.2 라벨을 따른다.
  *
  * 나중에 연결할 경로 자리 (화면 미구현 — 네비에 넣지 않음):
  * - 고객 인텔리전스 홈
- * - 작품 관심 분석 (/studio/interests) — 5h
+ * - 작품 관심 분석 (/studio/interests) — 5i
  * - 관람객 행동 / 익명 / 구역 — 5i
- * - 전시 등록 마법사 — 5j
- * - 전시 개선 인사이트 / 감성 — 5k
- * - 외부 연동 / 갤러리 설정 — 5l
+ * - 전시 개선 인사이트 / 감성 — 5i
  */
 
 import type { Exhibition } from "@/lib/types";
@@ -66,6 +64,7 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
         href: () => "/studio",
         match: (p) =>
           p === "/studio" ||
+          p.startsWith("/studio/exhibitions/new") ||
           (p.startsWith("/studio/exhibitions/") &&
             !/\/customers$/.test(p) &&
             !/\/theme-color$/.test(p)),
@@ -76,6 +75,25 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
         ico: "◫",
         href: (exId) => (exId ? `/studio/reports/${exId}` : "/studio"),
         match: (p) => p.startsWith("/studio/reports/"),
+      },
+    ],
+  },
+  {
+    label: "ECOSYSTEM",
+    items: [
+      {
+        id: "connections",
+        label: "외부 연동",
+        ico: "⇄",
+        href: () => "/studio/connections",
+        match: (p) => p.startsWith("/studio/connections"),
+      },
+      {
+        id: "settings",
+        label: "갤러리 설정",
+        ico: "⚙",
+        href: () => "/studio/settings",
+        match: (p) => p.startsWith("/studio/settings"),
       },
     ],
   },
@@ -97,6 +115,13 @@ export const STUDIO_NAV_UNCONTRACTED: StudioNavItem[] = [
     href: () => "/studio/contract",
     match: (p) => p === "/studio/contract" || p.startsWith("/studio/contract/"),
   },
+  {
+    id: "settings",
+    label: "갤러리 설정",
+    ico: "⚙",
+    href: () => "/studio/settings",
+    match: (p) => p.startsWith("/studio/settings"),
+  },
 ];
 
 export function crumbLabel(pathname: string): string {
@@ -108,7 +133,9 @@ export function crumbLabel(pathname: string): string {
   if (/\/studio\/exhibitions\/[^/]+\/customers/.test(pathname)) return "전시별 고객";
   if (pathname.startsWith("/studio/inquiries")) return "문의 인박스";
   if (pathname.startsWith("/studio/reports/")) return "전시 리포트";
-  if (pathname === "/studio/exhibitions/new") return "전시 등록";
+  if (pathname.startsWith("/studio/connections")) return "외부 연동";
+  if (pathname.startsWith("/studio/settings")) return "갤러리 설정";
+  if (pathname === "/studio/exhibitions/new") return "새 전시 등록";
   if (/\/theme-color$/.test(pathname)) return "테마 색";
   if (/\/review$/.test(pathname)) return "배치";
   if (/\/qr$/.test(pathname)) return "QR";

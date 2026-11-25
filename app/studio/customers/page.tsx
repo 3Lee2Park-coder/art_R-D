@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
 import {
+  getGalleryCustomer,
   listGalleryCustomers,
   type GalleryCustomerListItem,
 } from "@/lib/leaflet/galleryCustomers";
@@ -13,6 +14,7 @@ import {
   CUSTOMER_ACCESS_DENIED,
 } from "@/lib/leaflet/reportAccess";
 import { formatDate } from "@/lib/format";
+import { customersCsvRows, downloadCsv } from "@/lib/studio/exportCsv";
 
 function CustomerRows({ items }: { items: GalleryCustomerListItem[] }) {
   if (items.length === 0) {
@@ -82,13 +84,47 @@ export default function StudioCustomersPage() {
     );
   }
 
+  function exportCsv() {
+    if (!app.myGalleryId) return;
+    const exhibitionIds = app.exhibitions
+      .filter((e) => e.galleryId === app.myGalleryId)
+      .map((e) => e.id);
+    const cutoff =
+      gallery?.contractState === "ended" ? gallery.contractEndAt : null;
+    const rows = customersCsvRows(
+      items.map((c) => {
+        const detail = getGalleryCustomer({
+          galleryId: app.myGalleryId!,
+          exhibitionIds,
+          contractEndAt: cutoff,
+          customerId: c.customerId,
+        });
+        return {
+          customerId: c.customerId,
+          displayName: c.name ?? "",
+          email: detail?.emails[0] ?? null,
+          phone: detail?.phones[0] ?? null,
+          visitCount: detail?.visits.length ?? 0,
+          inquiryCount: detail?.inquiries.length ?? 0,
+          lastActivityAt: c.lastVisitAt,
+        };
+      }),
+    );
+    downloadCsv("restart-customers.csv", rows);
+  }
+
   return (
     <Frame width="utility">
-      <PageTitle title="전체 고객" kicker={gallery?.name} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <PageTitle title="전체 고객" kicker={gallery?.name} />
+        <button type="button" className="btn btn-secondary" onClick={exportCsv}>
+          CSV 내보내기
+        </button>
+      </div>
       <CustomerRows items={items} />
       <p className="mt-8">
         <Link href="/studio" className="link">
-          내 전시
+          전시 관리
         </Link>
       </p>
     </Frame>
