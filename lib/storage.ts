@@ -34,6 +34,8 @@ export const KEYS = {
   reviewAsked: "restart.reviewAsked",
   /** 회원가입 이름. 허브 인사에만 사용 [가안] */
   visitorName: "restart.visitorName",
+  /** 갤러리 스튜디오 전역 전시 선택 (5g) */
+  studioExhibitionId: "restart.studioExhibitionId",
 } as const;
 
 export const SESSION = {
