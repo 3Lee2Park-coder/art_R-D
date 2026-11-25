@@ -110,14 +110,15 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
           <p className="m-0 text-[14px] text-mute">{EMPTY_ARTWORK_ROWS}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[32rem] border-collapse text-left text-[14px]">
+            <table className="w-full min-w-[40rem] border-collapse text-left text-[14px]">
               <thead>
                 <tr className="border-b border-hairline">
                   <th className="py-2 pr-3 font-semibold">작품</th>
                   <th className="py-2 pr-3 font-semibold">촬영 기록</th>
                   <th className="py-2 pr-3 font-semibold">관심 등록</th>
                   <th className="py-2 pr-3 font-semibold">문의</th>
-                  <th className="py-2 font-semibold">추천</th>
+                  <th className="py-2 pr-3 font-semibold">추천</th>
+                  <th className="py-2 font-semibold">가장 닮은 작품</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,10 +128,13 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
                     <td className="py-2 pr-3 tabular-nums">{row.recordCount}</td>
                     <td className="py-2 pr-3 tabular-nums">{row.interestCount}</td>
                     <td className="py-2 pr-3 tabular-nums">{row.inquiryCount}</td>
-                    <td className="py-2 tabular-nums">
+                    <td className="py-2 pr-3 tabular-nums">
                       {model.recommendationsAllEmpty
                         ? EMPTY_RECOMMENDATIONS
                         : row.recommendationCount}
+                    </td>
+                    <td className="py-2 tabular-nums">
+                      {model.similarAllEmpty ? EMPTY_INSUFFICIENT : row.similarCount}
                     </td>
                   </tr>
                 ))}
@@ -162,8 +166,6 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
           </ul>
         )}
       </section>
-
-      <EmptyCard title="가장 닮은 작품 추천 성과" message={model.recommendationsEmpty} />
 
       <section className="utility-panel">
         <SectionHeader title="이 전시의 고객·리플릿 세션" />

@@ -45,7 +45,8 @@
       "recordCount": 1,
       "interestCount": 2,
       "inquiryCount": 0,
-      "recommendationCount": 0
+      "recommendationCount": 0,
+      "similarCount": 0
     }
   ],
   "inquiries": {

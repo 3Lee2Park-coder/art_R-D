@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExhibitionReportView } from "@/components/leaflet/ExhibitionReportView";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
@@ -12,17 +12,32 @@ import {
   totalRecordsFromLeaflets,
   type ExhibitionReportViewModel,
 } from "@/lib/leaflet/exhibitionReportView";
+import {
+  canViewExhibitionReport,
+  REPORT_ACCESS_DENIED,
+} from "@/lib/leaflet/reportAccess";
 import { formatPeriod, oneParam } from "@/lib/format";
 
 export default function GalleryReportPage() {
   const id = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
   const app = useApp();
   const exhibition = app.exhibitions.find((item) => item.id === id);
+  const gallery = app.galleries.find((g) => g.id === app.myGalleryId);
+  const allowed = useMemo(
+    () =>
+      canViewExhibitionReport({
+        role: app.role,
+        myGalleryId: app.myGalleryId,
+        contractState: gallery?.contractState,
+        exhibitionGalleryId: exhibition?.galleryId,
+      }),
+    [app.role, app.myGalleryId, gallery?.contractState, exhibition?.galleryId],
+  );
   const [model, setModel] = useState<ExhibitionReportViewModel | null>(null);
 
   useEffect(() => {
     if (!app.ready) return;
-    if (!exhibition || exhibition.galleryId !== app.myGalleryId) {
+    if (!allowed) {
       setModel(null);
       return;
     }
@@ -33,13 +48,22 @@ export default function GalleryReportPage() {
         totalRecords: totalRecordsFromLeaflets(source.leaflets, id),
       }),
     );
-  }, [app.ready, app.myGalleryId, exhibition, id]);
+  }, [app.ready, allowed, id]);
 
-  if (!exhibition || exhibition.galleryId !== app.myGalleryId) {
+  if (!allowed) {
     return (
       <Frame width="utility">
         <PageTitle title="전시 리포트" />
-        <p>전시를 찾을 수 없습니다.</p>
+        <p>{REPORT_ACCESS_DENIED}</p>
+      </Frame>
+    );
+  }
+
+  if (!exhibition) {
+    return (
+      <Frame width="utility">
+        <PageTitle title="전시 리포트" />
+        <p>{REPORT_ACCESS_DENIED}</p>
       </Frame>
     );
   }
@@ -49,9 +73,7 @@ export default function GalleryReportPage() {
       <PageTitle title={exhibition.title} kicker="전시 리포트" />
       <p className="text-[14px] text-mute">{formatPeriod(exhibition.startDate, exhibition.endDate)}</p>
       <p className="mt-2 text-[14px]">{exhibition.ended ? "종료" : "진행 중"}</p>
-      <div className="mt-6">
-        {model ? <ExhibitionReportView model={model} /> : null}
-      </div>
+      <div className="mt-6">{model ? <ExhibitionReportView model={model} /> : null}</div>
     </Frame>
   );
 }

@@ -43,6 +43,7 @@ export type ReportArtworkRow = {
   interestCount: number;
   inquiryCount: number;
   recommendationCount: number;
+  similarCount: number;
 };
 
 export type ReportZoneRow = {
@@ -67,6 +68,8 @@ export type ExhibitionReportViewModel = {
   artworkRows: ReportArtworkRow[];
   /** 추천 건수가 전부 0이면 true → 열에 빈 문구 */
   recommendationsAllEmpty: boolean;
+  /** 가장 닮은 작품 건수가 전부 0이면 true → 열에 빈 문구 */
+  similarAllEmpty: boolean;
   inquiryTotal: number;
   inquiryByStatus: { label: InquiryStatus; count: number }[];
   saleSummary: { label: string; count: number }[];
@@ -78,7 +81,6 @@ export type ExhibitionReportViewModel = {
   emotions: { emotionId: string; label: string; count: number }[];
   zonesAvailable: boolean;
   zones: ReportZoneRow[];
-  recommendationsEmpty: string;
   hasMemberOnlyBucket: false;
   styleKeys: ReportStyleId[];
 };
@@ -107,6 +109,7 @@ function toArtworkRow(r: ExhibitionReportArtworkStat): ReportArtworkRow {
     interestCount: r.interestCount,
     inquiryCount: r.inquiryCount,
     recommendationCount: r.recommendationCount,
+    similarCount: r.similarCount,
   };
 }
 
@@ -163,6 +166,8 @@ export function toExhibitionReportView(
   const recommendationsAllEmpty =
     artworkRows.length === 0 ||
     artworkRows.every((r) => r.recommendationCount === 0);
+  const similarAllEmpty =
+    artworkRows.length === 0 || artworkRows.every((r) => r.similarCount === 0);
 
   const inquiryByStatus = (
     ["신규", "연락 완료", "후속 예정", "종료"] as const
@@ -211,6 +216,7 @@ export function toExhibitionReportView(
     typeNames,
     artworkRows,
     recommendationsAllEmpty,
+    similarAllEmpty,
     inquiryTotal: report.inquiries.total,
     inquiryByStatus,
     saleSummary,
@@ -222,7 +228,6 @@ export function toExhibitionReportView(
     emotions,
     zonesAvailable,
     zones,
-    recommendationsEmpty: EMPTY_RECOMMENDATIONS,
     hasMemberOnlyBucket: false,
     styleKeys: [...REPORT_STYLE_IDS],
   };
