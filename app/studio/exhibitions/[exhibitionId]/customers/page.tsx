@@ -12,6 +12,8 @@ import {
   REPORT_ACCESS_DENIED,
 } from "@/lib/leaflet/reportAccess";
 import { formatDate, oneParam } from "@/lib/format";
+import { downloadCsv } from "@/lib/studio/exportCsv";
+import { buildExhibitionCustomersCsvRows, CSV_FILENAMES } from "@/lib/studio/studioCsv";
 
 export default function ExhibitionCustomersPage() {
   const exhibitionId = oneParam(useParams<{ exhibitionId: string }>().exhibitionId);
@@ -44,8 +46,7 @@ export default function ExhibitionCustomersPage() {
     allowed,
     app.myGalleryId,
     exhibitionId,
-    gallery?.contractState,
-    gallery?.contractEndAt,
+    gallery,
   ]);
 
   if (!allowed) {
@@ -66,9 +67,27 @@ export default function ExhibitionCustomersPage() {
     );
   }
 
+  function exportCsv() {
+    const rows = buildExhibitionCustomersCsvRows(
+      {
+        role: app.role,
+        gallery,
+        exhibitions: app.exhibitions,
+        artworkTitle: (id) => app.artworks.find((a) => a.id === id)?.title ?? "",
+      },
+      exhibitionId,
+    );
+    if (rows) downloadCsv(CSV_FILENAMES.exhibitionCustomers, rows);
+  }
+
   return (
     <Frame width="utility">
-      <PageTitle title="전시 고객" kicker={exhibition.title} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <PageTitle title="전시 고객" kicker={exhibition.title} />
+        <button type="button" className="btn btn-secondary" onClick={exportCsv}>
+          CSV 내보내기
+        </button>
+      </div>
       {items.length === 0 ? (
         <p className="mt-6">데이터 부족</p>
       ) : (

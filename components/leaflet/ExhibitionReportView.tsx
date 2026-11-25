@@ -18,7 +18,7 @@ function KpiGrid({ items }: { items: ExhibitionReportViewModel["kpis"] }) {
           <p className="m-0 text-[13px] text-mute">{kpi.label}</p>
           <p className="mt-1 mb-0 text-[20px] font-semibold tabular-nums">
             {kpi.value === null ? (
-              <span className="text-[14px] font-normal text-mute">{EMPTY_INSUFFICIENT}</span>
+              <span className="text-[14px] font-normal text-mute">{EMPTY_INESTIMABLE}</span>
             ) : (
               <>
                 {kpi.value}
@@ -51,11 +51,32 @@ function BarList({ rows }: { rows: { label: string; value: number; pct: number }
   );
 }
 
-function EmptyCard({ title, message }: { title: string; message: string }) {
+function EmptyCard({
+  title,
+  message,
+  points,
+}: {
+  title: string;
+  message: string | null;
+  points?: { label: string; count: number }[];
+}) {
   return (
     <section className="utility-panel">
       <SectionHeader title={title} />
-      <p className="m-0 text-[14px] text-mute">{message}</p>
+      {message ? (
+        <p className="m-0 text-[14px] text-mute">{message}</p>
+      ) : points && points.length > 0 ? (
+        <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[13px]">
+          {points.map((p) => (
+            <li key={p.label} className="flex justify-between gap-2">
+              <span>{p.label}</span>
+              <span className="tabular-nums">{p.count}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="m-0 text-[14px] text-mute">{EMPTY_INESTIMABLE}</p>
+      )}
     </section>
   );
 }
@@ -73,8 +94,16 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <EmptyCard title="날짜별 전시 방문 추이" message={model.visitTrendEmpty} />
-        <EmptyCard title="시간대별 전시 방문 추이" message={model.hourlyTrendEmpty} />
+        <EmptyCard
+          title="날짜별 전시 방문 추이"
+          message={model.visitTrendEmpty}
+          points={model.visitTrend}
+        />
+        <EmptyCard
+          title="시간대별 전시 방문 추이"
+          message={model.hourlyTrendEmpty}
+          points={model.hourlyTrend}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -85,7 +114,7 @@ export function ExhibitionReportView({ model }: { model: ExhibitionReportViewMod
               <li key={step.label} className="flex justify-between gap-3 text-[14px]">
                 <span>{step.label}</span>
                 <span className="tabular-nums text-mute">
-                  {step.value === null ? EMPTY_INSUFFICIENT : step.value}
+                  {step.value === null ? EMPTY_INESTIMABLE : step.value}
                 </span>
               </li>
             ))}

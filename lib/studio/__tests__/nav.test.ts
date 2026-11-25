@@ -69,7 +69,7 @@ describe("studio nav helpers", () => {
     expect(crumbLabel("/studio/spaces/ex-edge")).toBe("구역별 반응");
     expect(crumbLabel("/studio/insights/ex-edge")).toBe("전시 개선 인사이트");
     expect(crumbLabel("/studio/settings")).toBe("갤러리 설정");
-    expect(crumbLabel("/studio/connections")).toBe("외부 연동");
+    expect(crumbLabel("/studio/connections")).toBe("외부 서비스 연동");
     expect(crumbLabel("/studio/exhibitions/new")).toBe("새 전시 등록");
   });
 });

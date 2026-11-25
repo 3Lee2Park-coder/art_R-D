@@ -10,18 +10,28 @@ import {
   useMemo,
   useState,
 } from "react";
+import { resolveLeafletTheme } from "@/components/leaflet/theme";
 import { useApp } from "@/components/providers";
+import { ThemeColorPicker } from "@/components/studio/ThemeColorPicker";
 import { Frame, PageTitle } from "@/components/ui";
 import { compressImageFile } from "@/lib/leaflet/compressImage";
+import { writeExhibitionThemeColor } from "@/lib/leaflet/exhibitionTheme";
+import { COLOR_BY_NAME, type RestartColor } from "@/lib/leaflet/colors";
 import { KEYS, readJSON } from "@/lib/storage";
+import { WIZARD_LABELS } from "@/lib/studio/copy";
 import { artworkTemplateCsv } from "@/lib/studio/exportCsv";
 import { EXHIBITION_OBJECTIVES } from "@/lib/studio/exhibitionOps";
 import { parseArtworkCsv } from "@/lib/studio/parseArtworkCsv";
 import {
+  buildWizardSubmission,
+  hydrateWizardDraft,
+  removeWizardZone,
+  toWizardWork,
+  validateWizardStep1,
   emptyWizardDraft,
   type WizardDraft,
+  type WizardZone,
 } from "@/lib/studio/wizardDraft";
-import type { Artist, Artwork, Exhibition, ExhibitionZone } from "@/lib/types";
 
 const STEP_LABELS = ["기본 정보", "작품 및 작가", "배치도 및 구역", "최종 검수"] as const;
 
@@ -38,14 +48,18 @@ function NewExhibitionWizard() {
   const search = useSearchParams();
   const step = clampStep(Number(search.get("step") || "1"));
   const contracted = app.role === "gallery-contracted";
+  const gallery = app.galleries.find((g) => g.id === app.myGalleryId);
   const [draft, setDraft] = useState<WizardDraft>(() => emptyWizardDraft());
   const [error, setError] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualArtist, setManualArtist] = useState("");
+  const [manualWidth, setManualWidth] = useState("");
+  const [manualImage, setManualImage] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = readJSON<WizardDraft | null>(localStorage, KEYS.wizardDraft, null);
-    if (stored) setDraft({ ...emptyWizardDraft(), ...stored, step });
-    else setDraft((d) => ({ ...d, step }));
+    setDraft({ ...hydrateWizardDraft(stored), step });
     setHydrated(true);
   }, [step]);
 
@@ -63,14 +77,10 @@ function NewExhibitionWizard() {
     [draft, persist, router],
   );
 
-  const canStep2 = useMemo(() => {
-    if (!draft.title.trim() || !draft.venue.trim() || !draft.startDate || !draft.endDate) {
-      return false;
-    }
-    if (draft.endDate < draft.startDate) return false;
-    if (contracted && draft.objectives.length === 0) return false;
-    return true;
-  }, [draft, contracted]);
+  const step1Error = useMemo(
+    () => validateWizardStep1(draft, { contracted }),
+    [draft, contracted],
+  );
 
   async function onPoster(file: File | null) {
     if (!file) return;
@@ -96,6 +106,18 @@ function NewExhibitionWizard() {
     }
   }
 
+  async function onManualImage(file: File | null) {
+    if (!file) {
+      setManualImage(null);
+      return;
+    }
+    try {
+      setManualImage(await compressImageFile(file));
+    } catch {
+      setError("작품 이미지를 처리하지 못했습니다.");
+    }
+  }
+
   async function onArtworkFile(file: File | null) {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".csv")) {
@@ -110,10 +132,61 @@ function NewExhibitionWizard() {
         return;
       }
       setError("");
-      persist({ ...draft, works });
+      persist({
+        ...draft,
+        works: [...draft.works, ...works.map((w) => toWizardWork(w))],
+      });
     } catch {
       setError("작품 파일을 읽지 못했습니다.");
     }
+  }
+
+  function addManualWork() {
+    const title = manualTitle.trim();
+    const artistName = manualArtist.trim();
+    if (!title || !artistName) {
+      setError("작품명과 작가를 입력해 주세요.");
+      return;
+    }
+    const width = manualWidth.trim() === "" ? null : Number(manualWidth);
+    if (width !== null && (!Number.isFinite(width) || width <= 0)) {
+      setError("가로 크기를 확인해 주세요.");
+      return;
+    }
+    setError("");
+    persist({
+      ...draft,
+      works: [
+        ...draft.works,
+        toWizardWork(
+          {
+            title,
+            artistName,
+            year: null,
+            widthCm: width,
+            heightCm: null,
+            medium: null,
+            description: null,
+          },
+          { imageDataUrl: manualImage },
+        ),
+      ],
+    });
+    setManualTitle("");
+    setManualArtist("");
+    setManualWidth("");
+    setManualImage(null);
+  }
+
+  function removeWork(workId: string) {
+    persist({ ...draft, works: draft.works.filter((w) => w.workId !== workId) });
+  }
+
+  function setWorkZone(workId: string, zoneId: string | null) {
+    persist({
+      ...draft,
+      works: draft.works.map((w) => (w.workId === workId ? { ...w, zoneId } : w)),
+    });
   }
 
   function addZone() {
@@ -127,29 +200,15 @@ function NewExhibitionWizard() {
     });
   }
 
-  function updateZone(
-    zoneId: string,
-    patch: Partial<Omit<ExhibitionZone, "exhibitionId">>,
-  ) {
+  function updateZone(zoneId: string, patch: Partial<WizardZone>) {
     persist({
       ...draft,
       zones: draft.zones.map((z) => (z.zoneId === zoneId ? { ...z, ...patch } : z)),
     });
   }
 
-  function removeZone(zoneId: string) {
-    persist({ ...draft, zones: draft.zones.filter((z) => z.zoneId !== zoneId) });
-  }
-
-  function validateStep1(): string | null {
-    if (!draft.title.trim() || !draft.venue.trim() || !draft.startDate || !draft.endDate) {
-      return "전시 이름, 장소, 기간을 입력해 주세요.";
-    }
-    if (draft.endDate < draft.startDate) return "기간을 다시 확인해 주세요.";
-    if (contracted && draft.objectives.length === 0) {
-      return "전시 목표를 하나 이상 선택해 주세요.";
-    }
-    return null;
+  function pickThemeColor(color: RestartColor) {
+    persist({ ...draft, themeColorName: color.name });
   }
 
   function submitFinal(event: FormEvent) {
@@ -158,7 +217,7 @@ function NewExhibitionWizard() {
       setError("갤러리 정보가 없습니다.");
       return;
     }
-    const v1 = validateStep1();
+    const v1 = validateWizardStep1(draft, { contracted });
     if (v1) {
       setError(v1);
       goStep(1);
@@ -166,67 +225,18 @@ function NewExhibitionWizard() {
     }
 
     const exhibitionId = `ex-${Date.now().toString(36)}`;
-    const exhibition: Exhibition = {
-      id: exhibitionId,
-      title: draft.title.trim(),
+    const result = buildWizardSubmission(draft, {
       galleryId: app.myGalleryId,
-      status: contracted ? "contracted" : "uncontracted",
-      venue: draft.venue.trim(),
-      startDate: draft.startDate,
-      endDate: draft.endDate,
-      posterUrl: draft.posterDataUrl || "/images/posters/plain.svg",
-      description:
-        contracted && draft.description.trim() ? draft.description.trim() : null,
-      leafletEnabled: contracted,
-      published: !contracted,
-      approvalState: contracted ? "pending" : "none",
-      ended: false,
-      floorPlanUrl: draft.floorPlanDataUrl,
-      themeColorName: null,
-    };
-    app.upsertExhibition(exhibition);
-
-    if (contracted) {
-      app.saveExhibitionGoals({
-        exhibitionId,
-        objectives: draft.objectives,
-        targets: draft.targets,
-      });
-      app.saveExhibitionZones(
-        exhibitionId,
-        draft.zones.map((z) => ({ ...z, exhibitionId })),
-      );
-    }
-
-    const artistByName = new Map<string, string>();
-    for (const work of draft.works) {
-      let artistId = artistByName.get(work.artistName);
-      if (!artistId) {
-        artistId = `ar-${Date.now().toString(36)}-${artistByName.size}`;
-        artistByName.set(work.artistName, artistId);
-        const artist: Artist = {
-          id: artistId,
-          name: work.artistName,
-          bio: null,
-          imageUrl: null,
-        };
-        app.upsertArtist(artist);
-      }
-      const artwork: Artwork = {
-        id: `aw-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
-        title: work.title,
-        artistId,
-        exhibitionId,
-        zone: draft.zones[0]?.name ?? null,
-        imageUrl: "/images/artworks/plane.svg",
-        description: work.description,
-        priceKrw: null,
-        forSale: false,
-        likeCount: 0,
-        widthCm: work.widthCm,
-      };
-      app.upsertArtwork(artwork);
-    }
+      contracted,
+      exhibitionId,
+    });
+    app.upsertExhibition(result.exhibition);
+    const color = draft.themeColorName ? COLOR_BY_NAME[draft.themeColorName] : null;
+    if (color) writeExhibitionThemeColor(exhibitionId, color);
+    if (result.goals) app.saveExhibitionGoals(result.goals);
+    if (contracted) app.saveExhibitionZones(exhibitionId, result.zones);
+    for (const artist of result.artists) app.upsertArtist(artist);
+    for (const artwork of result.artworks) app.upsertArtwork(artwork);
 
     localStorage.removeItem(KEYS.wizardDraft);
     router.push(
@@ -243,12 +253,13 @@ function NewExhibitionWizard() {
     );
   }
 
+  const themePreview = draft.themeColorName
+    ? resolveLeafletTheme(draft.themeColorName)
+    : null;
+
   return (
     <Frame width="utility">
       <PageTitle title="새 전시 등록" />
-      <p className="mb-4 text-[14px] text-mute">
-        전시 기본 정보부터 작품 목록, 구역 배치까지 순서대로 등록합니다.
-      </p>
 
       <ol className="mb-6 flex flex-wrap gap-2 p-0 list-none">
         {STEP_LABELS.map((label, i) => {
@@ -260,10 +271,11 @@ function NewExhibitionWizard() {
                 type="button"
                 className={`btn btn-secondary min-h-10 px-3 ${active ? "ring-1 ring-[var(--studio-green)]" : ""}`}
                 onClick={() => {
-                  if (n > 1 && !canStep2) {
-                    setError(validateStep1() ?? "1단계를 먼저 채워 주세요.");
+                  if (n > 1 && step1Error) {
+                    setError(step1Error);
                     return;
                   }
+                  setError("");
                   goStep(n);
                 }}
               >
@@ -279,7 +291,7 @@ function NewExhibitionWizard() {
       {step === 1 ? (
         <div className="flex max-w-lg flex-col gap-4">
           <label className="block">
-            <span className="mb-2 block text-[14px] font-semibold">전시 이름</span>
+            <span className="mb-2 block text-[14px] font-semibold">{WIZARD_LABELS.title}</span>
             <input
               className="field"
               value={draft.title}
@@ -287,7 +299,11 @@ function NewExhibitionWizard() {
             />
           </label>
           <label className="block">
-            <span className="mb-2 block text-[14px] font-semibold">장소</span>
+            <span className="mb-2 block text-[14px] font-semibold">{WIZARD_LABELS.gallery}</span>
+            <input className="field" value={gallery?.name ?? ""} readOnly />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-[14px] font-semibold">{WIZARD_LABELS.venue}</span>
             <input
               className="field"
               value={draft.venue}
@@ -295,7 +311,9 @@ function NewExhibitionWizard() {
             />
           </label>
           <label className="block">
-            <span className="mb-2 block text-[14px] font-semibold">시작</span>
+            <span className="mb-2 block text-[14px] font-semibold">
+              {WIZARD_LABELS.startDate}
+            </span>
             <input
               className="field"
               type="date"
@@ -304,7 +322,9 @@ function NewExhibitionWizard() {
             />
           </label>
           <label className="block">
-            <span className="mb-2 block text-[14px] font-semibold">종료</span>
+            <span className="mb-2 block text-[14px] font-semibold">
+              {WIZARD_LABELS.endDate}
+            </span>
             <input
               className="field"
               type="date"
@@ -315,7 +335,9 @@ function NewExhibitionWizard() {
           {contracted ? (
             <>
               <label className="block">
-                <span className="mb-2 block text-[14px] font-semibold">소개</span>
+                <span className="mb-2 block text-[14px] font-semibold">
+                  {WIZARD_LABELS.description}
+                </span>
                 <textarea
                   className="field min-h-24"
                   value={draft.description}
@@ -325,7 +347,9 @@ function NewExhibitionWizard() {
                 />
               </label>
               <fieldset>
-                <legend className="mb-2 text-[14px] font-semibold">전시 목표</legend>
+                <legend className="mb-2 text-[14px] font-semibold">
+                  {WIZARD_LABELS.objectives}
+                </legend>
                 <div className="flex flex-col gap-2">
                   {EXHIBITION_OBJECTIVES.map((obj) => {
                     const checked = draft.objectives.includes(obj);
@@ -411,25 +435,47 @@ function NewExhibitionWizard() {
                   />
                 </label>
               </div>
-              <p className="m-0 text-[12px] text-mute">
-                목표는 갤러리 내부 운영 기준입니다. 업계 평균을 의미하지 않습니다.
-              </p>
             </>
           ) : null}
+
+          <div>
+            <span className="mb-2 block text-[14px] font-semibold">
+              {WIZARD_LABELS.themeColor}
+            </span>
+            {themePreview ? (
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span
+                  className="inline-block h-10 w-10 shrink-0 rounded-sm border border-hairline"
+                  style={{ background: themePreview.bg }}
+                  aria-hidden
+                />
+                <p className="m-0 text-[15px] font-semibold">
+                  {themePreview.name}{" "}
+                  <span className="ml-1 rounded-sm bg-ink/10 px-1.5 py-0.5 text-[12px] font-medium">
+                    선택
+                  </span>
+                </p>
+              </div>
+            ) : null}
+            <ThemeColorPicker
+              selectedName={draft.themeColorName}
+              onPick={pickThemeColor}
+            />
+          </div>
+
           <button
             type="button"
             className="btn btn-primary"
             onClick={() => {
-              const msg = validateStep1();
-              if (msg) {
-                setError(msg);
+              if (step1Error) {
+                setError(step1Error);
                 return;
               }
               setError("");
               goStep(2);
             }}
           >
-            다음
+            {WIZARD_LABELS.next}
           </button>
         </div>
       ) : null}
@@ -447,7 +493,6 @@ function NewExhibitionWizard() {
               <p className="text-[13px] text-mute">{draft.posterName}</p>
             ) : null}
             {draft.posterDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={draft.posterDataUrl}
                 alt="포스터 미리보기"
@@ -455,11 +500,57 @@ function NewExhibitionWizard() {
               />
             ) : null}
           </div>
+
+          <div className="studio-card">
+            <h3 className="mt-0 text-[15px] font-semibold">작품 추가</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1 block text-[12px] text-mute">작품명</span>
+                <input
+                  className="field"
+                  value={manualTitle}
+                  onChange={(e) => setManualTitle(e.target.value)}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[12px] text-mute">작가</span>
+                <input
+                  className="field"
+                  value={manualArtist}
+                  onChange={(e) => setManualArtist(e.target.value)}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[12px] text-mute">가로(cm)</span>
+                <input
+                  className="field"
+                  type="number"
+                  min={0}
+                  step="0.1"
+                  value={manualWidth}
+                  onChange={(e) => setManualWidth(e.target.value)}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[12px] text-mute">이미지</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => void onManualImage(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary mt-3"
+              onClick={addManualWork}
+            >
+              작품 추가
+            </button>
+          </div>
+
           <div className="studio-card">
             <h3 className="mt-0 text-[15px] font-semibold">작품 목록 CSV</h3>
-            <p className="text-[13px] text-mute">
-              권장 열: 작품명, 작가명, 제작연도, 가로(cm), 세로(cm), 매체, 작품 설명
-            </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -485,6 +576,7 @@ function NewExhibitionWizard() {
               />
             </div>
           </div>
+
           {draft.works.length > 0 ? (
             <div className="table-wrap">
               <table className="studio-table">
@@ -494,29 +586,38 @@ function NewExhibitionWizard() {
                     <th>작가</th>
                     <th>가로</th>
                     <th>설명</th>
+                    <th aria-label="삭제" />
                   </tr>
                 </thead>
                 <tbody>
-                  {draft.works.map((w, i) => (
-                    <tr key={`${w.title}-${i}`}>
+                  {draft.works.map((w) => (
+                    <tr key={w.workId}>
                       <td>{w.title}</td>
                       <td>{w.artistName}</td>
                       <td>{w.widthCm ?? "—"}</td>
                       <td>{w.description ?? "—"}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-secondary min-h-9 px-2"
+                          onClick={() => removeWork(w.workId)}
+                        >
+                          삭제
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p className="text-[14px] text-mute">아직 불러온 작품이 없습니다.</p>
-          )}
+          ) : null}
+
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn btn-secondary" onClick={() => goStep(1)}>
-              이전
+              {WIZARD_LABELS.prev}
             </button>
             <button type="button" className="btn btn-primary" onClick={() => goStep(3)}>
-              다음
+              {WIZARD_LABELS.next}
             </button>
           </div>
         </div>
@@ -532,7 +633,6 @@ function NewExhibitionWizard() {
               onChange={(e) => void onFloorPlan(e.target.files?.[0] ?? null)}
             />
             {draft.floorPlanDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={draft.floorPlanDataUrl}
                 alt="배치도 미리보기"
@@ -547,9 +647,7 @@ function NewExhibitionWizard() {
                 구역 추가
               </button>
             </div>
-            {draft.zones.length === 0 ? (
-              <p className="text-[14px] text-mute">구역을 추가해 주세요. (선택)</p>
-            ) : (
+            {draft.zones.length > 0 ? (
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
                 {draft.zones.map((z) => (
                   <li key={z.zoneId} className="studio-card flex flex-wrap gap-3">
@@ -584,21 +682,64 @@ function NewExhibitionWizard() {
                     <button
                       type="button"
                       className="btn btn-secondary self-end"
-                      onClick={() => removeZone(z.zoneId)}
+                      onClick={() => persist(removeWizardZone(draft, z.zoneId))}
                     >
                       삭제
                     </button>
                   </li>
                 ))}
               </ul>
-            )}
+            ) : null}
           </div>
+
+          {draft.zones.length > 0 && draft.works.length > 0 ? (
+            <div>
+              <h3 className="mb-3 mt-0 text-[15px] font-semibold">작품별 구역</h3>
+              <div className="table-wrap">
+                <table className="studio-table">
+                  <thead>
+                    <tr>
+                      <th>작품명</th>
+                      <th>작가</th>
+                      <th>구역</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {draft.works.map((w) => (
+                      <tr key={w.workId}>
+                        <td>{w.title}</td>
+                        <td>{w.artistName}</td>
+                        <td>
+                          <select
+                            className="field"
+                            aria-label={`${w.title} 구역`}
+                            value={w.zoneId ?? ""}
+                            onChange={(e) =>
+                              setWorkZone(w.workId, e.target.value || null)
+                            }
+                          >
+                            <option value="">구역 없음</option>
+                            {draft.zones.map((z) => (
+                              <option key={z.zoneId} value={z.zoneId}>
+                                {z.name}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn btn-secondary" onClick={() => goStep(2)}>
-              이전
+              {WIZARD_LABELS.prev}
             </button>
             <button type="button" className="btn btn-primary" onClick={() => goStep(4)}>
-              다음
+              {WIZARD_LABELS.next}
             </button>
           </div>
         </div>
@@ -612,11 +753,17 @@ function NewExhibitionWizard() {
               <strong>{draft.title || "(제목 없음)"}</strong>
             </p>
             <p className="m-0 mt-1 text-[14px] text-mute">
-              {draft.venue} · {draft.startDate} – {draft.endDate}
+              {draft.venue ? `${draft.venue} · ` : ""}
+              {draft.startDate} – {draft.endDate}
             </p>
             <p className="m-0 mt-2 text-[14px]">
               작품 {draft.works.length}점 · 구역 {draft.zones.length}곳
             </p>
+            {draft.themeColorName ? (
+              <p className="m-0 mt-2 text-[13px] text-mute">
+                테마 색 {draft.themeColorName}
+              </p>
+            ) : null}
             {contracted && draft.objectives.length ? (
               <p className="m-0 mt-2 text-[13px] text-mute">
                 목표: {draft.objectives.join(", ")}
@@ -625,13 +772,13 @@ function NewExhibitionWizard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn btn-secondary" onClick={() => goStep(3)}>
-              이전
+              {WIZARD_LABELS.prev}
             </button>
             <button type="submit" className="btn btn-primary">
-              {contracted ? "확인 요청" : "게시"}
+              {WIZARD_LABELS.submit}
             </button>
             <Link href="/studio" className="btn btn-secondary">
-              취소
+              {WIZARD_LABELS.cancel}
             </Link>
           </div>
         </form>

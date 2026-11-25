@@ -37,6 +37,7 @@ import {
   mergeVisitorOnLogin,
   newVisitId,
 } from "@/lib/leaflet/visitSession";
+import { getStudioFixtures } from "@/lib/mock/studioFixtures";
 import { writeVisitConsent } from "@/lib/leaflet/visitConsent";
 import { modeFor, screenIdFor } from "@/lib/screens";
 import {
@@ -53,13 +54,14 @@ import {
   applyGalleryProfile,
   mergeArtists,
   mergeArtworks,
+  mergeGoals,
+  mergeZones,
   type GalleryProfilePatch,
 } from "@/lib/studio/exhibitionOps";
 import type {
   Artist,
   Artwork,
   CaptureSession,
-  DecorState,
   Exhibition,
   ExhibitionGoals,
   ExhibitionZone,
@@ -196,8 +198,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [added, setAdded] = useState<Exhibition[]>([]);
   const [addedArtists, setAddedArtists] = useState<Artist[]>([]);
   const [addedArtworks, setAddedArtworks] = useState<Artwork[]>([]);
-  const [exhibitionGoals, setExhibitionGoals] = useState<ExhibitionGoals[]>([]);
-  const [exhibitionZones, setExhibitionZones] = useState<ExhibitionZone[]>([]);
+  const [storedGoals, setExhibitionGoals] = useState<ExhibitionGoals[]>([]);
+  const [storedZones, setExhibitionZones] = useState<ExhibitionZone[]>([]);
   const [galleryProfiles, setGalleryProfiles] = useState<
     Record<string, GalleryProfilePatch>
   >({});
@@ -745,13 +747,27 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   const artists = useMemo(
-    () => mergeArtists(artistSeed, addedArtists),
+    () => mergeArtists(mergeArtists(artistSeed, getStudioFixtures().artists), addedArtists),
     [addedArtists],
   );
 
   const artworks = useMemo(
-    () => mergeArtworks(artworkSeed as Artwork[], addedArtworks),
+    () =>
+      mergeArtworks(
+        mergeArtworks(artworkSeed as Artwork[], getStudioFixtures().artworks),
+        addedArtworks,
+      ),
     [addedArtworks],
+  );
+
+  const exhibitionGoals = useMemo(
+    () => mergeGoals(getStudioFixtures().goals, storedGoals),
+    [storedGoals],
+  );
+
+  const exhibitionZones = useMemo(
+    () => mergeZones(getStudioFixtures().zones, storedZones),
+    [storedZones],
   );
 
   const archivedLeaflets = useMemo(() => {

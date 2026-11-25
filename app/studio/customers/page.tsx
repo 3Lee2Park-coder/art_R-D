@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
 import {
-  getGalleryCustomer,
   listGalleryCustomers,
   type GalleryCustomerListItem,
 } from "@/lib/leaflet/galleryCustomers";
@@ -14,7 +13,8 @@ import {
   CUSTOMER_ACCESS_DENIED,
 } from "@/lib/leaflet/reportAccess";
 import { formatDate } from "@/lib/format";
-import { customersCsvRows, downloadCsv } from "@/lib/studio/exportCsv";
+import { downloadCsv } from "@/lib/studio/exportCsv";
+import { buildAllCustomersCsvRows, CSV_FILENAMES } from "@/lib/studio/studioCsv";
 
 function CustomerRows({ items }: { items: GalleryCustomerListItem[] }) {
   if (items.length === 0) {
@@ -71,8 +71,7 @@ export default function StudioCustomersPage() {
     allowed,
     app.myGalleryId,
     app.exhibitions,
-    gallery?.contractState,
-    gallery?.contractEndAt,
+    gallery,
   ]);
 
   if (!allowed) {
@@ -85,32 +84,13 @@ export default function StudioCustomersPage() {
   }
 
   function exportCsv() {
-    if (!app.myGalleryId) return;
-    const exhibitionIds = app.exhibitions
-      .filter((e) => e.galleryId === app.myGalleryId)
-      .map((e) => e.id);
-    const cutoff =
-      gallery?.contractState === "ended" ? gallery.contractEndAt : null;
-    const rows = customersCsvRows(
-      items.map((c) => {
-        const detail = getGalleryCustomer({
-          galleryId: app.myGalleryId!,
-          exhibitionIds,
-          contractEndAt: cutoff,
-          customerId: c.customerId,
-        });
-        return {
-          customerId: c.customerId,
-          displayName: c.name ?? "",
-          email: detail?.emails[0] ?? null,
-          phone: detail?.phones[0] ?? null,
-          visitCount: detail?.visits.length ?? 0,
-          inquiryCount: detail?.inquiries.length ?? 0,
-          lastActivityAt: c.lastVisitAt,
-        };
-      }),
-    );
-    downloadCsv("restart-customers.csv", rows);
+    const rows = buildAllCustomersCsvRows({
+      role: app.role,
+      gallery,
+      exhibitions: app.exhibitions,
+      artworkTitle: (id) => app.artworks.find((a) => a.id === id)?.title ?? "",
+    });
+    if (rows) downloadCsv(CSV_FILENAMES.allCustomers, rows);
   }
 
   return (

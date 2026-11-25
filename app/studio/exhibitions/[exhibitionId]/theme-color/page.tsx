@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { resolveLeafletTheme } from "@/components/leaflet/theme";
 import { useApp } from "@/components/providers";
+import { ThemeColorPicker } from "@/components/studio/ThemeColorPicker";
 import { Frame, PageTitle, SectionHeader } from "@/components/ui";
-import { RESTART_COLORS, type RestartColor } from "@/lib/leaflet/colors";
+import { type RestartColor } from "@/lib/leaflet/colors";
 import {
   themeColorNameForExhibition,
   writeExhibitionThemeColor,
@@ -28,14 +29,7 @@ export default function ExhibitionThemeColorPage() {
   const [selectedName, setSelectedName] = useState(() =>
     themeColorNameForExhibition(id, exhibition?.themeColorName),
   );
-  const [query, setQuery] = useState("");
   const [tick, setTick] = useState(0);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return RESTART_COLORS;
-    return RESTART_COLORS.filter((c) => c.name.toLowerCase().includes(q));
-  }, [query]);
 
   const theme = resolveLeafletTheme(selectedName);
 
@@ -88,49 +82,7 @@ export default function ExhibitionThemeColorPage() {
           </div>
         )}
 
-        <label className="mb-4 block">
-          <span className="sr-only">색상명 검색</span>
-          <input
-            className="field"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="색상명 검색"
-            disabled={!canEdit}
-          />
-        </label>
-
-        {filtered.length === 0 ? (
-          <p className="text-[14px]">검색된 색상이 없습니다.</p>
-        ) : (
-          <div className="grid grid-cols-5 gap-2 sm:grid-cols-8 md:grid-cols-10">
-            {filtered.map((color) => {
-              const on = color.name === selectedName;
-              return (
-                <button
-                  key={color.name}
-                  type="button"
-                  title={color.name}
-                  disabled={!canEdit}
-                  aria-pressed={on}
-                  aria-label={color.name}
-                  onClick={() => pick(color)}
-                  className="relative aspect-square rounded-sm border border-hairline disabled:opacity-50"
-                  style={{
-                    background: color.hex,
-                    outline: on ? `2px solid ${theme.text === "#FFFFFF" ? "#111" : theme.bg}` : undefined,
-                    outlineOffset: 2,
-                  }}
-                >
-                  {on ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-black/55 px-0.5 py-0.5 text-center text-[9px] text-white">
-                      선택
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <ThemeColorPicker selectedName={selectedName} onPick={pick} disabled={!canEdit} />
       </div>
 
       <div className="mt-10" key={tick}>

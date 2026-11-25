@@ -5,18 +5,23 @@ import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/providers";
 import { Frame, PageTitle } from "@/components/ui";
 import { isOnOrBeforeContractEnd } from "@/lib/leaflet/contractCutoff";
-import { listInquiries, type Inquiry } from "@/lib/leaflet/inquiry";
+import { listStudioInquiries, type Inquiry } from "@/lib/leaflet/inquiry";
 import { formatDate } from "@/lib/format";
-import { downloadCsv, inquiriesCsvRows } from "@/lib/studio/exportCsv";
+import { usePathname } from "next/navigation";
+import { KEYS } from "@/lib/storage";
+import { resolveSelectedExhibitionId } from "@/lib/studio/nav";
+import { downloadCsv } from "@/lib/studio/exportCsv";
+import { buildInquiriesCsvRows, CSV_FILENAMES } from "@/lib/studio/studioCsv";
 
 export default function StudioInquiriesPage() {
   const app = useApp();
+  const pathname = usePathname();
   const gallery = app.galleries.find((g) => g.id === app.myGalleryId);
   const [items, setItems] = useState<Inquiry[]>([]);
 
   useEffect(() => {
     if (!app.ready) return;
-    setItems(listInquiries());
+    setItems(listStudioInquiries());
   }, [app.ready]);
 
   const mine = useMemo(() => {
@@ -33,22 +38,23 @@ export default function StudioInquiriesPage() {
   }, [items, app.exhibitions, app.myGalleryId, gallery?.contractState, gallery?.contractEndAt]);
 
   function exportCsv() {
-    downloadCsv(
-      "restart-inquiries.csv",
-      inquiriesCsvRows(
-        mine.map((q) => {
-          const art = app.artworks.find((a) => a.id === q.inquiredArtworkIds[0]);
-          return {
-            inquiryId: q.id,
-            customerId: q.name,
-            artworkTitle: art?.title ?? q.inquiredArtworkIds[0] ?? "",
-            message: q.message ?? "",
-            status: q.status,
-            createdAt: q.createdAt,
-          };
-        }),
-      ),
+    const shows = app.exhibitions.filter((e) => e.galleryId === app.myGalleryId);
+    const selected = resolveSelectedExhibitionId(
+      shows,
+      localStorage.getItem(KEYS.studioExhibitionId),
+      pathname,
     );
+    if (!selected) return;
+    const rows = buildInquiriesCsvRows(
+      {
+        role: app.role,
+        gallery,
+        exhibitions: app.exhibitions,
+        artworkTitle: (id) => app.artworks.find((a) => a.id === id)?.title ?? "",
+      },
+      selected,
+    );
+    if (rows) downloadCsv(CSV_FILENAMES.inquiries, rows);
   }
 
   return (

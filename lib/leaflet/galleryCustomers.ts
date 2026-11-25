@@ -30,6 +30,8 @@ export type LoadGalleryCustomersInput = {
   exhibitionIds: string[];
   contractEndAt?: string | null;
   storage?: ReportStorage;
+  /** true면 갤러리 fixture를 합치지 않는다 (저장 데이터만 검증하는 테스트용) */
+  skipFixtures?: boolean;
 };
 
 function toListItem(detail: GalleryCustomerDetail): GalleryCustomerListItem {
@@ -51,6 +53,7 @@ function readSources(input: LoadGalleryCustomersInput): ExhibitionReportSource[]
   return input.exhibitionIds.map((id) =>
     readExhibitionReportSource(id, input.storage, {
       contractEndAt: input.contractEndAt,
+      skipFixtures: input.skipFixtures,
     }),
   );
 }
@@ -67,8 +70,26 @@ export function listExhibitionCustomers(
   if (!input.exhibitionIds.includes(input.exhibitionId)) return [];
   const source = readExhibitionReportSource(input.exhibitionId, input.storage, {
     contractEndAt: input.contractEndAt,
+    skipFixtures: input.skipFixtures,
   });
   return buildExhibitionCustomers(source);
+}
+
+export function listGalleryCustomerDetails(
+  input: LoadGalleryCustomersInput,
+): GalleryCustomerDetail[] {
+  return buildCustomersFromSources(readSources(input));
+}
+
+export function listExhibitionCustomerDetails(
+  input: LoadGalleryCustomersInput & { exhibitionId: string },
+): GalleryCustomerDetail[] {
+  if (!input.exhibitionIds.includes(input.exhibitionId)) return [];
+  const source = readExhibitionReportSource(input.exhibitionId, input.storage, {
+    contractEndAt: input.contractEndAt,
+    skipFixtures: input.skipFixtures,
+  });
+  return buildCustomersFromSources([source]);
 }
 
 export function getGalleryCustomer(

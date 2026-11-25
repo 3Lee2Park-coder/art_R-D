@@ -18,6 +18,7 @@ import {
   visitorKeyForLeaflet,
   type VisitorIdentityKind,
 } from "@/lib/leaflet/visitorIdentity";
+import { getStudioFixtures } from "@/lib/mock/studioFixtures";
 import type { Role } from "@/lib/types";
 
 export type ContactMethod = "email" | "phone";
@@ -61,6 +62,19 @@ export function listInquiries(leafletId?: string): Inquiry[] {
   if (typeof localStorage === "undefined") return [];
   const all = readJSON<Inquiry[]>(localStorage, KEYS.inquiries, []).map(hydrateInquiry);
   return leafletId ? all.filter((i) => i.leafletId === leafletId) : all;
+}
+
+/** 갤러리 스튜디오용: fixture + 저장 문의 (동일 id는 저장 우선). 관람객 listInquiries와 분리. */
+export function listStudioInquiries(): Inquiry[] {
+  const fixtures = getStudioFixtures().inquiries.map(hydrateInquiry);
+  const stored =
+    typeof localStorage !== "undefined"
+      ? readJSON<Inquiry[]>(localStorage, KEYS.inquiries, []).map(hydrateInquiry)
+      : [];
+  const map = new Map<string, Inquiry>();
+  for (const f of fixtures) map.set(f.id, f);
+  for (const s of stored) map.set(s.id, s);
+  return [...map.values()];
 }
 
 /** 실패 시 짧은 안내 문구, 성공 시 null */
@@ -142,16 +156,22 @@ export function updateInquiry(
   patch: { status?: InquiryStatus; saleResult?: SaleResult },
 ): Inquiry | null {
   if (typeof localStorage === "undefined") return null;
-  const all = listInquiries();
-  const index = all.findIndex((i) => i.id === id);
-  if (index < 0) return null;
+  const stored = listInquiries();
+  const index = stored.findIndex((i) => i.id === id);
+  const base =
+    index >= 0
+      ? stored[index]!
+      : getStudioFixtures().inquiries.map(hydrateInquiry).find((i) => i.id === id);
+  if (!base) return null;
   const next: Inquiry = {
-    ...all[index],
-    status: patch.status ?? all[index].status,
-    saleResult: patch.saleResult !== undefined ? patch.saleResult : all[index].saleResult,
+    ...base,
+    status: patch.status ?? base.status,
+    saleResult: patch.saleResult !== undefined ? patch.saleResult : base.saleResult,
   };
-  const updated = [...all];
-  updated[index] = next;
+  const updated =
+    index >= 0
+      ? stored.map((i, n) => (n === index ? next : i))
+      : [...stored, next];
   localStorage.setItem(KEYS.inquiries, JSON.stringify(updated));
   return next;
 }

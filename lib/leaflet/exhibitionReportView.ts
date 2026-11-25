@@ -53,6 +53,8 @@ export type ReportZoneRow = {
   dwellLabel: string | null;
 };
 
+export type ReportTrendPoint = { label: string; count: number };
+
 export type ExhibitionReportViewModel = {
   exhibitionId: string;
   exhibitionTitle: string | null;
@@ -60,8 +62,11 @@ export type ExhibitionReportViewModel = {
   leafletCount: number;
   contactsSecuredCount: number;
   kpis: ReportKpi[];
-  visitTrendEmpty: string;
-  hourlyTrendEmpty: string;
+  /** null이면 문구 없음(추이 데이터 있음). 문자열이면 빈 상태 문구 */
+  visitTrendEmpty: string | null;
+  hourlyTrendEmpty: string | null;
+  visitTrend: ReportTrendPoint[];
+  hourlyTrend: ReportTrendPoint[];
   funnel: ReportFunnelStep[];
   styles: ReportBarRow[];
   typeNames: ReportBarRow[];
@@ -87,6 +92,20 @@ export type ExhibitionReportViewModel = {
 
 export type ExhibitionReportViewExtras = {
   totalRecords?: number | null;
+  checkIn?: {
+    qrOpens: number | null;
+    uniqueCheckIns: number | null;
+    recordStarts: number | null;
+    daily: ReportTrendPoint[] | null;
+    hourly: ReportTrendPoint[] | null;
+  };
+  /** C8: zones.ts와 동일 체류 라벨 (zone name → label|null) */
+  zoneDwellLabels?: Record<string, string | null>;
+  /**
+   * C7: 작품표에는 이 전시 작품만 둔다. 없으면 필터하지 않는다.
+   * RestArt 추천 작품(전시 밖)은 추천 칸/표에서만 다룬다.
+   */
+  exhibitionArtworkIds?: readonly string[];
 };
 
 function pctOf(value: number, total: number): number {
@@ -126,10 +145,20 @@ export function toExhibitionReportView(
   const totalRecords =
     extras.totalRecords === undefined ? null : extras.totalRecords;
   const contactsSecuredCount = report.contactsSecured.count;
+  const checkIn = extras.checkIn;
+  const qrOpens = checkIn?.qrOpens ?? null;
+  const uniqueCheckIns = checkIn?.uniqueCheckIns ?? null;
+  const recordStarts = checkIn?.recordStarts ?? null;
+  const visitTrend = checkIn?.daily ?? [];
+  const hourlyTrend = checkIn?.hourly ?? [];
+  const visitTrendEmpty =
+    checkIn?.daily == null ? EMPTY_INESTIMABLE : null;
+  const hourlyTrendEmpty =
+    checkIn?.hourly == null ? EMPTY_INESTIMABLE : null;
 
   const kpis: ReportKpi[] = [
-    { label: "QR 접속", value: null, unit: "회" },
-    { label: "고유 QR 체크인", value: null, unit: "건" },
+    { label: "QR 접속", value: qrOpens, unit: "회" },
+    { label: "고유 QR 체크인", value: uniqueCheckIns, unit: "건" },
     { label: "리플릿 생성", value: leafletCount, unit: "건" },
     { label: "작품 기록", value: totalRecords, unit: "회" },
     { label: "관심 등록", value: interestTotal, unit: "건" },
@@ -154,20 +183,26 @@ export function toExhibitionReportView(
   }));
 
   const funnel: ReportFunnelStep[] = [
-    { label: "QR 접속", value: null },
-    { label: "고유 체크인", value: null },
-    { label: "기록 시작", value: null },
+    { label: "QR 접속", value: qrOpens },
+    { label: "고유 체크인", value: uniqueCheckIns },
+    { label: "기록 시작", value: recordStarts },
     { label: "리플릿 생성", value: leafletCount },
     { label: "작품 관심 등록", value: interestTotal },
     { label: "작품 문의", value: report.inquiries.total },
   ];
 
-  const artworkRows = report.artworkStats.map(toArtworkRow);
+  const allRows = report.artworkStats.map(toArtworkRow);
+  const ownIds = extras.exhibitionArtworkIds
+    ? new Set(extras.exhibitionArtworkIds)
+    : null;
+  const artworkRows = ownIds
+    ? allRows.filter((r) => ownIds.has(r.artworkId))
+    : allRows;
+  // 추천은 전시 밖 작품이므로 빈 문구 판단은 필터 전 전체 행 기준
   const recommendationsAllEmpty =
-    artworkRows.length === 0 ||
-    artworkRows.every((r) => r.recommendationCount === 0);
+    allRows.length === 0 || allRows.every((r) => r.recommendationCount === 0);
   const similarAllEmpty =
-    artworkRows.length === 0 || artworkRows.every((r) => r.similarCount === 0);
+    allRows.length === 0 || allRows.every((r) => r.similarCount === 0);
 
   const inquiryByStatus = (
     ["신규", "연락 완료", "후속 예정", "종료"] as const
@@ -194,12 +229,20 @@ export function toExhibitionReportView(
   let zonesAvailable = false;
   if (report.zones.available) {
     zonesAvailable = true;
-    zones = report.zones.items.map((z) => ({
-      zone: z.zone,
-      recordCount: z.recordCount,
-      dwellLabel:
-        z.dwell.available === true ? formatDwellSec(z.dwell.averageSec) : null,
-    }));
+    zones = report.zones.items.map((z) => {
+      const fromShared = extras.zoneDwellLabels?.[z.zone];
+      const dwellLabel =
+        fromShared !== undefined
+          ? fromShared
+          : z.dwell.available === true
+            ? formatDwellSec(z.dwell.averageSec)
+            : null;
+      return {
+        zone: z.zone,
+        recordCount: z.recordCount,
+        dwellLabel,
+      };
+    });
   }
 
   return {
@@ -209,8 +252,10 @@ export function toExhibitionReportView(
     leafletCount,
     contactsSecuredCount,
     kpis,
-    visitTrendEmpty: EMPTY_INSUFFICIENT,
-    hourlyTrendEmpty: EMPTY_INSUFFICIENT,
+    visitTrendEmpty,
+    hourlyTrendEmpty,
+    visitTrend,
+    hourlyTrend,
     funnel,
     styles,
     typeNames,

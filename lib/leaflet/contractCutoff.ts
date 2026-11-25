@@ -39,11 +39,18 @@ export function filterSourceByContractEnd(
   source: ExhibitionReportSource,
   contractEndAt: string,
 ): ExhibitionReportSource {
+  const sessions = source.checkInSessions ?? [];
   return {
     ...source,
     leaflets: source.leaflets.filter((l) => keepRecorded(l.recordedAt, contractEndAt)),
     interests: source.interests.filter((i) => keepRecorded(i.addedAt, contractEndAt)),
     inquiries: source.inquiries.filter((q) => keepRecorded(q.createdAt, contractEndAt)),
     events: source.events.filter((e) => keepRecorded(e.at, contractEndAt)),
+    checkInSessions: sessions.filter(
+      (s) =>
+        keepRecorded(s.openedAt, contractEndAt) ||
+        keepRecorded(s.checkedInAt, contractEndAt) ||
+        keepRecorded(s.recordStartedAt, contractEndAt),
+    ),
   };
 }

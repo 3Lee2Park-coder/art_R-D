@@ -23,7 +23,8 @@ export type ExhibitionOpsRow = {
   periodState: ReturnType<typeof exhibitionPeriodState>;
   leafletCount: number;
   artistCount: number;
-  /** 고유 체크인 수집이 없으면 null → UI 「데이터 부족」 */
+  artworkCount: number;
+  /** 체크인 세션이 없으면 null → UI 「추정 불가」 */
   uniqueCheckIns: number | null;
 };
 
@@ -31,6 +32,8 @@ export function buildExhibitionOpsRows(input: {
   exhibitions: Exhibition[];
   artworks: Artwork[];
   leafletCounts: Record<string, number>;
+  /** 전시별 고유 체크인 (buildCheckInMetrics). 없거나 null이면 추정 불가 */
+  uniqueCheckIns?: Record<string, number | null>;
   today?: string;
 }): ExhibitionOpsRow[] {
   const today = input.today ?? todayISO();
@@ -46,7 +49,8 @@ export function buildExhibitionOpsRows(input: {
       periodState: exhibitionPeriodState(exhibition, today),
       leafletCount: input.leafletCounts[exhibition.id] ?? 0,
       artistCount: artistIds.size,
-      uniqueCheckIns: null,
+      artworkCount: works.length,
+      uniqueCheckIns: input.uniqueCheckIns?.[exhibition.id] ?? null,
     };
   });
 }
@@ -85,6 +89,26 @@ export function mergeArtworks(seed: Artwork[], added: Artwork[]): Artwork[] {
   for (const a of seed) map.set(a.id, { ...a, widthCm: a.widthCm ?? null });
   for (const a of added) map.set(a.id, { ...a, widthCm: a.widthCm ?? null });
   return [...map.values()];
+}
+
+/** 전시별로 저장값이 있으면 그것이 이긴다. */
+export function mergeGoals(
+  base: ExhibitionGoals[],
+  stored: ExhibitionGoals[],
+): ExhibitionGoals[] {
+  const map = new Map<string, ExhibitionGoals>();
+  for (const g of base) map.set(g.exhibitionId, g);
+  for (const g of stored) map.set(g.exhibitionId, g);
+  return [...map.values()];
+}
+
+/** 전시 단위로 병합: 저장 구역이 있는 전시는 저장 구역만, 없으면 base. */
+export function mergeZones(
+  base: ExhibitionZone[],
+  stored: ExhibitionZone[],
+): ExhibitionZone[] {
+  const storedIds = new Set(stored.map((z) => z.exhibitionId));
+  return [...base.filter((z) => !storedIds.has(z.exhibitionId)), ...stored];
 }
 
 export type GalleryProfilePatch = {

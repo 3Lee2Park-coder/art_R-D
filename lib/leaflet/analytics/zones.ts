@@ -46,6 +46,15 @@ export type ZonesAnalytics = {
   transitions: ZoneTransition[];
 };
 
+/** C8: 리포트·구역 화면 공통 체류 표시 */
+export function formatZoneDwellSec(sec: number | null): string | null {
+  if (sec == null) return null;
+  if (sec < 60) return `${Math.round(sec)}초`;
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return s ? `${m}분 ${s}초` : `${m}분`;
+}
+
 function emotionLabel(counts: Map<string, number>): string | null {
   let best: string | null = null;
   let n = 0;

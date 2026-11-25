@@ -197,7 +197,7 @@ export default function StudioContractPage() {
 
     <section className="contact" id="contact">
       <div className="wrap contact-inner">
-        <div><span className="eyebrow">LET'S TALK ABOUT YOUR NEXT EXHIBITION</span><h2>다음 전시를 준비하는<br /><em>새로운 관점.</em></h2><p>갤러리의 전시 운영 방식과 필요한 데이터를 들려주세요.</p></div>
+        <div><span className="eyebrow">LET&apos;S TALK ABOUT YOUR NEXT EXHIBITION</span><h2>다음 전시를 준비하는<br /><em>새로운 관점.</em></h2><p>갤러리의 전시 운영 방식과 필요한 데이터를 들려주세요.</p></div>
         <div className="contact-actions"><a className="button button-light" href={COMPANY_INQUIRY_MAILTO}>도입 상담 문의하기 <span className="arrow">↗</span></a><small>{COMPANY_INQUIRY_EMAIL}</small></div>
       </div>
     </section>

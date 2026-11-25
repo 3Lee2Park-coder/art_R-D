@@ -2,6 +2,7 @@
  * 전시 개선 인사이트 (5i). 규칙만. LLM 없음.
  */
 
+import { withSubject } from "@/lib/josa";
 import type { InterestsAnalytics } from "@/lib/leaflet/analytics/interests";
 import type {
   ZoneAnalyticsRow,
@@ -118,13 +119,13 @@ export function buildInsightsAnalytics(input: {
   const topSimilar = input.interests.similarRows[0];
   if (topSimilar && topSimilar.exposureCount > 0) {
     cards.push({
-      tag: "추천 작품 성과",
-      title: `${topSimilar.title}이(가) 가장 자주 “가장 닮은 작품”으로 추천되었습니다.`,
-      observation: `${topSimilar.exposureCount}회 추천, 추천 후 관심 등록 ${topSimilar.interestAfter}회(${topSimilar.interestRate ?? 0}%), 추천 작품 문의 ${topSimilar.inquiryAfter}건입니다.`,
+      tag: "가장 닮은 작품 성과",
+      title: `${withSubject(topSimilar.title)} 가장 자주 “가장 닮은 작품”으로 선정되었습니다.`,
+      observation: `${topSimilar.exposureCount}회 선정, 선정 후 관심 등록 ${topSimilar.interestAfter}회(${topSimilar.interestRate ?? 0}%), 해당 작품 문의 ${topSimilar.inquiryAfter}건입니다.`,
       suggestion:
-        "추천 알고리즘 버전별로 추천 노출, 관심 등록, 문의를 비교하고, 추천 이유와 추천 후보군을 함께 검토합니다.",
+        "가장 닮은 작품 선정 기준별로 노출 수, 관심 등록, 문의를 비교하고, 후보 작품 구성을 함께 검토합니다.",
       metricRef:
-        "확인 지표: 추천 노출 수, 추천 후 관심 등록률, 추천 작품 문의율 · 추천이 구매 의사를 뜻하지 않음",
+        "확인 지표: 가장 닮은 작품 노출 수, 노출 후 관심 등록률, 해당 작품 문의율 · 노출이 구매 의사를 뜻하지 않음",
     });
   }
 
