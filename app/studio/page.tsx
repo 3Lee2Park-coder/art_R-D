@@ -28,7 +28,6 @@ export default function StudioPage() {
       </div>
       <ul className="mt-8 border-t border-hairline">
         {shows.map((exhibition) => {
-          const report = app.reports.find((item) => item.exhibitionId === exhibition.id);
           return (
             <li key={exhibition.id} className="border-b border-hairline py-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -55,7 +54,7 @@ export default function StudioPage() {
                     QR
                   </Link>
                 ) : null}
-                {contracted && report ? (
+                {contracted ? (
                   <Link href={`/studio/reports/${exhibition.id}`} className="btn btn-secondary min-h-11 px-4">
                     리포트
                   </Link>
