@@ -12,6 +12,8 @@ export function CoverCard({
   galleryLine,
   artistLine,
   imageUrl,
+  /** 꾸미기 필 자리 — 공유 미리보기에서는 false */
+  dateEndPad = false,
 }: {
   result: LeafletResult;
   theme: LeafletTheme;
@@ -20,17 +22,25 @@ export function CoverCard({
   galleryLine: string;
   artistLine: string;
   imageUrl: string | null;
+  dateEndPad?: boolean;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
-      <div className="flex shrink-0 items-baseline justify-between gap-3">
+      <div
+        data-cover-header
+        className="flex min-h-11 shrink-0 items-center justify-between gap-3"
+      >
         <span
           className="font-semibold tracking-tight"
           style={{ color: theme.text, fontSize: "clamp(0.8125rem, 2svh, 0.9375rem)" }}
         >
           RestArt
         </span>
-        <span style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)" }}>
+        <span
+          data-cover-date
+          className={dateEndPad ? "pr-[5.5rem]" : undefined}
+          style={{ color: theme.aux, fontSize: "clamp(0.75rem, 1.8svh, 0.8125rem)" }}
+        >
           {formatDate(visitDate)}
         </span>
       </div>

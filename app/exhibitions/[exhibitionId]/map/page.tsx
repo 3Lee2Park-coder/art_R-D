@@ -78,7 +78,10 @@ export default function MapPage() {
     <div className="mx-auto w-full max-w-[480px] px-4 py-6 pb-28">
       <div className="flex items-center justify-between gap-3">
         <h1 className="display">배치도</h1>
-        <Link href={`/exhibitions/${id}/capture${suffix}`} className="link-accent text-[14px] font-semibold">
+        <Link
+          href={`/exhibitions/${id}/capture${suffix}`}
+          className="btn btn-secondary-dark min-h-10 px-4 text-[14px] font-semibold"
+        >
           촬영
         </Link>
       </div>
@@ -90,7 +93,12 @@ export default function MapPage() {
           onClick={() => setPlanOpen(true)}
           aria-label="배치도 확대"
         >
-          <img src={floorPlanUrl} alt="" className="h-auto w-full object-cover" />
+          <img
+            src={floorPlanUrl}
+            alt=""
+            className="w-full object-cover"
+            style={{ aspectRatio: "16 / 10", minHeight: 160 }}
+          />
         </button>
       ) : null}
 

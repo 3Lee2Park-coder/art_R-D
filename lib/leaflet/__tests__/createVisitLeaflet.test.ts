@@ -51,13 +51,14 @@ describe("createVisitLeaflet", () => {
     ).toBe("오늘의 산책자");
   });
 
-  it("내 사진·한줄평 재계산 시 유형은 유지하고 대표 이미지는 내 사진", () => {
+  it("내 사진·한줄평 재계산 시 유형·themeColor는 유지하고 대표 이미지는 내 사진", () => {
     const base = createVisitLeaflet({
       visitId: "visit-notes",
       exhibitionId: "ex-edge",
       records: scenarioToVisit("wonder-immersive").records,
       scenarioId: "wonder-immersive",
       visitDate: "2026-11-20",
+      themeColor: "Persian Indigo",
     });
     const typeName = base.result!.typeName;
     const next = recomputeLeafletNotes(base, {
@@ -66,9 +67,11 @@ describe("createVisitLeaflet", () => {
     });
     expect(next.result?.typeName).toBe(typeName);
     expect(next.result?.ruleVersion).toBe(base.result?.ruleVersion);
+    expect(next.themeColor).toBe("Persian Indigo");
     expect(next.comment).toBe("오늘 좋았다");
     expect(next.result?.representative.url).toBe("data:image/png;base64,abc");
     expect(next.result?.representative.kind).toBe("userPhoto");
   });
 });
+
 
