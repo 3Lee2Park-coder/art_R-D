@@ -1,0 +1,85 @@
+{
+  "exhibitionId": "ex-edge",
+  "exhibitionTitle": "빛의 가장자리",
+  "themeColorName": "Persian Indigo",
+  "leaflets": {
+    "count": 2,
+    "items": [
+      {
+        "id": "visit-a",
+        "identityKind": "member",
+        "style": "immersive",
+        "typeName": "경이 몰입가",
+        "themeColor": "Persian Indigo"
+      },
+      {
+        "id": "visit-b",
+        "identityKind": "anonymous",
+        "style": "walker",
+        "typeName": "오늘의 산책자",
+        "themeColor": "Wheat"
+      }
+    ]
+  },
+  "visitors": {
+    "stored": {
+      "member": 1,
+      "identified": 0,
+      "anonymous": 1,
+      "unspecified": 0
+    },
+    "report": {
+      "identified": 1,
+      "anonymous": 1,
+      "unspecified": 0,
+      "total": 2
+    }
+  },
+  "interestByArtwork": [
+    { "artworkId": "aw-e01", "count": 2 }
+  ],
+  "inquiries": {
+    "total": 1,
+    "byStatus": {
+      "신규": 1,
+      "연락 완료": 0,
+      "후속 예정": 0,
+      "종료": 0
+    },
+    "bySaleResult": {
+      "미입력": 1,
+      "판매됨": 0,
+      "렌탈됨": 0,
+      "해당 없음": 0
+    }
+  },
+  "styles": {
+    "collector": 0,
+    "explorer": 0,
+    "immersive": 1,
+    "walker": 1
+  },
+  "styleLabels": {
+    "collector": "수집가",
+    "explorer": "탐험가",
+    "immersive": "몰입가",
+    "walker": "오늘의 산책자"
+  },
+  "typeNames": [
+    { "typeName": "경이 몰입가", "count": 1 },
+    { "typeName": "오늘의 산책자", "count": 1 }
+  ],
+  "emotions": [
+    { "emotionId": "awe", "count": 1 }
+  ],
+  "zones": {
+    "available": true,
+    "items": [
+      {
+        "zone": "A",
+        "recordCount": 1,
+        "dwell": { "available": false }
+      }
+    ]
+  }
+}
