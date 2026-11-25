@@ -30,6 +30,11 @@ export default function StudioPage() {
             문의
           </Link>
         ) : null}
+        {canReport ? (
+          <Link href="/studio/customers" className="btn btn-secondary">
+            고객
+          </Link>
+        ) : null}
       </div>
       <ul className="mt-8 border-t border-hairline">
         {shows.map((exhibition) => {
@@ -62,6 +67,14 @@ export default function StudioPage() {
                 {canReport ? (
                   <Link href={`/studio/reports/${exhibition.id}`} className="btn btn-secondary min-h-11 px-4">
                     리포트
+                  </Link>
+                ) : null}
+                {canReport ? (
+                  <Link
+                    href={`/studio/exhibitions/${exhibition.id}/customers`}
+                    className="btn btn-secondary min-h-11 px-4"
+                  >
+                    고객
                   </Link>
                 ) : null}
               </div>

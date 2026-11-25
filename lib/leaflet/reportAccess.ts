@@ -27,3 +27,21 @@ export function canViewExhibitionReport(input: ReportAccessInput): boolean {
 
   return false;
 }
+
+export type GalleryCustomersAccessInput = {
+  role: ReportAccessInput["role"];
+  myGalleryId: string | null;
+  contractState: ReportAccessInput["contractState"];
+};
+
+/** 전체·상세 고객. 자기 갤러리 + 계약/종료만. */
+export function canViewGalleryCustomers(input: GalleryCustomersAccessInput): boolean {
+  if (!input.myGalleryId) return false;
+  if (input.role === "gallery-contracted" && input.contractState === "contracted") {
+    return true;
+  }
+  if (isEndedGallery(input.role, input.contractState)) return true;
+  return false;
+}
+
+export const CUSTOMER_ACCESS_DENIED = "고객을 볼 수 없습니다";

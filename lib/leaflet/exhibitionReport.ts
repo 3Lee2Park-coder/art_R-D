@@ -130,6 +130,8 @@ export type ExhibitionReportSourceInquiry = {
   contactMethod?: "email" | "phone" | null;
   contactValue?: string;
   consentContact?: boolean;
+  consentNews?: boolean;
+  name?: string | null;
   inquiredArtworkIds?: string[];
   /** 문의 생성 시각 (컷오프용) */
   createdAt?: string | null;
@@ -150,10 +152,6 @@ export type ExhibitionReportSource = {
   artworkTitles?: Record<string, string | undefined>;
 };
 
-/** 5f: 동일 ExhibitionReportSource로 고객 목록을 만든다. 별도 저장소 읽기 금지. */
-export function buildExhibitionCustomers(_source: ExhibitionReportSource): null {
-  return null;
-}
 
 function emptyStatusCounts(): Record<InquiryStatus, number> {
   return {

@@ -61,7 +61,7 @@ export function readExhibitionReportSource(
   const exhibition = exhibitionSeed.find((e) => e.id === exhibitionId) ?? null;
 
   const leaflets: Leaflet[] = store
-    ? store === localStorage
+    ? typeof localStorage !== "undefined" && store === localStorage
       ? readSavedLeaflets()
       : readList<Leaflet>(store, KEYS.savedLeaflets)
     : [];
