@@ -36,6 +36,13 @@ export const KEYS = {
   visitorName: "restart.visitorName",
   /** 갤러리 스튜디오 전역 전시 선택 (5g) */
   studioExhibitionId: "restart.studioExhibitionId",
+  /** 5h 전시 등록 초안 */
+  wizardDraft: "restart.wizardDraft",
+  exhibitionGoals: "restart.exhibitionGoals",
+  exhibitionZones: "restart.exhibitionZones",
+  studioArtworks: "restart.studioArtworks",
+  studioArtists: "restart.studioArtists",
+  galleryProfiles: "restart.galleryProfiles",
 } as const;
 
 export const SESSION = {

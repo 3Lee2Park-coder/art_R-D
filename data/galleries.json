@@ -7,7 +7,10 @@
     "contractState": "contracted",
     "contractStartAt": "2024-01-01",
     "contractEndAt": null,
-    "bio": "한남동에서 동시대 회화와 설치를 소개합니다."
+    "bio": "한남동에서 동시대 회화와 설치를 소개합니다.",
+    "address": null,
+    "contactPhone": null,
+    "contactEmail": null
   },
   {
     "id": "g-seochon",
@@ -17,7 +20,10 @@
     "contractState": "uncontracted",
     "contractStartAt": null,
     "contractEndAt": null,
-    "bio": null
+    "bio": null,
+    "address": null,
+    "contactPhone": null,
+    "contactEmail": null
   },
   {
     "id": "g-busan",
@@ -27,6 +33,9 @@
     "contractState": "ended",
     "contractStartAt": "2025-06-01",
     "contractEndAt": "2025-08-20T23:59:59.999Z",
-    "bio": "광안리에서 지역 작가를 소개합니다."
+    "bio": "광안리에서 지역 작가를 소개합니다.",
+    "address": null,
+    "contactPhone": null,
+    "contactEmail": null
   }
 ]

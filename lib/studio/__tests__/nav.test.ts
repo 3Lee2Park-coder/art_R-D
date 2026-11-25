@@ -55,11 +55,16 @@ describe("studio nav helpers", () => {
     expect(ids).not.toContain("wizard");
     expect(ids).toContain("allCustomers");
     expect(ids).toContain("reports");
+    expect(ids).toContain("connections");
+    expect(ids).toContain("settings");
   });
 
   it("crumb 라벨", () => {
     expect(crumbLabel("/studio")).toBe("전시 관리");
     expect(crumbLabel("/studio/customers")).toBe("전체 고객");
     expect(crumbLabel("/studio/reports/ex-edge")).toBe("전시 리포트");
+    expect(crumbLabel("/studio/settings")).toBe("갤러리 설정");
+    expect(crumbLabel("/studio/connections")).toBe("외부 연동");
+    expect(crumbLabel("/studio/exhibitions/new")).toBe("새 전시 등록");
   });
 });

@@ -48,6 +48,8 @@ export type Artwork = {
   priceKrw: number | null;
   forSale: boolean;
   likeCount: number;
+  /** 가로 크기(cm). 없으면 null */
+  widthCm: number | null;
 };
 
 export type Artist = {
@@ -68,6 +70,28 @@ export type Gallery = {
   /** ISO 날짜 또는 일시. 종료 계약 아카이브 컷오프 (recordedAt ≤ 이 값) */
   contractEndAt: string | null;
   bio: string | null;
+  address: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+};
+
+/** 전시 목표 (5h). 시드에는 지어 넣지 않음. */
+export type ExhibitionGoals = {
+  exhibitionId: string;
+  objectives: string[];
+  targets: {
+    records: number | null;
+    interests: number | null;
+    inquiries: number | null;
+  };
+};
+
+/** 전시 구역 (5h / 5i). Artwork.zone은 name과 동일 문자열. */
+export type ExhibitionZone = {
+  exhibitionId: string;
+  zoneId: string;
+  name: string;
+  wallLengthM: number | null;
 };
 
 export type LeafletPhoto = {
