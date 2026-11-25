@@ -1,0 +1,127 @@
+"use client";
+
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useApp } from "@/components/providers";
+import { Frame, PageTitle } from "@/components/ui";
+import { listInquiries, updateInquiry, type Inquiry } from "@/lib/leaflet/inquiry";
+import {
+  INQUIRY_STATUSES,
+  SALE_RESULTS,
+  type InquiryStatus,
+  type SaleResult,
+} from "@/lib/leaflet/inquiryStatus";
+import { formatDate, oneParam } from "@/lib/format";
+
+export default function StudioInquiryDetailPage() {
+  const id = oneParam(useParams<{ inquiryId: string }>().inquiryId);
+  const app = useApp();
+  const router = useRouter();
+  const [inquiry, setInquiry] = useState<Inquiry | null>(null);
+  const [status, setStatus] = useState<InquiryStatus>("신규");
+  const [saleResult, setSaleResult] = useState<SaleResult>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!app.ready) return;
+    const found = listInquiries().find((i) => i.id === id) ?? null;
+    setInquiry(found);
+    if (found) {
+      setStatus(found.status);
+      setSaleResult(found.saleResult);
+    }
+  }, [app.ready, id]);
+
+  if (!app.ready) {
+    return (
+      <Frame width="utility">
+        <PageTitle title="문의" />
+      </Frame>
+    );
+  }
+
+  if (!inquiry) {
+    return (
+      <Frame width="utility">
+        <PageTitle title="문의" />
+        <p>문의를 찾을 수 없습니다.</p>
+        <p className="mt-6">
+          <Link href="/studio/inquiries" className="link">
+            목록
+          </Link>
+        </p>
+      </Frame>
+    );
+  }
+
+  const art = app.artworks.find((a) => a.id === inquiry.inquiredArtworkIds[0]);
+  const exhibition = app.exhibitions.find((e) => e.id === inquiry.exhibitionId);
+
+  function onSave(event: FormEvent) {
+    event.preventDefault();
+    const next = updateInquiry(inquiry!.id, { status, saleResult });
+    if (next) {
+      setInquiry(next);
+      setSaved(true);
+    }
+  }
+
+  return (
+    <Frame width="utility">
+      <PageTitle title={inquiry.name} kicker="문의" />
+      <p className="m-0 text-[14px] text-mute">
+        {exhibition?.title ?? inquiry.exhibitionId} · {formatDate(inquiry.createdAt.slice(0, 10))}
+      </p>
+      <p className="mt-2 m-0 text-[15px]">{art?.title ?? inquiry.inquiredArtworkIds.join(", ")}</p>
+      <p className="mt-2 m-0 text-[14px]">
+        {inquiry.contactMethod === "email" ? "이메일" : "연락처"} · {inquiry.contactValue}
+      </p>
+      {inquiry.message ? <p className="mt-4 m-0 text-[15px]">{inquiry.message}</p> : null}
+
+      <form className="utility-panel mt-8" onSubmit={onSave}>
+        <label className="block">
+          <span className="mb-2 block text-[14px] font-semibold">상태</span>
+          <select
+            className="field"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as InquiryStatus)}
+          >
+            {INQUIRY_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="mt-4 block">
+          <span className="mb-2 block text-[14px] font-semibold">판매 결과</span>
+          <select
+            className="field"
+            value={saleResult ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setSaleResult(v === "" ? null : (v as Exclude<SaleResult, null>));
+            }}
+          >
+            <option value="">미입력</option>
+            {SALE_RESULTS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="submit" className="btn btn-primary">
+            저장
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => router.push("/studio/inquiries")}>
+            목록
+          </button>
+        </div>
+        {saved ? <p className="mt-3 mb-0 text-[14px]">저장했습니다.</p> : null}
+      </form>
+    </Frame>
+  );
+}

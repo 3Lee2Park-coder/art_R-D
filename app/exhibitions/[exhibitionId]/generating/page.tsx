@@ -12,7 +12,7 @@ import {
   createVisitLeaflet,
   LeafletBlockedError,
 } from "@/lib/leaflet/createVisitLeaflet";
-import { leafletFixtures } from "@/lib/leaflet/fixtures";
+import { themeColorNameForExhibition } from "@/lib/leaflet/exhibitionTheme";
 import { oneParam, todayISO } from "@/lib/format";
 import { SESSION } from "@/lib/storage";
 import { newVisitId } from "@/lib/leaflet/visitSession";
@@ -75,7 +75,7 @@ export default function GeneratingPage() {
         records,
         photos: capture?.photos ?? [],
         scenarioId: scenarioRef.current,
-        themeColor: leafletFixtures.defaultThemeColor,
+        themeColor: themeColorNameForExhibition(id, exhibition?.themeColorName),
         visitDate: todayISO(),
         history: [],
       });

@@ -29,6 +29,11 @@ export type Exhibition = {
   ended: boolean;
   /** 배치도 이미지. 없으면 맵 상단 블록 숨김 */
   floorPlanUrl: string | null;
+  /**
+   * 리플릿 테마 색 이름(65색). null이면 fixture defaultThemeColor.
+   * 런타임 선택은 KEYS.exhibitionThemeColor가 우선 (CL-009).
+   */
+  themeColorName: string | null;
 };
 
 export type Artwork = {

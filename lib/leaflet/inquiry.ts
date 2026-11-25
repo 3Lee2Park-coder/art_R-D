@@ -8,6 +8,12 @@ import {
 } from "@/lib/leaflet/events";
 import { interestArtworkIdsForLeaflet } from "@/lib/leaflet/interest";
 import {
+  normalizeInquiryStatus,
+  normalizeSaleResult,
+  type InquiryStatus,
+  type SaleResult,
+} from "@/lib/leaflet/inquiryStatus";
+import {
   resolveIdentityKind,
   visitorKeyForLeaflet,
   type VisitorIdentityKind,
@@ -30,9 +36,8 @@ export type Inquiry = {
   consentContact: true;
   consentNews: boolean;
   identityKind: VisitorIdentityKind;
-  /** 갤러리 화면용 예약. 이 단계 UI 없음 */
-  status: "open";
-  saleResult: null;
+  status: InquiryStatus;
+  saleResult: SaleResult;
 };
 
 export type InquiryFormInput = {
@@ -44,9 +49,17 @@ export type InquiryFormInput = {
   consentNews: boolean;
 };
 
+function hydrateInquiry(raw: Inquiry & { status?: unknown; saleResult?: unknown }): Inquiry {
+  return {
+    ...raw,
+    status: normalizeInquiryStatus(raw.status),
+    saleResult: normalizeSaleResult(raw.saleResult),
+  };
+}
+
 export function listInquiries(leafletId?: string): Inquiry[] {
   if (typeof localStorage === "undefined") return [];
-  const all = readJSON<Inquiry[]>(localStorage, KEYS.inquiries, []);
+  const all = readJSON<Inquiry[]>(localStorage, KEYS.inquiries, []).map(hydrateInquiry);
   return leafletId ? all.filter((i) => i.leafletId === leafletId) : all;
 }
 
@@ -92,7 +105,7 @@ export function submitInquiry(input: {
     consentContact: true,
     consentNews: Boolean(input.form.consentNews),
     identityKind: nextKind,
-    status: "open",
+    status: "신규",
     saleResult: null,
   };
 
@@ -122,6 +135,25 @@ export function submitInquiry(input: {
   });
 
   return { ok: true, inquiry };
+}
+
+export function updateInquiry(
+  id: string,
+  patch: { status?: InquiryStatus; saleResult?: SaleResult },
+): Inquiry | null {
+  if (typeof localStorage === "undefined") return null;
+  const all = listInquiries();
+  const index = all.findIndex((i) => i.id === id);
+  if (index < 0) return null;
+  const next: Inquiry = {
+    ...all[index],
+    status: patch.status ?? all[index].status,
+    saleResult: patch.saleResult !== undefined ? patch.saleResult : all[index].saleResult,
+  };
+  const updated = [...all];
+  updated[index] = next;
+  localStorage.setItem(KEYS.inquiries, JSON.stringify(updated));
+  return next;
 }
 
 export function recordInquiryOpen(input: {

@@ -161,7 +161,7 @@ describe("events and leaflet merge", () => {
     expect(result.inquiry.consentNews).toBe(true);
     expect(result.inquiry.createdAt).toBeTruthy();
     expect(result.inquiry.saleResult).toBeNull();
-    expect(result.inquiry.status).toBe("open");
+    expect(result.inquiry.status).toBe("신규");
     expect(result.inquiry.identityKind).toBe("identified");
 
     const events = listVisitorEvents("demo-bright-explorer");

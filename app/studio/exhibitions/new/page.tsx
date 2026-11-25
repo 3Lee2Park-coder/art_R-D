@@ -42,6 +42,7 @@ export default function NewExhibitionPage() {
       approvalState: contracted ? "pending" : "none",
       ended: false,
       floorPlanUrl: null,
+      themeColorName: null,
     };
     app.upsertExhibition(exhibition);
     router.push(contracted ? `/studio/exhibitions/${exhibition.id}/review` : "/studio");

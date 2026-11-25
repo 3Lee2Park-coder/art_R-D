@@ -16,9 +16,16 @@ export default function StudioPage() {
     <Frame width="utility">
       <PageTitle title="내 전시" kicker={gallery?.name} />
       {gallery ? <p className="mb-6 text-[14px] text-mute">{contractLabel(gallery.contractState)}</p> : null}
-      <Link href="/studio/exhibitions/new" className="btn btn-primary">
-        전시 등록
-      </Link>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/studio/exhibitions/new" className="btn btn-primary">
+          전시 등록
+        </Link>
+        {contracted ? (
+          <Link href="/studio/inquiries" className="btn btn-secondary">
+            문의
+          </Link>
+        ) : null}
+      </div>
       <ul className="mt-8 border-t border-hairline">
         {shows.map((exhibition) => {
           const report = app.reports.find((item) => item.exhibitionId === exhibition.id);
@@ -33,6 +40,14 @@ export default function StudioPage() {
                 {contracted ? (
                   <Link href={`/studio/exhibitions/${exhibition.id}/review`} className="btn btn-secondary min-h-11 px-4">
                     배치
+                  </Link>
+                ) : null}
+                {contracted && exhibition.leafletEnabled && exhibition.status === "contracted" ? (
+                  <Link
+                    href={`/studio/exhibitions/${exhibition.id}/theme-color`}
+                    className="btn btn-secondary min-h-11 px-4"
+                  >
+                    테마 색
                   </Link>
                 ) : null}
                 {contracted && exhibition.published && exhibition.status === "contracted" ? (
