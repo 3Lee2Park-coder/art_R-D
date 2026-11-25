@@ -26,7 +26,10 @@ export function CoverCard({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
-      <div className="flex shrink-0 items-baseline justify-between gap-3">
+      <div
+        data-cover-header
+        className="flex min-h-11 shrink-0 items-center justify-between gap-3"
+      >
         <span
           className="font-semibold tracking-tight"
           style={{ color: theme.text, fontSize: "clamp(0.8125rem, 2svh, 0.9375rem)" }}
@@ -50,7 +53,7 @@ export function CoverCard({
         }}
       >
         {imageUrl ? (
-          <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+          <img src={imageUrl} alt="" className="max-h-full max-w-full object-contain" />
         ) : null}
       </div>
 

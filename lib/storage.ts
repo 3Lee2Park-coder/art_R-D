@@ -80,6 +80,22 @@ export function readSavedLeaflets() {
   return readJSON<Leaflet[]>(localStorage, KEYS.savedLeaflets, []);
 }
 
+/**
+ * localStorage 할당량(~5MB) 초과 시 큰 data URL 사진을 비우고 재시도.
+ * 프로토타입: 서버 스토리지 없이 메타·리플릿은 남기고, 초고용량 미리보기만 포기.
+ */
 export function writeSavedLeaflets(leaflets: Leaflet[]) {
-  localStorage.setItem(KEYS.savedLeaflets, JSON.stringify(leaflets));
+  const payload = JSON.stringify(leaflets);
+  try {
+    localStorage.setItem(KEYS.savedLeaflets, payload);
+    return;
+  } catch (err) {
+    if (!(err instanceof DOMException) || err.name !== "QuotaExceededError") throw err;
+  }
+  const stripped = leaflets.map((item) => {
+    const url = item.myPhotoUrl;
+    if (!url || url.length < 80_000) return item;
+    return { ...item, myPhotoUrl: undefined };
+  });
+  localStorage.setItem(KEYS.savedLeaflets, JSON.stringify(stripped));
 }

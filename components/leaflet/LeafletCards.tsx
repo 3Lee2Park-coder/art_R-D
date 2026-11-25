@@ -226,7 +226,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
                 <button
                   type="button"
                   data-decorate-pill
-                  className="absolute top-3 right-3 z-20 min-h-11 rounded-full px-4 text-[13px] font-semibold shadow-sm"
+                  className="absolute top-4 right-4 z-20 flex h-11 items-center rounded-full px-4 text-[13px] font-semibold shadow-sm"
                   style={{
                     background: theme.text,
                     color: theme.bg,

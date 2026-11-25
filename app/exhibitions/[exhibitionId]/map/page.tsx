@@ -78,7 +78,10 @@ export default function MapPage() {
     <div className="mx-auto w-full max-w-[480px] px-4 py-6 pb-28">
       <div className="flex items-center justify-between gap-3">
         <h1 className="display">배치도</h1>
-        <Link href={`/exhibitions/${id}/capture${suffix}`} className="link-accent text-[14px] font-semibold">
+        <Link
+          href={`/exhibitions/${id}/capture${suffix}`}
+          className="btn btn-secondary-dark min-h-10 px-4 text-[14px] font-semibold"
+        >
           촬영
         </Link>
       </div>
