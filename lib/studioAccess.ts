@@ -19,6 +19,9 @@ export function pathNeedsContractLanding(path: string): boolean {
   if (path.startsWith("/studio/reports")) return true;
   if (path.startsWith("/studio/inquiries")) return true;
   if (path.startsWith("/studio/customers")) return true;
+  if (path.startsWith("/studio/interests")) return true;
+  if (path.startsWith("/studio/spaces")) return true;
+  if (path.startsWith("/studio/insights")) return true;
   if (/^\/studio\/exhibitions\/[^/]+\/customers/.test(path)) return true;
   return false;
 }

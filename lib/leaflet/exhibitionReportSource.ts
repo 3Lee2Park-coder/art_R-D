@@ -13,7 +13,7 @@ import {
 import { themeColorNameForExhibition } from "@/lib/leaflet/exhibitionTheme";
 import type { InterestWork } from "@/lib/leaflet/interest";
 import { KEYS, readJSON, readSavedLeaflets } from "@/lib/storage";
-import type { Leaflet } from "@/lib/types";
+import type { Artwork, Leaflet } from "@/lib/types";
 
 export type ReportStorage = Pick<Storage, "getItem">;
 
@@ -72,9 +72,12 @@ export function readExhibitionReportSource(
     : [];
   const events = store ? readList<VisitorEvent>(store, KEYS.visitorEvents) : [];
 
+  const studioArts = store
+    ? readList<Artwork>(store, KEYS.studioArtworks)
+    : [];
   const zonesByArtwork: Record<string, string | null | undefined> = {};
   const artworkTitles: Record<string, string | undefined> = {};
-  for (const a of artworkSeed) {
+  for (const a of [...artworkSeed, ...studioArts]) {
     if (a.exhibitionId !== exhibitionId) continue;
     zonesByArtwork[a.id] = a.zone;
     artworkTitles[a.id] = a.title;
