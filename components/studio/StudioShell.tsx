@@ -70,6 +70,18 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
       router.push(`/studio/reports/${id}`);
       return;
     }
+    if (pathname.startsWith("/studio/interests/")) {
+      router.push(`/studio/interests/${id}`);
+      return;
+    }
+    if (pathname.startsWith("/studio/spaces/")) {
+      router.push(`/studio/spaces/${id}`);
+      return;
+    }
+    if (pathname.startsWith("/studio/insights/")) {
+      router.push(`/studio/insights/${id}`);
+      return;
+    }
     if (/\/studio\/exhibitions\/[^/]+\/customers/.test(pathname)) {
       router.push(`/studio/exhibitions/${id}/customers`);
     }

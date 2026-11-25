@@ -50,11 +50,13 @@ describe("studio nav helpers", () => {
   it("네비에 미구현 화면 id가 없다", () => {
     const ids = STUDIO_NAV_GROUPS.flatMap((g) => g.items.map((i) => i.id));
     expect(ids).not.toContain("home");
-    expect(ids).not.toContain("interests");
-    expect(ids).not.toContain("insights");
     expect(ids).not.toContain("wizard");
+    expect(ids).not.toContain("visitors");
     expect(ids).toContain("allCustomers");
     expect(ids).toContain("reports");
+    expect(ids).toContain("interests");
+    expect(ids).toContain("spaces");
+    expect(ids).toContain("insights");
     expect(ids).toContain("connections");
     expect(ids).toContain("settings");
   });
@@ -63,6 +65,9 @@ describe("studio nav helpers", () => {
     expect(crumbLabel("/studio")).toBe("전시 관리");
     expect(crumbLabel("/studio/customers")).toBe("전체 고객");
     expect(crumbLabel("/studio/reports/ex-edge")).toBe("전시 리포트");
+    expect(crumbLabel("/studio/interests/ex-edge")).toBe("작품 관심 분석");
+    expect(crumbLabel("/studio/spaces/ex-edge")).toBe("구역별 반응");
+    expect(crumbLabel("/studio/insights/ex-edge")).toBe("전시 개선 인사이트");
     expect(crumbLabel("/studio/settings")).toBe("갤러리 설정");
     expect(crumbLabel("/studio/connections")).toBe("외부 연동");
     expect(crumbLabel("/studio/exhibitions/new")).toBe("새 전시 등록");

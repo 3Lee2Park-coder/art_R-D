@@ -1,12 +1,8 @@
 /**
- * 갤러리 스튜디오 네비 (5g/5h).
+ * 갤러리 스튜디오 네비 (5g/5h/5i).
  * HTML RestArt_Gallery_Management_v2.2 라벨을 따른다.
  *
- * 나중에 연결할 경로 자리 (화면 미구현 — 네비에 넣지 않음):
- * - 고객 인텔리전스 홈
- * - 작품 관심 분석 (/studio/interests) — 5i
- * - 관람객 행동 / 익명 / 구역 — 5i
- * - 전시 개선 인사이트 / 감성 — 5i
+ * 네비에 넣지 않음: 고객 인텔리전스 홈, 관람객 행동, 익명 관람, 감성 및 관람 유형.
  */
 
 import type { Exhibition } from "@/lib/types";
@@ -52,6 +48,13 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
         href: () => "/studio/inquiries",
         match: (p) => p.startsWith("/studio/inquiries"),
       },
+      {
+        id: "interests",
+        label: "작품 관심 분석",
+        ico: "♡",
+        href: (exId) => (exId ? `/studio/interests/${exId}` : "/studio"),
+        match: (p) => p.startsWith("/studio/interests"),
+      },
     ],
   },
   {
@@ -75,6 +78,20 @@ export const STUDIO_NAV_GROUPS: StudioNavGroup[] = [
         ico: "◫",
         href: (exId) => (exId ? `/studio/reports/${exId}` : "/studio"),
         match: (p) => p.startsWith("/studio/reports/"),
+      },
+      {
+        id: "spaces",
+        label: "구역별 반응",
+        ico: "▦",
+        href: (exId) => (exId ? `/studio/spaces/${exId}` : "/studio"),
+        match: (p) => p.startsWith("/studio/spaces"),
+      },
+      {
+        id: "insights",
+        label: "전시 개선 인사이트",
+        ico: "◇",
+        href: (exId) => (exId ? `/studio/insights/${exId}` : "/studio"),
+        match: (p) => p.startsWith("/studio/insights"),
       },
     ],
   },
@@ -133,6 +150,9 @@ export function crumbLabel(pathname: string): string {
   if (/\/studio\/exhibitions\/[^/]+\/customers/.test(pathname)) return "전시별 고객";
   if (pathname.startsWith("/studio/inquiries")) return "문의 인박스";
   if (pathname.startsWith("/studio/reports/")) return "전시 리포트";
+  if (pathname.startsWith("/studio/interests")) return "작품 관심 분석";
+  if (pathname.startsWith("/studio/spaces")) return "구역별 반응";
+  if (pathname.startsWith("/studio/insights")) return "전시 개선 인사이트";
   if (pathname.startsWith("/studio/connections")) return "외부 연동";
   if (pathname.startsWith("/studio/settings")) return "갤러리 설정";
   if (pathname === "/studio/exhibitions/new") return "새 전시 등록";
@@ -160,6 +180,9 @@ export function resolveSelectedExhibitionId(
 ): string | null {
   const fromPath =
     pathname.match(/^\/studio\/reports\/([^/]+)/)?.[1] ??
+    pathname.match(/^\/studio\/interests\/([^/]+)/)?.[1] ??
+    pathname.match(/^\/studio\/spaces\/([^/]+)/)?.[1] ??
+    pathname.match(/^\/studio\/insights\/([^/]+)/)?.[1] ??
     pathname.match(/^\/studio\/exhibitions\/([^/]+)\/customers/)?.[1] ??
     null;
   if (fromPath && shows.some((e) => e.id === fromPath)) return fromPath;
