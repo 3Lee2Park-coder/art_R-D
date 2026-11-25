@@ -64,7 +64,10 @@ export type ExhibitionReportArtworkStat = {
   recordCount: number;
   interestCount: number;
   inquiryCount: number;
+  /** RestArt 추천(recommendationArtworkIds)만 */
   recommendationCount: number;
+  /** 전시 작품 가장 닮은 작품(result.similar.artworkId)만 */
+  similarCount: number;
 };
 
 export type ExhibitionReport = {
@@ -248,14 +251,18 @@ function countContactsSecured(
   return keys.size;
 }
 
+/** 리플릿당 추천 ID (배열 내 중복은 1). similar와 합치지 않음. */
 function recommendationIdsForLeaflet(l: ExhibitionReportSourceLeaflet): string[] {
   const set = new Set<string>();
   for (const id of l.recommendationArtworkIds ?? []) {
     if (id) set.add(id);
   }
-  const similar = l.result?.similar?.artworkId;
-  if (similar) set.add(similar);
   return [...set];
+}
+
+function similarArtworkIdForLeaflet(l: ExhibitionReportSourceLeaflet): string | null {
+  const id = l.result?.similar?.artworkId;
+  return id ? id : null;
 }
 
 /**
@@ -327,6 +334,7 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
 
   const recordMap = new Map<string, number>();
   const recommendMap = new Map<string, number>();
+  const similarMap = new Map<string, number>();
   for (const l of leaflets) {
     for (const r of l.records ?? []) {
       bumpCount(recordMap, r.artworkId);
@@ -334,6 +342,8 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     for (const id of recommendationIdsForLeaflet(l)) {
       bumpCount(recommendMap, id);
     }
+    const similarId = similarArtworkIdForLeaflet(l);
+    if (similarId) bumpCount(similarMap, similarId);
   }
 
   const inquiryArtMap = new Map<string, number>();
@@ -359,6 +369,7 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
     ...interestMap.keys(),
     ...inquiryArtMap.keys(),
     ...recommendMap.keys(),
+    ...similarMap.keys(),
   ]);
   const artworkStats: ExhibitionReportArtworkStat[] = [...artIds]
     .map((artworkId) => {
@@ -366,6 +377,7 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
       const interestCount = interestMap.get(artworkId) ?? 0;
       const inquiryCount = inquiryArtMap.get(artworkId) ?? 0;
       const recommendationCount = recommendMap.get(artworkId) ?? 0;
+      const similarCount = similarMap.get(artworkId) ?? 0;
       const title = input.artworkTitles?.[artworkId];
       const row: ExhibitionReportArtworkStat = {
         artworkId,
@@ -373,6 +385,7 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
         interestCount,
         inquiryCount,
         recommendationCount,
+        similarCount,
       };
       if (title) row.title = title;
       return row;
@@ -382,13 +395,21 @@ export function buildExhibitionReport(input: ExhibitionReportSource): Exhibition
         r.recordCount > 0 ||
         r.interestCount > 0 ||
         r.inquiryCount > 0 ||
-        r.recommendationCount > 0,
+        r.recommendationCount > 0 ||
+        r.similarCount > 0,
     )
     .sort(
       (a, b) =>
-        b.recordCount + b.interestCount + b.inquiryCount + b.recommendationCount -
-          (a.recordCount + a.interestCount + a.inquiryCount + a.recommendationCount) ||
-        a.artworkId.localeCompare(b.artworkId),
+        b.recordCount +
+          b.interestCount +
+          b.inquiryCount +
+          b.recommendationCount +
+          b.similarCount -
+          (a.recordCount +
+            a.interestCount +
+            a.inquiryCount +
+            a.recommendationCount +
+            a.similarCount) || a.artworkId.localeCompare(b.artworkId),
     );
 
   const styles = emptyStyles();

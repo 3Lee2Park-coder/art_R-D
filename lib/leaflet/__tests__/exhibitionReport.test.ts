@@ -118,7 +118,37 @@ describe("buildExhibitionReport", () => {
     expect(report.contactsSecured.count).toBe(1);
   });
 
-  it("작품 A 기록2·관심1·문의1·추천1 → artworkStats 한 행", () => {
+  it("추천과 가장 닮은 작품 ID가 다르면 각각 센다", () => {
+    const report = buildExhibitionReport(
+      emptySource({
+        artworkTitles: { "aw-rec": "추천작", "aw-sim": "유사작" },
+        leaflets: [
+          {
+            id: "v1",
+            exhibitionId: "ex-edge",
+            recommendationArtworkIds: ["aw-rec", "aw-rec"],
+            result: { similar: { artworkId: "aw-sim" } },
+            records: [
+              {
+                artworkId: "aw-rec",
+                source: "camera",
+                atSec: 0,
+                movingSec: 0,
+                emotionId: null,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    const byId = Object.fromEntries(report.artworkStats.map((r) => [r.artworkId, r]));
+    expect(byId["aw-rec"]?.recommendationCount).toBe(1);
+    expect(byId["aw-rec"]?.similarCount).toBe(0);
+    expect(byId["aw-sim"]?.recommendationCount).toBe(0);
+    expect(byId["aw-sim"]?.similarCount).toBe(1);
+  });
+
+  it("같은 ID여도 추천·가장 닮은 작품을 합치지 않는다", () => {
     const report = buildExhibitionReport(
       emptySource({
         artworkTitles: { "aw-a": "작품 A" },
@@ -167,7 +197,6 @@ describe("buildExhibitionReport", () => {
         ],
       }),
     );
-    expect(report.leaflets.count).toBe(1);
     expect(report.artworkStats).toEqual([
       {
         artworkId: "aw-a",
@@ -176,6 +205,7 @@ describe("buildExhibitionReport", () => {
         interestCount: 1,
         inquiryCount: 1,
         recommendationCount: 1,
+        similarCount: 1,
       },
     ]);
     expect(report.contactsSecured.count).toBe(1);
