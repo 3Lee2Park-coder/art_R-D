@@ -90,7 +90,12 @@ export default function MapPage() {
           onClick={() => setPlanOpen(true)}
           aria-label="배치도 확대"
         >
-          <img src={floorPlanUrl} alt="" className="h-auto w-full object-cover" />
+          <img
+            src={floorPlanUrl}
+            alt=""
+            className="w-full object-cover"
+            style={{ aspectRatio: "16 / 10", minHeight: 160 }}
+          />
         </button>
       ) : null}
 
