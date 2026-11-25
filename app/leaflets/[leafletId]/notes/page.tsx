@@ -1,7 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { PhotoPickField } from "@/components/leaflet/PhotoPickField";
 import { useApp } from "@/components/providers";
 import { PageTitle } from "@/components/ui";
 import { REASON_CHIPS } from "@/lib/constants";
@@ -21,7 +22,6 @@ export default function NotesPage() {
   const [chips, setChips] = useState<string[]>(leaflet?.notes?.reasonChips ?? []);
   const [comment, setComment] = useState(leaflet?.comment ?? leaflet?.notes?.comment ?? "");
   const [preview, setPreview] = useState<string | null>(leaflet?.myPhotoUrl ?? null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   if (!leaflet) {
     return (
@@ -30,18 +30,6 @@ export default function NotesPage() {
         <p>리플릿을 찾을 수 없습니다.</p>
       </div>
     );
-  }
-
-  function onFile(file: File | null) {
-    if (!file || !file.type.startsWith("image/")) {
-      setPreview(null);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") setPreview(reader.result);
-    };
-    reader.readAsDataURL(file);
   }
 
   function save() {
@@ -71,23 +59,7 @@ export default function NotesPage() {
       <PageTitle title="기록" />
       {hasRecords ? (
         <>
-          <label className="block">
-            <span className="mb-2 block text-[14px] font-semibold">내 사진</span>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="field field-dark"
-              onChange={(event) => onFile(event.target.files?.[0] ?? null)}
-            />
-          </label>
-          {preview ? (
-            <img
-              src={preview}
-              alt=""
-              className="mt-4 max-h-64 w-full object-contain bg-canvas-dark-deep"
-            />
-          ) : null}
+          <PhotoPickField preview={preview} onPick={setPreview} label="사진 추가" />
           <label className="mt-6 block">
             <span className="mb-2 block text-[14px] font-semibold">한줄평</span>
             <textarea

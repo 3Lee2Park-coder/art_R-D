@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CoverCard } from "@/components/leaflet/CoverCard";
+import { DecorateSheet } from "@/components/leaflet/DecorateSheet";
 import { EmotionsCard } from "@/components/leaflet/EmotionsCard";
 import { ExhibitionEmotionsCard } from "@/components/leaflet/ExhibitionEmotionsCard";
 import { NextCard } from "@/components/leaflet/NextCard";
@@ -12,6 +12,7 @@ import { resolveLeafletTheme } from "@/components/leaflet/theme";
 import { useApp } from "@/components/providers";
 import { useTitle } from "@/components/ui";
 import { COLOR_BY_NAME } from "@/lib/leaflet/colors";
+import { recomputeLeafletNotes } from "@/lib/leaflet/createVisitLeaflet";
 import { isDemoLeafletId } from "@/lib/leaflet/demoLeaflets";
 import type { Leaflet } from "@/lib/types";
 
@@ -27,6 +28,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
   const result = leaflet.result;
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
+  const [decorateOpen, setDecorateOpen] = useState(false);
 
   const exhibition = leaflet.exhibitionId
     ? app.exhibitions.find((item) => item.id === leaflet.exhibitionId)
@@ -84,6 +86,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
     null;
 
   const comment = leaflet.notes?.comment ?? leaflet.comment;
+  const showDecorate = !readOnly && page === 0 && Boolean(leaflet.records?.length);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -142,6 +145,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
       galleryLine={galleryLine}
       artistLine={showArtists}
       imageUrl={imageUrl}
+      dateEndPad={!readOnly && Boolean(leaflet.records?.length)}
     />,
     <RecordsCard
       key="records"
@@ -182,8 +186,6 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
     />,
   ];
 
-  const showNotesLink = !readOnly && Boolean(leaflet.records?.length);
-
   return (
     <div
       className="relative flex h-[100svh] max-h-[100dvh] w-screen flex-col items-stretch overflow-hidden"
@@ -195,6 +197,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
         paddingLeft: "env(safe-area-inset-left)",
         paddingRight: "env(safe-area-inset-right)",
       }}
+      data-leaflet-cards
     >
       <div
         ref={scrollerRef}
@@ -204,6 +207,7 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
           <section
             key={i}
             data-leaflet-card
+            data-card-index={i}
             className="relative flex h-full w-full shrink-0 snap-center justify-center"
           >
             <div
@@ -218,6 +222,20 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4 pb-14">
                 {card}
               </div>
+              {i === 0 && showDecorate ? (
+                <button
+                  type="button"
+                  data-decorate-pill
+                  className="absolute top-3 right-3 z-20 min-h-11 rounded-full px-4 text-[13px] font-semibold shadow-sm"
+                  style={{
+                    background: theme.text,
+                    color: theme.bg,
+                  }}
+                  onClick={() => setDecorateOpen(true)}
+                >
+                  꾸미기
+                </button>
+              ) : null}
               <div
                 className="absolute inset-x-0 bottom-0 flex h-12 items-center justify-center gap-1.5"
                 role="tablist"
@@ -243,17 +261,21 @@ export function LeafletCards({ leaflet, readOnly = false }: { leaflet: Leaflet; 
           </section>
         ))}
       </div>
-      {showNotesLink ? (
-        <div className="mx-auto flex w-full max-w-[480px] shrink-0 justify-center px-4 pb-3 pt-1">
-          <Link
-            href={`/leaflets/${leaflet.id}/notes`}
-            className="bg-transparent text-[13px] font-medium underline-offset-2"
-            style={{ color: theme.aux, textDecorationColor: theme.aux }}
-          >
-            내 사진·한줄평 남기기
-          </Link>
-        </div>
-      ) : null}
+
+      <DecorateSheet
+        open={decorateOpen}
+        initialPhoto={leaflet.myPhotoUrl ?? null}
+        initialComment={leaflet.comment ?? leaflet.notes?.comment ?? ""}
+        onClose={() => setDecorateOpen(false)}
+        onSave={({ myPhotoUrl, comment: nextComment }) => {
+          const next = recomputeLeafletNotes(leaflet, {
+            myPhotoUrl,
+            comment: nextComment,
+          });
+          app.upsertLeaflet(next);
+          setDecorateOpen(false);
+        }}
+      />
     </div>
   );
 }
